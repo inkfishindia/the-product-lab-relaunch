@@ -1,7 +1,14 @@
 # REPO-MAP — The Product Lab Relaunch
-<!-- last-updated: 2026-03-26 -->
+<!-- last-updated: 2026-06-25 -->
 
-Complete directory and file index. Start here to navigate the project.
+**This is the single canonical text map of the workspace. Start here to navigate.**
+
+Two companions, each with one job — don't duplicate them here:
+- **[FILE-INDEX.html](FILE-INDEX.html)** — interactive browser for every file (search + preview). Open in a browser.
+- **[docs/POST-LAUNCH-RESTRUCTURE-PLAN.md](docs/POST-LAUNCH-RESTRUCTURE-PLAN.md)** — the gated plan for the *future* `apps/services/packages/content/ops/brand` layout. Until that runs, the layout below is reality.
+
+> Consolidation note (2026-06-25): this file replaces four overlapping maps. `docs/WORKSPACE-INDEX.md`
+> and `docs/PROJECT-SCOPE-AND-STRUCTURE.md` are now pointer stubs that redirect here. Do not recreate them.
 
 ---
 
@@ -10,180 +17,128 @@ Complete directory and file index. Start here to navigate the project.
 | Field | Value |
 |-------|-------|
 | **Company** | The Product Lab (theproductlab.in) |
-| **Operator** | Dan (CEO — sole human) |
+| **Operator** | Dan (CEO — sole human, D-012) |
 | **AI Director** | Harley (Program Director) |
 | **Phase** | 4 — Build & Merchandising (ACTIVE) |
-| **Platform** | Commerce.com (Fynd) |
-| **Payments** | Razorpay (UPI + cards + COD) |
-| **Shipping** | Shiprocket |
+| **Platform** | **Medusa v2 backend + Next.js 16 storefront** (D-025 reversed Fynd/D-022) |
+| **Infra (planned)** | Vercel (storefront) + Railway/Render/Fly (Medusa API) + Supabase Postgres + managed Redis |
+| **Payments** | Razorpay (UPI + cards + wallets), COD via Shiprocket |
+| **Shipping** | Shiprocket (multi-carrier) |
+| **Notifications** | WhatsApp (Meta Cloud API primary — D-033/D-034) + Email (SMTP/Resend/SendGrid fallback) |
 | **Analytics** | GA4 + Microsoft Clarity |
 | **Primary Channel** | Instagram |
-| **Brand Position** | "Small objects. Big opinions." / "Wear your opinion." |
-| **Budget Rule** | No tool >₹5,000/month |
+| **Brand** | **Light+Bold** — "Small objects. Big opinions." / "Wear your opinion." / *Find. Collect. Gift.* (D-018–D-021; supersedes Darkroom/D-015) |
+| **Drop 1 scope** | Text-opinion stickers only; 67 published across 5 collections (D-028) |
+| **Latest decision** | D-035 (`decisions/decision-log.md` is the running log) |
+| **Budget rule** | No tool >₹5,000/month unless revenue-generating |
+
+> Brand caution: the old **Darkroom** system (dark #1A1A1A background, D-015) is **dead**. Current visual system is
+> Light+Bold (cream #F5F0EB base). Canonical specs: `artifacts/phase-4/visual-identity-rebrand.md`,
+> `artifacts/phase-4/copy-system-rebrand.md`, `artifacts/phase-4/ui-system.md`.
 
 ---
 
-## 🗺️ Directory Map
+## Current Directory Map (today's reality)
 
 ```
 the-product-lab-relaunch/
 │
-├── CLAUDE.md               ← Operating rules (read first, always)
-├── HARLEY.md               ← Program Director operating brief
-├── REPO-MAP.md             ← This file — full directory index
-├── README.md               ← Project overview
+├── CLAUDE.md / HARLEY.md / README.md   ← operating rules (read CLAUDE.md first, always)
+├── REPO-MAP.md                         ← this file (canonical text map)
+├── FILE-INDEX.html                     ← interactive file browser
 │
-├── knowledge/              ← Source of truth docs (00–25 + INDEX)
-│   ├── INDEX.md            ← Master knowledge index
-│   ├── 00-MASTER-BRIEF.md
-│   ├── 01-AGENT-ORG-CHART.md
-│   ├── 02-AGENT-PERSONAS.md
-│   ├── ... (03–14, planning docs)
-│   ├── 15-HANDOFF-INTAKE.md
-│   ├── 16-COMPANY-FACTS.md
-│   ├── 17-PRODUCTION-COSTS.md
-│   ├── 18-ARTIST-PLATFORM.md
-│   ├── 19-TECH-STACK-LEGACY.md
-│   ├── 20-MARKETING-BASELINE.md
-│   ├── 20-TPL-COMPANY-PROFILE-CONSOLIDATED.md
-│   ├── 22-TPL-FINANCIALS-CONSOLIDATED.md
-│   ├── 23-TPL-TECH-SYSTEMS-CONSOLIDATED.md
-│   ├── 24-TPL-ARTIST-PLATFORM-CONSOLIDATED.md
-│   └── 25-AGENT-BRIEFING-PACKAGES.md
+├── Apps & services (nested git repos — excluded from root repo, see .gitignore)
+│   ├── storefront/                     ← Next.js 16 storefront (16 routes, live on Medusa catalog)
+│   ├── backend/medusa/                 ← Medusa v2 backend (active launch platform)
+│   ├── backend/medusa-eval/            ← platform evaluation docs (reference)
+│   └── mission-control-eval/           ← program dashboard app (own repo)
 │
-├── agents/                 ← All 25 agent cards with invocation prompts
-│   ├── README.md           ← Quick lookup table
-│   ├── pod-a/              ← Command: harley.md, claire.md, maria.md
-│   ├── pod-b/              ← Strategy: weiss.md, heyward.md, jenna.md
-│   ├── pod-c/              ← Product: shreyas.md, andy.md
-│   ├── pod-d/              ← Creative: sean.md, joanna.md, kurt.md, julie.md
-│   ├── pod-e/              ← Build: tobi.md, james.md
-│   ├── pod-f/              ← Growth: nik.md, avinash.md, eli.md
-│   ├── pod-g/              ← Marketing: andrew.md, chase.md, rachel.md
-│   ├── pod-h/              ← Content: casey.md
-│   └── pod-i/              ← Ops/Finance: patrick.md, raj.md, tony.md, lenny.md
+├── Knowledge & artifacts
+│   ├── knowledge/                      ← curated source of truth (00–27 + INDEX); read 26-CURRENT-STATE every session
+│   ├── artifacts/phase-{1..6}/         ← agent outputs by phase (1–3 approved; 4 active; 5–6 ready)
+│   ├── catalogs/                       ← cleaned_catalog.json + catalog scripts
+│   ├── site-scrape/ · prototypes/      ← scrape references · HTML explorations
+│   └── TPL DUMP/                        ← raw source CSVs (catalog source — NOT dead; archive-only otherwise)
 │
-├── artifacts/              ← All agent outputs, by phase
-│   ├── phase-1/            ← Audit outputs (11 files, all approved)
-│   ├── phase-2/            ← Strategy outputs (4 files, all approved)
-│   ├── phase-3/            ← Creative outputs (7 files, all approved)
-│   ├── phase-4/            ← Build outputs (3 files, draft — Tobi/James)
-│   ├── phase-5/            ← Campaign outputs (5 files, draft — planned ahead)
-│   └── phase-6/            ← Optimization outputs (1 file, draft — planned)
+├── Agent OS (the program control plane)
+│   ├── agents/ (25 cards, pod-a..pod-i) · pods/ (workspaces)
+│   ├── decisions/decision-log.md (D-001..D-035) · handoffs/ · status/ · templates/
+│   └── .claude/ (rules, settings.json hooks, agents, memory)
 │
-├── decisions/
-│   └── decision-log.md     ← All 17 decisions (D-001 through D-017)
+├── Brand & design
+│   ├── design/  (visual identity, UI system, wireframes, reviews)
+│   └── assets/  (brand tokens, product/social/creative)
 │
-├── handoffs/               ← Agent-to-agent transfer records
-│   ├── phase-1-to-2-handoff.md      (H-001)
-│   ├── phase-2-to-3-handoff.md      (H-002)
-│   ├── phase-3-to-4-handoff.md      (H-003, exists)
-│   ├── phase-4-to-5-handoff.md      (H-004, exists)
-│   ├── phase-5-to-6-handoff.md      (H-005, planned)
-│   └── handoff-intake-pod-briefs.md
+├── Ops & integrations
+│   ├── docs/ (ARCHITECTURE, GOVERNANCE, ops-sop/, research, this restructure plan)
+│   └── integrations/ (Airtable, Shiprocket)
 │
-├── status/                 ← Live project state
-│   ├── weekly-status.md    ← Master status (last updated 2026-03-26)
-│   ├── sprint-board.md     ← Task board (blocked / in progress / done)
-│   └── phase-tracker.md    ← Phase-by-phase progress dashboard
-│
-├── templates/              ← Standard formats (NEVER modify originals)
-│   ├── artifact-header.md
-│   ├── decision-entry.md
-│   ├── handoff-record.md
-│   └── phase-gate-review.md
-│
-├── assets/                 ← Brand assets
-│   ├── README.md           ← Asset overview and status
-│   ├── brand/              ← brand-tokens.md (colors, type, logo specs)
-│   ├── product/            ← Product photography (EMPTY — Dan to shoot)
-│   ├── social/             ← social-templates-brief.md (Canva execution)
-│   └── creative/           ← seeding-kit-brief.md + campaign assets
-│
-├── pods/                   ← Pod working spaces (scratch + notes)
-│   ├── pod-a-command/
-│   ├── pod-b-strategy/
-│   ├── pod-c-product/
-│   ├── pod-d-creative/
-│   ├── pod-e-build/
-│   ├── pod-f-growth/
-│   ├── pod-g-marketing/
-│   ├── pod-h-content/
-│   └── pod-i-ops/
-│
-├── scripts/
-│   └── README.md           ← How to invoke agents, quick lookup, phase gate commands
-│
-├── docs/
-│   └── ARCHITECTURE.md     ← System architecture doc
-│
-├── scratch/                ← Temporary working notes (session-level only)
-│
-└── TPL DUMP/               ← Original source material from Dan's prior Claude projects
-    ├── TPL optimizer- claude/
-    ├── TPL IG-claude/
-    └── TPL CEO - claude/
+└── archive/ · scratch/                 ← deprecated/raw · temporary (safe to prune)
+```
+
+The **future** target layout (`apps/`, `services/`, `packages/`, `content/`, `ops/`, `brand/`) and the gated
+migration to it live in **`docs/POST-LAUNCH-RESTRUCTURE-PLAN.md`** — not here.
+
+---
+
+## "I want to…" → go to
+
+| I want to… | Go to |
+|-------------|-------|
+| Understand current program state | `knowledge/26-CURRENT-STATE.md` |
+| Read operating rules | `CLAUDE.md` |
+| See current status / blockers | `status/weekly-status.md` · `status/sprint-board.md` |
+| Read all decisions | `decisions/decision-log.md` (D-001..D-035) |
+| Browse every file interactively | `FILE-INDEX.html` |
+| Spawn an agent | `agents/[pod]/[agent].md` (persona: `knowledge/02`, prompt: `knowledge/09`) |
+| Check brand colours / type / logo | `assets/brand/brand-tokens.md` + `artifacts/phase-4/visual-identity-rebrand.md` |
+| Read brand voice rules | `artifacts/phase-4/copy-system-rebrand.md` |
+| Read the UI/component system | `artifacts/phase-4/ui-system.md` |
+| See what Tobi is building | `artifacts/phase-4/technical-implementation-plan.md` · `artifacts/phase-4/deploy-checklist.md` |
+| See the QA gate | `artifacts/phase-4/qa-checklist.md` (James owns sign-off) |
+| Understand pricing / product structure | `artifacts/phase-2/pricing-framework.md` · `artifacts/phase-2/product-hierarchy.md` |
+| See the Drop 1 catalog curation | `artifacts/phase-4/drop-1-merchandising-curation.md` |
+| See the launch runbook | `artifacts/phase-5/launch-runbook.md` |
+| Add a decision | `decisions/decision-log.md` (+ `templates/decision-entry.md`) |
+| File a handoff | `handoffs/` (+ `templates/handoff-record.md`) |
+| Plan the workspace restructure | `docs/POST-LAUNCH-RESTRUCTURE-PLAN.md` |
+
+---
+
+## Cleanliness Rules
+
+1. New source-of-truth docs go in `knowledge/`, `docs/`, or the owning domain folder — **never the root**.
+2. New app code goes inside the app/service that owns it (`storefront/`, `backend/medusa/`).
+3. Tag new files by their **future** target domain (per the restructure plan) so the eventual move shrinks.
+4. Raw imports and scrape outputs (`TPL DUMP/`, `site-scrape/`, `tpl ref/`) are references, not working documents.
+5. `knowledge/` beats root duplicates. Do not delete a duplicate until a human confirms the canonical copy.
+6. Do not move the nested git repos (`storefront/`, `backend/medusa/`, `mission-control-eval/`) without updating Docker/compose, deploy paths, and README links — see restructure plan §0.
+7. Every active top-level folder should have a `README.md` naming its owner, purpose, and source of truth.
+8. Decisions link to the artifact or code path they affect (`Source / Artifacts` column).
+
+Run the hygiene check before any cleanup pass:
+
+```bash
+npm run check:workspace
 ```
 
 ---
 
-## 🔑 Key Files by Use Case
-
-| I want to... | Go to |
-|-------------|-------|
-| Understand current project state | `status/weekly-status.md` |
-| See what's blocked right now | `status/sprint-board.md` |
-| See phase-by-phase progress | `status/phase-tracker.md` |
-| Spawn an agent | `agents/[pod]/[agent].md` → copy invocation prompt |
-| Know what agent to use | `agents/README.md` or `scripts/README.md` |
-| Read all decisions made | `decisions/decision-log.md` |
-| Check a brand color or font | `assets/brand/brand-tokens.md` |
-| Read the brand voice rules | `artifacts/phase-3/copy-system.md` |
-| Read the visual identity | `artifacts/phase-3/visual-identity.md` |
-| See what Tobi needs to build | `artifacts/phase-4/technical-implementation-plan.md` |
-| See the QA checklist | `artifacts/phase-4/qa-checklist.md` |
-| See the launch runbook | `artifacts/phase-5/launch-runbook.md` |
-| Understand the pricing rules | `artifacts/phase-2/pricing-framework.md` |
-| Understand the product structure | `artifacts/phase-2/product-hierarchy.md` |
-| See what assets Dan needs to make | `artifacts/phase-3/asset-list.md` |
-| Add a new decision | `decisions/decision-log.md` (log table + template from `templates/decision-entry.md`) |
-| File a handoff | `handoffs/` + use `templates/handoff-record.md` |
-| Run a phase gate review | `templates/phase-gate-review.md` |
-
----
-
-## 🔴 Active Blockers (as of 2026-03-26)
-
-1. **Fynd credentials** — Tobi cannot start the platform build without Commerce.com store access. Dan must provide this.
-2. **Hero product photography** — Dan must shoot dark-background product photos. Brief in `artifacts/phase-3/asset-list.md`.
-3. **Hero product copy** — Core descriptions for card stickers, lapel pins, No Filter items. Voice rules in `artifacts/phase-3/copy-system.md`.
-
----
-
-## 📋 What Can Start Right Now (No Blockers)
-
-| Task | Agent | Artifact |
-|------|-------|---------|
-| Write 10 pre-launch post captions | Casey | pods/pod-h-content/ → artifacts/phase-5/ |
-| Build email/WhatsApp flows in Klaviyo | Eli | artifacts/phase-5/email-whatsapp-flows.md |
-| Finalize seeding recipient list | Rachel | artifacts/phase-5/seeding-plan.md |
-| Sharpen launch runbook | Andrew + Tony | artifacts/phase-5/launch-runbook.md |
-| Seeding kit design execution | Dan + Casey | assets/creative/ |
-
----
-
-## ✅ Locked Decisions Quick Ref
+## Locked Decisions — Quick Ref (full text in `decisions/decision-log.md`)
 
 | Decision | What's Locked |
 |----------|--------------|
 | D-005 | Brand territory: "Small objects. Big opinions." + "Wear your opinion." |
-| D-006 | Pricing: ₹149 floor, entry/core/premium/bundle tiers, free ship ₹499 |
-| D-007 | Pre-launch validation: 30+ gifts, 500 subscribers, 10 posts, price test |
-| D-011 | Scope: accessories only, TPL separate from YDS, Cunningham Road store open |
-| D-012 | Solo operator: Dan alone, no staff, AI handles strategy/creative/analytics |
-| D-014 | Operating model: build systems first, then hire one person |
-| D-015 | Visual direction: Darkroom hybrid, #1A1A1A/#F5F0EB/#E63B2E/#F2D024, Barlow Condensed + Inter |
-| D-016 | Phase 3 gate: PASSED. GO for Phase 4. |
-| D-017 | Phase 4 activated. Tobi leads build. |
+| D-006 | Pricing: ₹149 floor; entry/core/premium/bundle tiers; free ship ₹499; COD min ₹299; prepaid −₹30 |
+| D-007 | Pre-launch validation: 20+ gifts, 500+ subscribers, 10 posts, price test |
+| D-011 | Scope: accessories only; TPL separate from YDS; production owned by TPL |
+| D-012 | Solo operator: Dan alone + AI agents; everything executable by one person |
+| D-018 / D-021 | Visual system: **Light+Bold** (cream #F5F0EB), supersedes Darkroom/D-015 |
+| D-019 | Purchase mechanic: **Find. Collect. Gift.** drives all UX/copy |
+| D-020 | Drop 1 = text-opinion stickers only; characters/artist platform → Drop 2 |
+| D-025 | Launch platform: **Medusa + Next.js** (reverses Fynd/D-022) |
+| D-028 | Drop 1 curation: 67 published / 5 collections; meets the ≥3-collections gate |
+| D-030 / D-031 | Auth consolidated on Medusa (admin + customer), verified live |
+| D-033 / D-034 | WhatsApp notifications (Meta Cloud API direct transport) |
 
-**Change any of the above → escalate to Dan first.**
+**Change any locked decision → escalate to Dan first (CLAUDE.md operating rule 7).**

@@ -4,9 +4,13 @@
 **Status:** PLAN ONLY — do not execute until the gate below is met.
 **Owner:** Harley (plan) / Dan (approval + the one manual step only he can do)
 
-This is the deliberate, one-pass migration from the current flat layout to the target in
-[PROJECT-SCOPE-AND-STRUCTURE.md](PROJECT-SCOPE-AND-STRUCTURE.md). It exists so the move is a
+This is the deliberate, one-pass migration from the current flat layout (mapped in
+[/REPO-MAP.md](../REPO-MAP.md)) to the target defined in §1 below. It exists so the move is a
 checklist, not an improvisation. Everything here is reversible; nothing here is safe to do casually.
+
+> This plan is the **canonical owner of the target structure**. The former `PROJECT-SCOPE-AND-STRUCTURE.md`
+> and `WORKSPACE-INDEX.md` were consolidated into `/REPO-MAP.md` (current) + this plan (future) on 2026-06-25;
+> both are now pointer stubs.
 
 ---
 
@@ -42,9 +46,9 @@ The workspace is path-dependent in ways that make a careless move destructive. T
 
 ## 1. Target layout (canonical)
 
-Per `PROJECT-SCOPE-AND-STRUCTURE.md`. Note: an older `WORKSPACE-INDEX.md` "Target Domains" table
-proposes `growth/` and `commerce/` instead of `content/`+`packages/`. **Reconcile to the structure
-below** and retire the competing one (see §6, step 7).
+The canonical target is the tree below — this plan owns it. (A now-retired `WORKSPACE-INDEX.md`
+once proposed a competing `growth/`+`commerce/` split; that target is dead. Both old map docs are
+pointer stubs as of 2026-06-25 — see §6, step 7, already done.)
 
 ```text
 the-product-lab-relaunch/
