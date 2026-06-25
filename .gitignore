@@ -1,0 +1,44 @@
+# Workspace-local files
+.DS_Store
+*.log
+*.tsbuildinfo
+
+# Dependencies and build output
+node_modules/
+*/node_modules/
+.next/
+*/.next/
+dist/
+build/
+coverage/
+test-results/
+playwright-report/
+
+# Local environments, databases, and generated runtime data
+.env
+.env.*
+*.db
+*.sqlite
+.data/
+*/.data/
+
+# Local automation traces
+.playwright-mcp/
+
+# Large or generated exports should be archived intentionally, not committed by accident.
+*.tmp
+*.bak
+
+# Nested app repos — each has its own independent git history. The root repo must NOT
+# swallow them as embedded gitlinks. They are versioned in place; the restructure plan
+# (docs/POST-LAUNCH-RESTRUCTURE-PLAN.md §7) moves them last, with their own care.
+/storefront/
+/backend/medusa/
+/mission-control-eval/
+
+# Reinstallable skill caches — reproducible from skills-lock.json, not source. ~45M.
+.claude/skills/
+.agents/skills/
+
+# Stray empty-dir artifact from a bad relative mkdir -p (no files inside). Safe to delete.
+/Drive/

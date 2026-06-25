@@ -1,0 +1,109 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Agent",
+      "TodoWrite",
+      "WebSearch",
+      "WebFetch",
+      "Write(artifacts/**)",
+      "Write(decisions/**)",
+      "Write(handoffs/**)",
+      "Write(status/**)",
+      "Write(knowledge/**)",
+      "Edit(artifacts/**)",
+      "Edit(decisions/**)",
+      "Edit(handoffs/**)",
+      "Edit(status/**)",
+      "Edit(knowledge/**)",
+      "Write(scratch/**)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(date *)",
+      "Bash(mkdir *)"
+    ],
+    "deny": [
+      "Write(.claude/agents/**)",
+      "Write(.claude/settings.json)",
+      "Write(.claude/skills/**)",
+      "Write(.claude/commands/**)",
+      "Write(.claude/rules/**)",
+      "Write(.mcp.json)",
+      "Write(CLAUDE.md)",
+      "Edit(.claude/agents/**)",
+      "Edit(.claude/settings.json)",
+      "Edit(.claude/skills/**)",
+      "Edit(.claude/commands/**)",
+      "Edit(.claude/rules/**)",
+      "Edit(.mcp.json)",
+      "Edit(CLAUDE.md)",
+      "Bash(rm -rf *)",
+      "Bash(rm -r *)",
+      "Bash(git push *)",
+      "Bash(git reset --hard *)",
+      "Bash(git checkout -- *)",
+      "Bash(git clean *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write(.claude/**)|Edit(.claude/**)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'BLOCKED: Cannot modify agent infrastructure (.claude/) — request Dan to make this change directly' && exit 1"
+          }
+        ]
+      },
+      {
+        "matcher": "Write(templates/**)|Edit(templates/**)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'WARNING: Templates are masters — copy before modifying. Are you sure you want to edit a template directly?'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write(artifacts/**)|Edit(artifacts/**)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=\"$CLAUDE_TOOL_ARG_FILE_PATH\"; if ! head -5 \"$file\" 2>/dev/null | grep -q 'last-updated:'; then echo 'WARNING: Artifact missing <!-- last-updated: YYYY-MM-DD --> timestamp in first 5 lines' >&2; fi; exit 0"
+          }
+        ]
+      },
+      {
+        "matcher": "Write(decisions/**)|Edit(decisions/**)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=\"$CLAUDE_TOOL_ARG_FILE_PATH\"; if ! grep -q 'D-[0-9]' \"$file\" 2>/dev/null; then echo 'WARNING: Decision entry missing D-XXX identifier' >&2; fi; exit 0"
+          }
+        ]
+      },
+      {
+        "matcher": "Write(handoffs/**)|Edit(handoffs/**)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=\"$CLAUDE_TOOL_ARG_FILE_PATH\"; if ! grep -q 'from:\\|to:' \"$file\" 2>/dev/null; then echo 'WARNING: Handoff record missing from:/to: fields' >&2; fi; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

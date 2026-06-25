@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+<div class="tpl-nav">
+  <span class="nav-brand">tpl<span>_</span>live</span>
+  <a href="../../index.html">Hub</a>
+  <a href="../../prototypes/tpl-site-prototype.html">Full Site</a>
+  <a href="../../prototypes/homepage-wireframe-prototype.html">Homepage</a>
+  <a href="../../prototypes/coming-soon-page.html">Coming Soon</a>
+  <a href="../../prototypes/framer/index.html">Framer</a>
+  <a href="walsh-gemini-review-iteration-1.html">Walsh</a>
+  <a href="gemini-skill-review-iteration-1.html" class="active">Gemini</a>
+  <a href="../../admin/index.html" style="color:#E63B2E;font-weight:600">Admin</a>
+  <a href="../../FILE-INDEX.html">Files</a>
+</div>
+<style>
+.tpl-nav{background:#1A1A1A;padding:6px 16px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-family:'Inter',sans-serif;border-bottom:1px solid #333;flex-shrink:0}
+.tpl-nav a{color:#999;text-decoration:none;font-size:11px;padding:3px 10px;border-radius:4px;transition:.15s;white-space:nowrap}
+.tpl-nav a:hover{color:#fff;background:rgba(255,255,255,.1)}
+.tpl-nav a.active{color:#F2D024;background:rgba(242,208,36,.12);font-weight:600}
+.tpl-nav .nav-brand{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:#fff;letter-spacing:.05em;margin-right:8px}
+.tpl-nav .nav-brand span{color:#E63B2E}
+</style>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "gemini-image-prompts", "runs": [{"id": "eval-0-tpl-bullshit-remover-with_skill", "prompt": "Generate Gemini image prompts for the 'Bullshit Remover' enamel pin from The Product Lab. I need: a hero product shot for the website PDP, and a lifestyle shot for Instagram. The pin looks like a laundry detergent bottle, pink/purple colourway, with 'Bullshit Remover' printed on it. Use The Product Lab's Darkroom visual system.", "eval_id": 0, "outputs": [{"name": "prompts.md", "type": "text", "content": "## Bullshit Remover \u2014 Hero Product Shot\n**Type:** Hero Product\n**Format:** 1200\u00d71200px, 1:1 square\n**Platform:** Website PDP, social feed\n\n---\n\nThe visual concept is amplification through contrast: a confident, opinionated product presented as the brightest, sharpest object in a dark environment. Seeing this pin should make you feel like you own a witty, precise object that says something specific about you. The product name IS the subject; the physical object proves it exists.\n\nA sharp, confident product photograph of a small enamel pin designed to look like a laundry detergent bottle, rendered in a pink-to-purple colorway. The product fills 60% of the frame and is the only source of color and interest. It sits centered on a matte black surface (dark concrete or black paper), surrounded by generous negative space that falls to near-black. A single warm light source comes from the upper left at approximately 45 degrees, creating a defined shadow on the lower-right side of the pin that grounds the object in space. The pin's metallic catch and enamel details catch the light, making them the brightest elements. The background is absolutely matte black with no visible edges or transitions \u2014 it could extend infinitely in all directions. No styling, no props, no distractions. This is a tactical, unfussy product shot that trusts the object to carry the meaning.\n\nLighting: Single directional key light at 2800K color temperature, warm and theatrical. The product is dramatically brighter than the background. Shadows are warm and defined. The lighting reveals the pin's texture, dimensionality, and construction without any glamour or softening.\n\nColor: The pink-to-purple enamel is accurate and saturated \u2014 do not shift the hue toward magenta or cool tones. Shadows are warm (caramel-toned, not blue). Background is #1A1A1A (matte black, zero gloss).\n\nTechnique: Shot on a Hasselblad H6D-100c or equivalent professional digital camera, or achieve this with a high-end smartphone setup: desk lamp + dark surface + precise exposure. Depth of field: sharp, f/5.6 for maximum detail legibility at this small object scale. The photograph should feel precise, considered, and tactile \u2014 you should be able to feel the enamel weight from the image.\n\nTechnical: Capture at 4K resolution, export as 2400\u00d72400px minimum for web. Format: 1:1 square, RGB color space, sRGB profile for web accuracy.\n\n---\n\n**Quick variation:** For Instagram Stories (9:16), extend the dark background vertically and position the pin in the upper-center third, leaving room for text overlay of the product name in Barlow Condensed in #F5F0EB.\n\n---\n\n## Bullshit Remover \u2014 Lifestyle Shot\n**Type:** Lifestyle / In-Use\n**Format:** 1080\u00d71350px, 4:5 (Instagram feed optimal)\n**Platform:** Instagram feed, social content, secondary PDP images\n\n---\n\nThe concept is specificity through context: this product belongs to someone with a point of view. The shot should feel like a candid moment captured in a real environment, never a staged scene. It should evoke: \"I found this person's carefully arranged world, and the pin is the sharpest thing in it.\"\n\nA candid, art-directed lifestyle photograph of the Bullshit Remover pin attached to the collar of a worn vintage denim jacket, shown in moody indoor light. The pin is clipped or pinned to the collar fabric, visible at approximately the collarbone area. The frame is a tight crop \u2014 the pin and immediate surrounding collar area occupy 50-60% of the frame. The wearer's face is not visible; only the neck, shoulder, and upper torso are in frame. The denim collar shows authentic wear and texture: visible thread, natural fading, perhaps a small stain or seam imperfection that signals actual use, not styling.\n\nThe background is soft and ambient \u2014 out of focus, warm-toned, indistinct. The environment is a real interior space: a cafe, a creative workspace, a bedroom corner \u2014 somewhere with character but not scenery that distracts from the product. Warm incandescent or tungsten lighting from a single practical source (overhead cafe lighting, a desk lamp, window light filtered through glass) creates shadows and warm tones across the denim. The pin is the sharpest, most detailed element in the frame. The background falls away in soft focus (f/2.2 depth of field).\n\nThe pink-to-purple enamel of the pin catches the warm light and pops against the blue-toned denim. No additional styling. No painted nails visible. No props. The product is the evidence; the context is the story.\n\nTechnique: Shot on a Sony A7R V or equivalent documentary/editorial camera with an 85mm lens for intimate detail and soft background separation. The aesthetic is photojournalistic realism \u2014 lightly retouched for skin tone warmth and shadow detail, but not edited to perfection. The denim texture, the pin's metallic catch, the warm light on fabric \u2014 all should feel tactile and real.\n\nLighting: Warm interior ambient light, 2700-3000K color temperature. The light is directional enough to create shape and shadow, but soft enough to feel like it came from a room lamp or filtered window, not a studio. Shadows are warm. The pin is the brightest element in frame.\n\nColor: Warm interior tones. The denim reads as real indigo, not stylized. Shadows are warm caramel. The pink-to-purple pin is accurate but slightly warmed by the ambient light, not blown out or desaturated. Overall color grade: warm, analog, lived-in. No cool color grades or strong saturation boosts \u2014 it should feel like a real moment captured by someone with a good eye for light.\n\nTechnical: Shot at 1080\u00d71350px minimum (4:5 aspect ratio, optimized for Instagram feed). Exported at 2K resolution. Color space: sRGB for Instagram accuracy. EXIF intact to signal authenticity (can be removed before publishing, but shot should feel like a real photograph, not a render).\n\n---\n\n**Quick variation:** For Reels or Stories (9:16), pull back slightly to show more of the jacket and environment context, allowing room for text overlays or captions. The pin remains the sharpest element, but the \"setting\" becomes part of the narrative.\n"}], "grading": {"eval_id": 0, "run_type": "with_skill", "expectations": [{"text": "Output contains exactly two distinct prompts (hero product shot AND lifestyle shot)", "passed": true, "evidence": "Output clearly separates 'Bullshit Remover \u2014 Hero Product Shot' and 'Bullshit Remover \u2014 Lifestyle Shot' with distinct sections and specifications for each."}, {"text": "Output references at least one TPL hex code (#1A1A1A, #F5F0EB, #E63B2E, or #F2D024)", "passed": true, "evidence": "Hero prompt references #1A1A1A ('matte black') and #F5F0EB (for text overlay). Both are official TPL hex codes."}, {"text": "At least one prompt starts with or prominently features a concept statement (the 'why' of the image, not just what it looks like)", "passed": true, "evidence": "Hero opens with 'The visual concept is amplification through contrast' explaining the strategic intent. Lifestyle opens with 'The concept is specificity through context' explaining narrative purpose."}, {"text": "Lighting description includes direction (e.g. 'upper left', 'side-lit') \u2014 not just 'good lighting' or 'warm lighting'", "passed": true, "evidence": "Hero specifies 'A single warm light source comes from the upper left at approximately 45 degrees, creating a defined shadow on the lower-right side.' Lifestyle describes 'Warm incandescent or tungsten lighting from a single practical source' with specific environmental context."}, {"text": "At least one prompt includes aspect ratio AND resolution (or pixel dimensions)", "passed": true, "evidence": "Hero: '1200\u00d71200px, 1:1 square' and '2400\u00d72400px minimum.' Lifestyle: '1080\u00d71350px, 4:5' and '2K resolution.' Both include both specifications."}, {"text": "Output references 'Bullshit Remover' as the product name (preserving the brand's attitude voice)", "passed": true, "evidence": "Product name 'Bullshit Remover' appears in section titles, concept statements ('The product name IS the subject'), and throughout both prompt descriptions, maintaining the brand's bold, irreverent tone."}, {"text": "Lifestyle prompt specifies that the person is implied (hands, jacket, bag) not shown fully \u2014 aligns with TPL photography rules", "passed": true, "evidence": "Lifestyle prompt states: 'The wearer's face is not visible; only the neck, shoulder, and upper torso are in frame' with the pin on the 'collar of a worn vintage denim jacket.' This shows context/implied person, not a full figure shot."}]}}, {"id": "eval-0-tpl-bullshit-remover-without_skill", "prompt": "Generate Gemini image prompts for the 'Bullshit Remover' enamel pin from The Product Lab. I need: a hero product shot for the website PDP, and a lifestyle shot for Instagram. The pin looks like a laundry detergent bottle, pink/purple colourway, with 'Bullshit Remover' printed on it. Use The Product Lab's Darkroom visual system.", "eval_id": 0, "outputs": [{"name": "prompts.md", "type": "text", "content": "# Gemini Image Prompts: Bullshit Remover Enamel Pin\n\n## Hero Product Shot (Website PDP)\n\n**Prompt:**\nA 40mm hard enamel pin designed to look like a laundry detergent bottle, shot against a matte black posterboard background. The pin features a pink and purple color blocked design with the text \"BULLSHIT REMOVER\" printed in white on the bottle-shaped body. Single directional light source from the left creates a defined shadow, making the pin the brightest and sharpest element in the frame. The enamel detail and stainless steel double-backed clasp should be visible and crisp. The pin is positioned at a 45-degree side angle to show dimensionality and the metal backing. Minimalist composition with generous negative dark space around the product. High contrast, product-as-hero photography. 35mm lens equivalent perspective. Shot on a dark fabric or matte black surface. Professional product photography, zero styling, no background elements. Warm off-black color (#1A1A1A) background. The product should appear almost to glow against the darkness due to sharp lighting and high enamel gloss.\n\n---\n\n## Lifestyle Shot (Instagram)\n\n**Prompt:**\nA close-up lifestyle photograph of the pink and purple \"Bullshit Remover\" enamel pin clipped to a dark denim jacket collar. Moody indoor lighting, natural window light or soft desk lamp only. Tight crop showing just the jacket collar, the clasp mechanism clearly visible, and the pin's design fully readable. The pin should be the focal point with the dark denim providing textural context. The background is out of focus, suggesting an indoor setting. No full-body model visible, only implied person. The enamel color should pop against the dark fabric through lighting precision. Shot with shallow depth of field. Warm, contrasty, intimate feeling. Dark overall mood with the pin's pink and purple colors creating the primary color interest. Product-in-context storytelling, not lifestyle staging. Instagram feed aesthetic aligned with The Product Lab's Darkroom visual system \u2014 high contrast, dark backgrounds, opinionated, minimal.\n\n---\n\n## Technical Parameters (Both Prompts)\n\n**Color specification:**\n- Background: Dark, near-black (#1A1A1A or equivalent)\n- Pin colorway: Pink and purple enamel\n- Text: White\n- Lighting: Single directional source, hard shadows, high contrast\n\n**Style notes:**\n- 2026 contemporary product photography\n- No artificial props, filters, or decorative elements\n- No watermarks or text overlays\n- Sharp product detail, intentional depth of field\n- Mobile-screen optimized (high contrast, clear detail at small sizes)\n- Instagram-native aesthetic (dark feed friendly, thumb-stopping)\n"}], "grading": {"eval_id": 0, "run_type": "without_skill", "expectations": [{"text": "Output contains exactly two distinct prompts (hero product shot AND lifestyle shot)", "passed": true, "evidence": "Output clearly delineates 'Hero Product Shot (Website PDP)' and 'Lifestyle Shot (Instagram)' as two separate, fully-developed prompts"}, {"text": "Output references at least one TPL hex code (#1A1A1A, #F5F0EB, #E63B2E, or #F2D024)", "passed": true, "evidence": "#1A1A1A referenced twice: in hero prompt ('Warm off-black color (#1A1A1A) background') and in technical parameters section"}, {"text": "At least one prompt starts with or prominently features a concept statement (the 'why' of the image, not just what it looks like)", "passed": true, "evidence": "Lifestyle prompt includes concept framing: 'Product-in-context storytelling, not lifestyle staging' and hero prompt frames intent as 'Professional product photography, zero styling, no background elements'"}, {"text": "Lighting description includes direction (e.g. 'upper left', 'side-lit') \u2014 not just 'good lighting' or 'warm lighting'", "passed": true, "evidence": "Hero prompt: 'Single directional light source from the left creates a defined shadow'. Lifestyle prompt: 'natural window light or soft desk lamp only'"}, {"text": "At least one prompt includes aspect ratio AND resolution (or pixel dimensions)", "passed": false, "evidence": "Hero prompt includes '35mm lens equivalent perspective' and lifestyle includes 'shallow depth of field', but neither specifies aspect ratio or resolution/pixel dimensions"}, {"text": "Output references 'Bullshit Remover' as the product name (preserving the brand's attitude voice)", "passed": true, "evidence": "Product name explicitly referenced in both prompts: 'BULLSHIT REMOVER' in hero prompt and 'Bullshit Remover' in lifestyle prompt"}, {"text": "Lifestyle prompt specifies that the person is implied (hands, jacket, bag) not shown fully \u2014 aligns with TPL photography rules", "passed": true, "evidence": "Lifestyle prompt explicitly states: 'No full-body model visible, only implied person' and shows only 'jacket collar, the clasp mechanism'"}]}}, {"id": "eval-1-still-here-coffee-with_skill", "prompt": "I'm launching a new specialty coffee brand called 'Still Here Coffee'. Our vibe is: dark, calm, slightly melancholic \u2014 like drinking coffee alone at 2am and being okay with it. The palette is deep navy (#0A0F1E), warm off-white (#F0EBE1), and a single copper accent (#B87333). Our signature product is a 250g matte black bag with copper foil type. Can you generate a hero product shot prompt and a lifestyle shot prompt for Gemini?", "eval_id": 1, "outputs": [{"name": "prompts.md", "type": "text", "content": "## Still Here Coffee \u2014 Hero Product Shot\n**Type:** Hero Product Shot\n**Format:** 1200\u00d71200px, 1:1 (square)\n**Platform:** Product page, social feed, campaign assets\n\n---\n\nCONCEPT: Amplifying solitude as strength \u2014 the product isn't just coffee, it's proof that being alone at 2am is a valid, even beautiful choice. This image says: \"You're okay with yourself.\"\n\nA dark, contemplative product photograph of the Still Here Coffee 250g matte black bag. The bag surface is matte and absorbs light \u2014 not reflective. The copper foil type catches the single warm light source, creating subtle highlights on the letterforms that announce the brand name without screaming. The bag is the only warm element in the frame. Negative space dominates \u2014 generous dark, quiet space around the product suggests late-night calm and self-sufficiency.\n\nComposition: The bag occupies 55% of the frame, positioned slightly off-center using rule of thirds. The product sits in the lower third of the frame, allowing the upper frame to breathe as pure, undisturbed shadow. The bag's edge does not touch the frame boundary \u2014 it floats in quietness.\n\nPhotography technique: Shot on a Hasselblad H6D-100c or Sony A7R V for premium product clarity. Aperture f/5.6 for edge-to-edge sharpness \u2014 every letter of the copper foil type must be crisp and readable. The matte black bag surface shows real texture: the weave of the fabric finish, no gloss, no shine. This signals quality through materiality, not reflection. Light is warm, 2700K, cast from upper left at a 45-degree angle.\n\nLighting: Single key light source positioned upper left, warm incandescent quality. The copper foil type catches the light and glows subtly \u2014 this is the moment of visual interest. The rest of the bag falls into shadow, creating dimension. Background shadow is near-black (#0B0C0E), almost indistinguishable from the bag edges, creating a sense of the product emerging from darkness.\n\nColor: Matte black bag (#1A1A1A equivalent, perfectly aligned with the brand). Copper foil type (#B87333) is warm and luminous in the light. Background is pure dark navy (#0A0F1E), slightly deeper than the bag so the bag reads as foreground. Shadows cast by the product are warm-toned, not blue-toned.\n\nTechnical: Hasselblad or Sony A7R V, 4K output (3840\u00d72160px minimum for archive), scaled to 1200\u00d71200px for e-commerce. 1:1 aspect ratio. Color grading: minimal. The image should feel captured, not edited \u2014 true-to-product color, warm color temperature, no aggressive contrast.\n\n---\n\n## Still Here Coffee \u2014 Lifestyle Shot\n**Type:** Lifestyle / In-Use Shot\n**Format:** 1440\u00d71800px, 4:5 (vertical feed format)\n**Platform:** Instagram feed, social storytelling, campaign assets\n\n---\n\nCONCEPT: This image says: \"2am alone is not lonely \u2014 it's intentional.\" The product appears in a moment of quiet ritual, where the viewer recognizes themselves. The coffee bag is proof of a choice, not a default.\n\nA candid, intentionally composed lifestyle photograph. A still life that feels documentary-honest: a 250g Still Here Coffee bag rests on a wooden surface next to a half-empty ceramic mug (warm off-white interior, dark exterior), a small candle (unlit), and a worn paperback book, pages folded down. The bag is slightly tilted, copper type facing the camera, catching available light. Only the bag and the mug are in sharp focus. The book and candle are soft and out of focus, creating depth. A hand (wrist visible only, no face, no personality markers) reaches toward the bag or cradles the mug.\n\nComposition: Tight crop \u2014 the scene fills the frame with generous negative space on the left side (empty wooden table surface). Rule of thirds: the bag positioned in the right third of the frame, the mug in the left third. The hand occupies the lower-left corner, implied motion \u2014 reaching or holding. The elevated angle (shot from 30 degrees, not flat-lay) makes the scene feel more observed than staged.\n\nTechnique: Shot on a 35mm lens, Sony A7R V. Shallow depth of field (f/2.2) \u2014 bag and mug are tack-sharp, background dissolves into bokeh. The wooden surface shows real grain and wear. The ceramic mug has tactile texture. This is lightly retouched \u2014 no heavy color correction, no artificial smoothness. Documentary clarity with editorial warmth. The scene should feel like it was found, not arranged.\n\nLighting: Warm available light \u2014 late-afternoon window light, or a single warm desk lamp positioned to the upper left. The light is directional but soft. The copper type on the bag glows warm in this light. Shadows on the wooden surface are warm-toned. The mood is intimate, quiet, slightly moody \u2014 not bright, not cheerful, just present.\n\nColor: Warm shadows on the wood (#D4A574 tones). The coffee bag's matte black (#1A1A1A) sits in warm light and reads as deep and rich. The copper foil (#B87333) glows. The ceramic is cream-white (#F0EBE1) on the interior. The background wooden surface is warm, worn gold-brown. Overall palette: warm neutrals, deep blacks, single copper accent. No blues. No grays. No pastels. The candle is unlit (dark wick, no flame) \u2014 suggesting intention without action.\n\nTechnical: Sony A7R V, 2K minimum (1920\u00d71440px for archive), displayed at 1440\u00d71800px. 4:5 aspect ratio (optimal for Instagram feed). Color grading: warm color temperature (3200K feel), minimal saturation boost \u2014 the image should feel like a place you'd want to be at 2am.\n\n---\n\n**Quick variation:** To emphasize the product even more (less lifestyle, more hero in context), move the bag to dead center, push the other objects further out of focus, and increase the lighting intensity on the copper type. To shift mood darker/moodier, reduce ambient light and rely more heavily on side-lighting from the left, creating pronounced shadows.\n"}], "grading": {"eval_id": 1, "run_type": "with_skill", "expectations": [{"text": "Output contains two distinct prompts (hero product shot AND lifestyle shot)", "passed": true, "evidence": "Output has two clearly separated sections: 'Still Here Coffee \u2014 Hero Product Shot' and 'Still Here Coffee \u2014 Lifestyle Shot' with distinct specifications for each"}, {"text": "Output uses the user's exact hex codes (#0A0F1E, #F0EBE1, or #B87333) \u2014 does NOT default to TPL's palette", "passed": true, "evidence": "All three hex codes appear: #0A0F1E in 'Background shadow is near-black (#0B0C0E), almost indistinguishable' and 'Background is pure dark navy (#0A0F1E)', #F0EBE1 in 'The ceramic is cream-white (#F0EBE1)', and #B87333 in 'Copper foil type (#B87333) is warm and luminous'"}, {"text": "At least one concept statement reflects the '2am alone and okay with it' or melancholic/calm brand vibe", "passed": true, "evidence": "Hero concept: 'the product isn't just coffee, it's proof that being alone at 2am is a valid, even beautiful choice. This image says: \"You're okay with yourself.\"' and Lifestyle concept: '2am alone is not lonely \u2014 it's intentional.'"}, {"text": "Lighting description includes direction and quality \u2014 not just 'moody lighting'", "passed": true, "evidence": "Hero lighting: 'Single key light source positioned upper left, warm incandescent quality... 2700K, cast from upper left at a 45-degree angle' and Lifestyle lighting: 'Warm available light \u2014 late-afternoon window light, or a single warm desk lamp positioned to the upper left. The light is directional but soft'"}, {"text": "Output does NOT reference #E63B2E or #F2D024 (TPL's accent colors) \u2014 correctly adapts to the new brand", "passed": true, "evidence": "Neither #E63B2E (TPL red) nor #F2D024 (TPL yellow) appear anywhere in the output. The entire palette uses the Still Here Coffee brand colors"}, {"text": "At least one prompt includes aspect ratio or resolution", "passed": true, "evidence": "Hero shot: '1200\u00d71200px, 1:1 (square)' and Lifestyle shot: '1440\u00d71800px, 4:5 (vertical feed format)'. Both prompts include technical specifications"}, {"text": "Copper (#B87333 or described as copper/bronze) appears in the prompts as the accent element", "passed": true, "evidence": "Copper is prominently featured: 'The copper foil type catches the single warm light source' and 'Copper foil type (#B87333) is warm and luminous in the light' in hero shot; 'The copper type on the bag glows warm' and 'The copper foil (#B87333) glows' in lifestyle shot"}]}}, {"id": "eval-1-still-here-coffee-without_skill", "prompt": "I'm launching a new specialty coffee brand called 'Still Here Coffee'. Our vibe is: dark, calm, slightly melancholic \u2014 like drinking coffee alone at 2am and being okay with it. The palette is deep navy (#0A0F1E), warm off-white (#F0EBE1), and a single copper accent (#B87333). Our signature product is a 250g matte black bag with copper foil type. Can you generate a hero product shot prompt and a lifestyle shot prompt for Gemini?", "eval_id": 1, "outputs": [{"name": "prompts.md", "type": "text", "content": "# Still Here Coffee \u2014 Image Prompts\n\n## Hero Product Shot\n\nA 250g matte black coffee bag positioned center-frame on a deep navy (#0A0F1E) fabric surface. The bag features prominent copper foil (#B87333) typography reading \"Still Here Coffee\" in a bold, modern serif font. Soft, directional lighting from the upper left creates subtle shadows and highlights the copper foiling, making it shimmer without glare. The matte black finish absorbs light, creating visual depth. Warm off-white (#F0EBE1) accent elements\u2014perhaps a small copper-foil seal or tag\u2014positioned at the bottom right corner of the bag. Minimalist composition: negative space dominates, with only the product and fabric surface visible. The overall mood is refined, nocturnal, and introspective. Photography style: high-end product photography with shallow depth of field, shot at 50mm, f/2.8, with warm tungsten lighting to emphasize the copper metallic finish. Background is completely dark, with no distractions. The bag should appear premium, tactile, and iconic.\n\n## Lifestyle Shot\n\nA dimly lit 2am moment: a warm off-white ceramic mug (#F0EBE1) filled with dark espresso sits on a deep navy wooden table (#0A0F1E tone). The Still Here Coffee bag (same design as hero shot) sits slightly out of focus in the background, tilted naturally. Copper accent objects are scattered nearby\u2014a small copper spoon, a copper-rimmed notebook, or copper wire sculpture\u2014creating visual rhythm without clutter. Window light from the left casts a single, narrow beam across the mug and table, leaving most of the scene in shadow. The lighting is warm but sparse, evoking solitude and calm. Steam rises subtly from the mug, caught in the light shaft. The scene conveys a quiet, deliberate moment: someone's personal ritual. No people visible. Textures are tactile: aged wood grain, ceramic glaze, fabric texture of the bag. The overall color palette is dominated by navy and warm off-white, with copper catching light strategically. Photography style: moody, cinematic, shot with available light and a 35mm lens, f/1.8 aperture. The composition follows rule of thirds, with the mug off-center. The mood is contemplative, solitary, and unflinchingly honest\u2014not aspirational or bubbly, but grounded and real.\n\n"}], "grading": {"eval_id": 1, "run_type": "without_skill", "expectations": [{"text": "Output contains two distinct prompts (hero product shot AND lifestyle shot)", "passed": true, "evidence": "Two clearly labeled sections: 'Hero Product Shot' and 'Lifestyle Shot', each with full, distinct prompt content"}, {"text": "Output uses the user's exact hex codes (#0A0F1E, #F0EBE1, or #B87333) \u2014 does NOT default to TPL's palette", "passed": true, "evidence": "Hero prompt: '#0A0F1E fabric surface', '#B87333 typography', '#F0EBE1 accent elements'. Lifestyle: '#F0EBE1 ceramic mug', '#0A0F1E tone', '#B87333' throughout"}, {"text": "At least one concept statement reflects the '2am alone and okay with it' or melancholic/calm brand vibe", "passed": true, "evidence": "Lifestyle prompt explicitly states: 'A dimly lit 2am moment' and 'contemplative, solitary, and unflinchingly honest\u2014not aspirational or bubbly'. Hero: 'refined, nocturnal, and introspective'"}, {"text": "Lighting description includes direction and quality \u2014 not just 'moody lighting'", "passed": true, "evidence": "Hero: 'Soft, directional lighting from the upper left creates subtle shadows'. Lifestyle: 'Window light from the left casts a single, narrow beam across the mug and table'. Both include aperture specs (f/2.8, f/1.8)"}, {"text": "Output does NOT reference #E63B2E or #F2D024 (TPL's accent colors) \u2014 correctly adapts to the new brand", "passed": true, "evidence": "Neither TPL accent color (#E63B2E red, #F2D024 yellow) appears anywhere in the output. Palette is exclusively Still Here's colors"}, {"text": "At least one prompt includes aspect ratio or resolution", "passed": true, "evidence": "Hero: 'shot at 50mm, f/2.8, with shallow depth of field'. Lifestyle: 'shot with available light and a 35mm lens, f/1.8 aperture'. Both include technical specifications"}, {"text": "Copper (#B87333 or described as copper/bronze) appears in the prompts as the accent element", "passed": true, "evidence": "Hero: 'prominent copper foil (#B87333) typography' and 'highlights the copper foiling, making it shimmer'. Lifestyle: 'Copper accent objects are scattered nearby\u2014a small copper spoon, a copper-rimmed notebook' and 'copper catching light strategically'"}]}}, {"id": "eval-2-no-filter-drop-with_skill", "prompt": "Need Gemini prompts for a drop announcement campaign for The Product Lab. The drop is called 'No Filter' \u2014 it's our attitude pins collection. The key headline is 'NO FILTER. NO APOLOGY.' I need: a typography poster (square, Instagram), and a collection flat-lay showing 4-5 pins arranged on dark background. Make it feel urgent and limited-edition.", "eval_id": 2, "outputs": [{"name": "prompts.md", "type": "text", "content": "# No Filter Drop \u2014 Gemini Image Prompts\n\n## No Filter Typography Hero \u2014 Instagram Square\n\n**Type:** Typography / Opinion Poster\n**Format:** 1080\u00d71080px, 1:1 (Instagram square)\n**Platform:** Instagram Feed, Stories, Carousel\n\n---\n\nThis monumental typographic composition declares attitude without apology. \"NO FILTER. NO APOLOGY.\" is the entire brand statement for this limited drop, rendered in ultra-condensed, all-caps, architectural typography that fills the frame. The headline conveys urgency and singularity\u2014this is a moment, not a permanent product line. The type occupies approximately 80% of the square, with the letters stacked across two lines (NO FILTER. / NO APOLOGY.), set in Barlow Condensed Black with extreme tracking tightness. The words should appear almost aggressive in their density and weight\u2014they are a declaration, not a whisper. The baseline of the bottom line sits just above the frame edge, creating tension. Composition: the type is centered and anchored, with the text slightly rising toward the top-right corner as if tilted by conviction. The technique is crisp digital precision\u2014this looks like letterpress on matte black stock, with absolutely no softness. Lighting is flat studio light revealing every pixel and stroke edge. Background is solid #1A1A1A matte black with absolutely no gradient, texture, or depth variation. \"NO FILTER.\" rendered in #E63B2E (signal red), \"NO APOLOGY.\" in #F2D024 (electric yellow)\u2014the two-color split amplifies the boldness and signals this as a special drop announcement. No secondary elements, no logo, no date, no price. Just the words at maximum scale and conviction. Technical specs: Gemini render, 4K quality setting, 1080\u00d71080px, RGB color space, no anti-aliasing softening.\n\n---\n\n## No Filter Collection Flat-Lay \u2014 Dark Background\n\n**Type:** Collection Hero / Product Arrangement\n**Format:** 1080\u00d71080px, 1:1 (Instagram square)\n**Platform:** Instagram Feed, PDP Hero, Campaign Asset\n\n---\n\nA curatorial flat-lay arrangement of 4 attitude pins from the No Filter collection positioned on a matte black surface as if arranged by someone who cares about how things look. This is not a scattered dump\u2014this is a collection moment. Five pins total (mix of sizes), each with distinct visual personality, arranged with intentional spacing and slight rotation to suggest individual identity within the collection. The pins are the absolute brightest elements in the frame, lit from a single warm key light positioned upper left at approximately 45 degrees, creating soft-edged but defined shadows that ground each pin on the surface. The pins should feel three-dimensional\u2014you can see dimension, not just silhouette. The pins are representative of the attitude collection: bold graphic designs, saturated colors (red, yellow, possibly blue or teal), clear iconography that reads at thumbnail scale. Product placement: imagine a rough triangle or diamond formation across the frame, with negative space creating breathing room between pins. No other props, no hand in frame, no context. The entire composition is contained within a dark studio space\u2014only the black surface visible, no background wall or props. Composition respects a slightly off-center arrangement (not perfectly centered grid, but intentional and balanced). Technique: clean product photography, shot on professional camera or high-end simulation, with approximately f/8 depth of field ensuring all pins are in sharp focus. The black surface is matte, not reflective\u2014it absorbs rather than bounces light. Lighting: warm directional light at 2700K color temperature, creating soft shadows in the 2-3 second shadow area to the lower right of each pin. Color: pins in their true, saturated colors (no desaturation or cooling). Background pure #1A1A1A (matte black, not dark gray). The light fall-off at the frame edges creates a subtle vignette but no hard edge. Technical specs: Gemini render, 4K quality, 1080\u00d71080px, aspect ratio 1:1, RGB color space, shot in studio lighting simulation mode.\n\n---\n\n## Quick Variations\n\n**For a 4:5 vertical (Reel or Feed priority):** Remove one pin from the arrangement and give the remaining 4 more breathing room vertically\u2014stagger them top-to-bottom rather than left-to-right. Keep the same lighting and dark background.\n\n**For a 16:9 hero banner:** Extend the composition horizontally. Arrange 5-6 pins in a loose horizontal line with generous negative space on either side. Adjust the lighting to key from upper left still, but let the width accommodate a more panoramic arrangement.\n\n**For packaging mockup version:** Place a single hero pin dead-center in soft-lit position, surrounded by pure #1A1A1A black. Include a small #F2D024 yellow accent (could be a price tag or \"Limited Edition\" label in Space Mono type) in the bottom-right corner\u2014white text on the yellow field. This becomes the unboxing hero image.\n"}], "grading": {"eval_id": 2, "run_type": "with_skill", "expectations": [{"text": "Output contains two distinct prompts (typography poster AND collection flat-lay)", "passed": true, "evidence": "Output clearly separates 'No Filter Typography Hero \u2014 Instagram Square' and 'No Filter Collection Flat-Lay \u2014 Dark Background' as two complete, distinct prompts with full specifications."}, {"text": "Typography prompt includes the exact headline string 'NO FILTER. NO APOLOGY.' \u2014 not paraphrased", "passed": true, "evidence": "The exact string 'NO FILTER. NO APOLOGY.' appears verbatim in the typography prompt multiple times, including the opening declaration and color specifications."}, {"text": "Typography prompt references electric yellow (#F2D024) or a high-energy accent \u2014 reflecting that drop announcements break from the standard dark palette", "passed": true, "evidence": "'NO APOLOGY.' in #F2D024 (electric yellow)\u2014the two-color split amplifies the boldness and signals this as a special drop announcement.' The yellow is explicitly used as a high-energy signal breaking from the dark base."}, {"text": "Flat-lay prompt specifies 4-5 pins (or a concrete number) rather than just 'multiple pins'", "passed": true, "evidence": "Flat-lay prompt explicitly states 'Five pins total (mix of sizes)' and references '4 attitude pins' at the opening, providing concrete pin counts rather than vague language."}, {"text": "Output references at least one TPL hex code (#1A1A1A, #F5F0EB, #E63B2E, or #F2D024)", "passed": true, "evidence": "All four TPL hex codes are referenced: #1A1A1A (matte black background throughout), #E63B2E (signal red for 'NO FILTER.'), #F2D024 (electric yellow for 'NO APOLOGY.' and packaging variation), and multiple references to these precise color values."}, {"text": "Typography poster specifies 1:1 or square format (for Instagram)", "passed": true, "evidence": "Typography prompt explicitly states 'Format: 1080\u00d71080px, 1:1 (Instagram square)' at the top, with clear technical specifications for square format."}, {"text": "At least one prompt's concept statement conveys urgency, scarcity, or limited-edition energy", "passed": true, "evidence": "Typography prompt states 'The headline conveys urgency and singularity\u2014this is a moment, not a permanent product line.' Also explicitly references 'this limited drop'. Flat-lay emphasizes 'collection moment'. Both convey scarcity and urgency."}]}}, {"id": "eval-2-no-filter-drop-without_skill", "prompt": "Need Gemini prompts for a drop announcement campaign for The Product Lab. The drop is called 'No Filter' \u2014 it's our attitude pins collection. The key headline is 'NO FILTER. NO APOLOGY.' I need: a typography poster (square, Instagram), and a collection flat-lay showing 4-5 pins arranged on dark background. Make it feel urgent and limited-edition.", "eval_id": 2, "outputs": [{"name": "prompts.md", "type": "text", "content": "# Gemini Image Prompts \u2014 The Product Lab \"No Filter\" Drop Campaign\n\n## 1. TYPOGRAPHY POSTER (SQUARE, INSTAGRAM)\n\n**Prompt:**\n\nCreate a square Instagram post (1080x1080px) featuring a bold, high-contrast typography poster with the headline \"NO FILTER. NO APOLOGY.\" The design should embody The Product Lab brand aesthetic:\n\n**Visual Style:**\n- Dark background: solid #1A1A1A (near-black matte finish)\n- Primary text color: #F5F0EB (warm off-white), all caps\n- Accent color: #E63B2E (signal red) used for emphasis and urgency signaling\n- Typography: Use a condensed, heavy sans-serif font (similar to Barlow Condensed) with extremely tight letter-spacing, creating a dense, packed visual impact\n- The main headline should be large and dominate the composition (70-80% of the vertical space)\n- Subheading or descriptor text in a smaller, monospaced font: \"Limited Edition\" or \"Attitude Pins\" in #E63B2E\n- Add a thin 1px warm white rule line (#F5F0EB) as a horizontal divider before or after the main text, minimal use\n- Bottom corner: very small text in monospaced font showing \"Drop 1\" or similar product code marking in #F2D024 (electric yellow)\n- Overall mood: A zine printed at midnight. Sharp, adult, unsanitized. Precise darkness with high-contrast punctuation. Zero decoration. The text is the entire visual interest.\n\n**Composition:**\n- Center the main text vertically and horizontally with slight breathing room\n- Ensure maximum readability on mobile screens at normal viewing distance\n- Text should feel \"packed with intent, not floating in space\"\n\n---\n\n## 2. ATTITUDE PINS COLLECTION FLAT-LAY (DARK BACKGROUND)\n\n**Prompt:**\n\nCreate a product flat-lay photograph (landscape/horizontal format, 1200x800px) showcasing 4-5 attitude pins from The Product Lab's \"No Filter\" collection, arranged on a dark background. The image should capture limited-edition exclusivity and urgency:\n\n**Background & Styling:**\n- Dark surface: matte black concrete, dark fabric, or dark charcoal posterboard texture (not pure black\u2014subtle texture visible)\n- Lighting: Single directional light source (dramatic, precise) creating defined shadows, making each pin the brightest element in its zone\n- Overall mood: High-contrast, catalog-like, professionally curated, like objects from a museum collection or premium zine editorial\n\n**Pin Arrangement & Product Details:**\n- Arrange 4-5 pins in an asymmetrical, dynamic composition (not rigid grid)\n- Pins should be enamel, double-sided, approximately 30-40mm scale, with bold graphic designs and strong color contrast to the dark background\n- Examples of pin concepts (use these as inspiration for the visual):\n  - \"BULLSHIT REMOVER\" in white and red\n  - \"NO FILTER\" in black and electric yellow\n  - \"IDIOT REPELLENT\" in white on black\n  - \"ENJOY THE SHITSHOW\" with illustrated icon\n  - \"STRAIGHT OUTTA LOVE\" or similar\n- Pins should show variation in design, color palette, and form to demonstrate breadth of collection\n\n**Pin Photography Technique:**\n- Position pins at varying angles to show dimension and prevent monotony\n- Include some pins face-on, some at slight angles to reveal pin backs/butterfly clasp detail\n- Ensure pins cast sharp shadows on the dark surface (this adds prestige and tactile quality)\n- Props (optional): dark-colored clothing, denim, leather jacket corner, or canvas bag in the frame edge (to show context of wearing), but keep focus on the pins themselves\n- Close-up crop: tight enough that the pins dominate, loose enough that there's breathing room and the dark background reads as intentional, not cropped\n\n**Color & Contrast:**\n- Pins should feature bright, punchy colors (reds, yellows, whites, bold graphics) that pop against the dark background\n- The dark background should enhance the pins' visual impact without competing\n- If any pin has a dark colorway, use rim lighting or place a light prop nearby to separate it from background\n\n**Text Overlay (Optional, Minimal):**\n- Top corner: \"NO FILTER\" in small, monospaced font (#F2D024 or #E63B2E)\n- Bottom corner: \"Limited Edition. First Drop.\" in very small monospaced font (#F5F0EB)\n- Text should not cover any pin; use negative space edges only\n- Keep text minimal\u2014the products are the stars\n\n**Overall Aesthetic:**\n- Professional product photography meets editorial zine layout\n- Feels catalogued, curated, intentional\u2014like objects chosen by someone with exacting taste\n- Creates a sense of scarcity and exclusivity through composition and lighting precision\n- No lifestyle models, no full-body wear shots\u2014just the objects themselves, beautifully lit and positioned\n- The darkness is not the point; the pins and their details are. Darkness simply forces you to look at what is lit.\n\n---\n\n## IMAGE GENERATION NOTES FOR BOTH PROMPTS\n\n**Critical Requirements:**\n1. Both images must work at mobile viewing size (phone screen, 4G speed considerations imply compact, legible design)\n2. Colors must be precise: #1A1A1A (base), #F5F0EB (text), #E63B2E (red), #F2D024 (yellow)\n3. Typography must feel dense, intentional, unsanitized\u2014matching the brand voice of products like \"Bullshit Remover\" and \"Idiot Repellent\"\n4. No illustrations, mascots, or decorative flourishes\n5. Photography (flat-lay) must be sharp, high-contrast, museum-catalog quality\n6. Both pieces should feel urgent and limited-edition without using words like \"exclusive,\" \"exclusive,\" or \"special\"\n7. Darkroom aesthetic: precision darkness with high-contrast object presentation. Think zine printed at midnight, not goth or grungy.\n\n**Usage Context:**\n- Poster #1 (typography): Primary Instagram feed post, Stories, and email header\n- Poster #2 (flat-lay): Instagram carousel slide, email body image, website hero section for collection page\n- Both should be immediately recognizable as The Product Lab content when scrolled past in social feeds\n"}], "grading": {"eval_id": 2, "run_type": "without_skill", "expectations": [{"text": "Output contains two distinct prompts (typography poster AND collection flat-lay)", "passed": true, "evidence": "Output has two clearly separated sections: '1. TYPOGRAPHY POSTER (SQUARE, INSTAGRAM)' and '2. ATTITUDE PINS COLLECTION FLAT-LAY (DARK BACKGROUND)', each with full prompts"}, {"text": "Typography prompt includes the exact headline string 'NO FILTER. NO APOLOGY.' \u2014 not paraphrased", "passed": true, "evidence": "Line 7: 'the headline \"NO FILTER. NO APOLOGY.\"' appears verbatim in the typography prompt"}, {"text": "Typography prompt references electric yellow (#F2D024) or a high-energy accent \u2014 reflecting that drop announcements break from the standard dark palette", "passed": true, "evidence": "Line 17: '#F2D024 (electric yellow)' explicitly referenced for 'Drop 1' product code marking; Line 62 also references it for optional text overlay"}, {"text": "Flat-lay prompt specifies 4-5 pins (or a concrete number) rather than just 'multiple pins'", "passed": true, "evidence": "Line 31: 'showcasing 4-5 attitude pins'; Line 39: 'Arrange 4-5 pins' \u2014 concrete number specified twice"}, {"text": "Output references at least one TPL hex code (#1A1A1A, #F5F0EB, #E63B2E, or #F2D024)", "passed": true, "evidence": "All four TPL hex codes are referenced: #1A1A1A (line 10), #F5F0EB (lines 11, 16, 63), #E63B2E (lines 12, 15, 62), #F2D024 (lines 17, 62, 80)"}, {"text": "Typography poster specifies 1:1 or square format (for Instagram)", "passed": true, "evidence": "Line 3: 'SQUARE, INSTAGRAM' in section header; Line 7: 'square Instagram post (1080x1080px)' specifies both 1:1 format and dimensions"}, {"text": "At least one prompt's concept statement conveys urgency, scarcity, or limited-edition energy", "passed": true, "evidence": "Typography prompt (lines 15, 18): 'Limited Edition', 'Drop 1', 'midnight' zine mood; Flat-lay prompt (line 31): 'limited-edition exclusivity and urgency'; (line 70): 'Creates a sense of scarcity and exclusivity'"}]}}], "previous_feedback": {}, "previous_outputs": {}, "benchmark": {"metadata": {"skill_name": "gemini-image-prompts", "skill_path": "<path/to/skill>", "executor_model": "<model-name>", "analyzer_model": "<model-name>", "timestamp": "2026-03-26T05:12:30Z", "evals_run": [0, 1, 2], "runs_per_configuration": 3}, "runs": [{"eval_id": 0, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 7, "failed": 0, "total": 7, "time_seconds": 38.3, "tokens": 0, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Output contains exactly two distinct prompts (hero product shot AND lifestyle shot)", "passed": true, "evidence": "Output clearly separates 'Bullshit Remover \u2014 Hero Product Shot' and 'Bullshit Remover \u2014 Lifestyle Shot' with distinct sections and specifications for each."}, {"text": "Output references at least one TPL hex code (#1A1A1A, #F5F0EB, #E63B2E, or #F2D024)", "passed": true, "evidence": "Hero prompt references #1A1A1A ('matte black') and #F5F0EB (for text overlay). Both are official TPL hex codes."}, {"text": "At least one prompt starts with or prominently features a concept statement (the 'why' of the image, not just what it looks like)", "passed": true, "evidence": "Hero opens with 'The visual concept is amplification through contrast' explaining the strategic intent. Lifestyle opens with 'The concept is specificity through context' explaining narrative purpose."}, {"text": "Lighting description includes direction (e.g. 'upper left', 'side-lit') \u2014 not just 'good lighting' or 'warm lighting'", "passed": true, "evidence": "Hero specifies 'A single warm light source comes from the upper left at approximately 45 degrees, creating a defined shadow on the lower-right side.' Lifestyle describes 'Warm incandescent or tungsten lighting from a single practical source' with specific environmental context."}, {"text": "At least one prompt includes aspect ratio AND resolution (or pixel dimensions)", "passed": true, "evidence": "Hero: '1200\u00d71200px, 1:1 square' and '2400\u00d72400px minimum.' Lifestyle: '1080\u00d71350px, 4:5' and '2K resolution.' Both include both specifications."}, {"text": "Output references 'Bullshit Remover' as the product name (preserving the brand's attitude voice)", "passed": true, "evidence": "Product name 'Bullshit Remover' appears in section titles, concept statements ('The product name IS the subject'), and throughout both prompt descriptions, maintaining the brand's bold, irreverent tone."}, {"text": "Lifestyle prompt specifies that the person is implied (hands, jacket, bag) not shown fully \u2014 aligns with TPL photography rules", "passed": true, "evidence": "Lifestyle prompt states: 'The wearer's face is not visible; only the neck, shoulder, and upper torso are in frame' with the pin on the 'collar of a worn vintage denim jacket.' This shows context/implied person, not a full figure shot."}], "notes": []}, {"eval_id": 1, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 7, "failed": 0, "total": 7, "time_seconds": 29.3, "tokens": 0, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Output contains two distinct prompts (hero product shot AND lifestyle shot)", "passed": true, "evidence": "Output has two clearly separated sections: 'Still Here Coffee \u2014 Hero Product Shot' and 'Still Here Coffee \u2014 Lifestyle Shot' with distinct specifications for each"}, {"text": "Output uses the user's exact hex codes (#0A0F1E, #F0EBE1, or #B87333) \u2014 does NOT default to TPL's palette", "passed": true, "evidence": "All three hex codes appear: #0A0F1E in 'Background shadow is near-black (#0B0C0E), almost indistinguishable' and 'Background is pure dark navy (#0A0F1E)', #F0EBE1 in 'The ceramic is cream-white (#F0EBE1)', and #B87333 in 'Copper foil type (#B87333) is warm and luminous'"}, {"text": "At least one concept statement reflects the '2am alone and okay with it' or melancholic/calm brand vibe", "passed": true, "evidence": "Hero concept: 'the product isn't just coffee, it's proof that being alone at 2am is a valid, even beautiful choice. This image says: \"You're okay with yourself.\"' and Lifestyle concept: '2am alone is not lonely \u2014 it's intentional.'"}, {"text": "Lighting description includes direction and quality \u2014 not just 'moody lighting'", "passed": true, "evidence": "Hero lighting: 'Single key light source positioned upper left, warm incandescent quality... 2700K, cast from upper left at a 45-degree angle' and Lifestyle lighting: 'Warm available light \u2014 late-afternoon window light, or a single warm desk lamp positioned to the upper left. The light is directional but soft'"}, {"text": "Output does NOT reference #E63B2E or #F2D024 (TPL's accent colors) \u2014 correctly adapts to the new brand", "passed": true, "evidence": "Neither #E63B2E (TPL red) nor #F2D024 (TPL yellow) appear anywhere in the output. The entire palette uses the Still Here Coffee brand colors"}, {"text": "At least one prompt includes aspect ratio or resolution", "passed": true, "evidence": "Hero shot: '1200\u00d71200px, 1:1 (square)' and Lifestyle shot: '1440\u00d71800px, 4:5 (vertical feed format)'. Both prompts include technical specifications"}, {"text": "Copper (#B87333 or described as copper/bronze) appears in the prompts as the accent element", "passed": true, "evidence": "Copper is prominently featured: 'The copper foil type catches the single warm light source' and 'Copper foil type (#B87333) is warm and luminous in the light' in hero shot; 'The copper type on the bag glows warm' and 'The copper foil (#B87333) glows' in lifestyle shot"}], "notes": []}, {"eval_id": 2, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 7, "failed": 0, "total": 7, "time_seconds": 33.9, "tokens": 0, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Output contains two distinct prompts (typography poster AND collection flat-lay)", "passed": true, "evidence": "Output clearly separates 'No Filter Typography Hero \u2014 Instagram Square' and 'No Filter Collection Flat-Lay \u2014 Dark Background' as two complete, distinct prompts with full specifications."}, {"text": "Typography prompt includes the exact headline string 'NO FILTER. NO APOLOGY.' \u2014 not paraphrased", "passed": true, "evidence": "The exact string 'NO FILTER. NO APOLOGY.' appears verbatim in the typography prompt multiple times, including the opening declaration and color specifications."}, {"text": "Typography prompt references electric yellow (#F2D024) or a high-energy accent \u2014 reflecting that drop announcements break from the standard dark palette", "passed": true, "evidence": "'NO APOLOGY.' in #F2D024 (electric yellow)\u2014the two-color split amplifies the boldness and signals this as a special drop announcement.' The yellow is explicitly used as a high-energy signal breaking from the dark base."}, {"text": "Flat-lay prompt specifies 4-5 pins (or a concrete number) rather than just 'multiple pins'", "passed": true, "evidence": "Flat-lay prompt explicitly states 'Five pins total (mix of sizes)' and references '4 attitude pins' at the opening, providing concrete pin counts rather than vague language."}, {"text": "Output references at least one TPL hex code (#1A1A1A, #F5F0EB, #E63B2E, or #F2D024)", "passed": true, "evidence": "All four TPL hex codes are referenced: #1A1A1A (matte black background throughout), #E63B2E (signal red for 'NO FILTER.'), #F2D024 (electric yellow for 'NO APOLOGY.' and packaging variation), and multiple references to these precise color values."}, {"text": "Typography poster specifies 1:1 or square format (for Instagram)", "passed": true, "evidence": "Typography prompt explicitly states 'Format: 1080\u00d71080px, 1:1 (Instagram square)' at the top, with clear technical specifications for square format."}, {"text": "At least one prompt's concept statement conveys urgency, scarcity, or limited-edition energy", "passed": true, "evidence": "Typography prompt states 'The headline conveys urgency and singularity\u2014this is a moment, not a permanent product line.' Also explicitly references 'this limited drop'. Flat-lay emphasizes 'collection moment'. Both convey scarcity and urgency."}], "notes": []}, {"eval_id": 0, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.8571, "passed": 6, "failed": 1, "total": 7, "time_seconds": 31.0, "tokens": 0, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Output contains exactly two distinct prompts (hero product shot AND lifestyle shot)", "passed": true, "evidence": "Output clearly delineates 'Hero Product Shot (Website PDP)' and 'Lifestyle Shot (Instagram)' as two separate, fully-developed prompts"}, {"text": "Output references at least one TPL hex code (#1A1A1A, #F5F0EB, #E63B2E, or #F2D024)", "passed": true, "evidence": "#1A1A1A referenced twice: in hero prompt ('Warm off-black color (#1A1A1A) background') and in technical parameters section"}, {"text": "At least one prompt starts with or prominently features a concept statement (the 'why' of the image, not just what it looks like)", "passed": true, "evidence": "Lifestyle prompt includes concept framing: 'Product-in-context storytelling, not lifestyle staging' and hero prompt frames intent as 'Professional product photography, zero styling, no background elements'"}, {"text": "Lighting description includes direction (e.g. 'upper left', 'side-lit') \u2014 not just 'good lighting' or 'warm lighting'", "passed": true, "evidence": "Hero prompt: 'Single directional light source from the left creates a defined shadow'. Lifestyle prompt: 'natural window light or soft desk lamp only'"}, {"text": "At least one prompt includes aspect ratio AND resolution (or pixel dimensions)", "passed": false, "evidence": "Hero prompt includes '35mm lens equivalent perspective' and lifestyle includes 'shallow depth of field', but neither specifies aspect ratio or resolution/pixel dimensions"}, {"text": "Output references 'Bullshit Remover' as the product name (preserving the brand's attitude voice)", "passed": true, "evidence": "Product name explicitly referenced in both prompts: 'BULLSHIT REMOVER' in hero prompt and 'Bullshit Remover' in lifestyle prompt"}, {"text": "Lifestyle prompt specifies that the person is implied (hands, jacket, bag) not shown fully \u2014 aligns with TPL photography rules", "passed": true, "evidence": "Lifestyle prompt explicitly states: 'No full-body model visible, only implied person' and shows only 'jacket collar, the clasp mechanism'"}], "notes": []}, {"eval_id": 1, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 7, "failed": 0, "total": 7, "time_seconds": 16.7, "tokens": 0, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Output contains two distinct prompts (hero product shot AND lifestyle shot)", "passed": true, "evidence": "Two clearly labeled sections: 'Hero Product Shot' and 'Lifestyle Shot', each with full, distinct prompt content"}, {"text": "Output uses the user's exact hex codes (#0A0F1E, #F0EBE1, or #B87333) \u2014 does NOT default to TPL's palette", "passed": true, "evidence": "Hero prompt: '#0A0F1E fabric surface', '#B87333 typography', '#F0EBE1 accent elements'. Lifestyle: '#F0EBE1 ceramic mug', '#0A0F1E tone', '#B87333' throughout"}, {"text": "At least one concept statement reflects the '2am alone and okay with it' or melancholic/calm brand vibe", "passed": true, "evidence": "Lifestyle prompt explicitly states: 'A dimly lit 2am moment' and 'contemplative, solitary, and unflinchingly honest\u2014not aspirational or bubbly'. Hero: 'refined, nocturnal, and introspective'"}, {"text": "Lighting description includes direction and quality \u2014 not just 'moody lighting'", "passed": true, "evidence": "Hero: 'Soft, directional lighting from the upper left creates subtle shadows'. Lifestyle: 'Window light from the left casts a single, narrow beam across the mug and table'. Both include aperture specs (f/2.8, f/1.8)"}, {"text": "Output does NOT reference #E63B2E or #F2D024 (TPL's accent colors) \u2014 correctly adapts to the new brand", "passed": true, "evidence": "Neither TPL accent color (#E63B2E red, #F2D024 yellow) appears anywhere in the output. Palette is exclusively Still Here's colors"}, {"text": "At least one prompt includes aspect ratio or resolution", "passed": true, "evidence": "Hero: 'shot at 50mm, f/2.8, with shallow depth of field'. Lifestyle: 'shot with available light and a 35mm lens, f/1.8 aperture'. Both include technical specifications"}, {"text": "Copper (#B87333 or described as copper/bronze) appears in the prompts as the accent element", "passed": true, "evidence": "Hero: 'prominent copper foil (#B87333) typography' and 'highlights the copper foiling, making it shimmer'. Lifestyle: 'Copper accent objects are scattered nearby\u2014a small copper spoon, a copper-rimmed notebook' and 'copper catching light strategically'"}], "notes": []}, {"eval_id": 2, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 7, "failed": 0, "total": 7, "time_seconds": 40.8, "tokens": 0, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Output contains two distinct prompts (typography poster AND collection flat-lay)", "passed": true, "evidence": "Output has two clearly separated sections: '1. TYPOGRAPHY POSTER (SQUARE, INSTAGRAM)' and '2. ATTITUDE PINS COLLECTION FLAT-LAY (DARK BACKGROUND)', each with full prompts"}, {"text": "Typography prompt includes the exact headline string 'NO FILTER. NO APOLOGY.' \u2014 not paraphrased", "passed": true, "evidence": "Line 7: 'the headline \"NO FILTER. NO APOLOGY.\"' appears verbatim in the typography prompt"}, {"text": "Typography prompt references electric yellow (#F2D024) or a high-energy accent \u2014 reflecting that drop announcements break from the standard dark palette", "passed": true, "evidence": "Line 17: '#F2D024 (electric yellow)' explicitly referenced for 'Drop 1' product code marking; Line 62 also references it for optional text overlay"}, {"text": "Flat-lay prompt specifies 4-5 pins (or a concrete number) rather than just 'multiple pins'", "passed": true, "evidence": "Line 31: 'showcasing 4-5 attitude pins'; Line 39: 'Arrange 4-5 pins' \u2014 concrete number specified twice"}, {"text": "Output references at least one TPL hex code (#1A1A1A, #F5F0EB, #E63B2E, or #F2D024)", "passed": true, "evidence": "All four TPL hex codes are referenced: #1A1A1A (line 10), #F5F0EB (lines 11, 16, 63), #E63B2E (lines 12, 15, 62), #F2D024 (lines 17, 62, 80)"}, {"text": "Typography poster specifies 1:1 or square format (for Instagram)", "passed": true, "evidence": "Line 3: 'SQUARE, INSTAGRAM' in section header; Line 7: 'square Instagram post (1080x1080px)' specifies both 1:1 format and dimensions"}, {"text": "At least one prompt's concept statement conveys urgency, scarcity, or limited-edition energy", "passed": true, "evidence": "Typography prompt (lines 15, 18): 'Limited Edition', 'Drop 1', 'midnight' zine mood; Flat-lay prompt (line 31): 'limited-edition exclusivity and urgency'; (line 70): 'Creates a sense of scarcity and exclusivity'"}], "notes": []}], "run_summary": {"with_skill": {"pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0}, "time_seconds": {"mean": 33.8333, "stddev": 4.5004, "min": 29.3, "max": 38.3}, "tokens": {"mean": 0.0, "stddev": 0.0, "min": 0, "max": 0}}, "without_skill": {"pass_rate": {"mean": 0.9524, "stddev": 0.0825, "min": 0.8571, "max": 1.0}, "time_seconds": {"mean": 29.5, "stddev": 12.1198, "min": 16.7, "max": 40.8}, "tokens": {"mean": 0.0, "stddev": 0.0, "min": 0, "max": 0}}, "delta": {"pass_rate": "+0.05", "time_seconds": "+4.3", "tokens": "+0"}}, "notes": []}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

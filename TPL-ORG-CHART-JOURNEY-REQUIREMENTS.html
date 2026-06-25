@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Product Lab — Org Chart · Journey · Launch Requirements</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0d14;
+    --bg2: #0f131c;
+    --bg3: #161b28;
+    --bg4: #1e2536;
+    --text: #e8e6e3;
+    --text2: rgba(255,255,255,0.7);
+    --text3: rgba(255,255,255,0.5);
+    --tpl-red: #E63B2E;
+    --tpl-yellow: #F2D024;
+    --tpl-cream: #F5F0EB;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --pink: #ec4899;
+    --teal: #14b8a6;
+    --orange: #f97316;
+  }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  h1 { font-size: 2.6rem; color: var(--tpl-cream); margin-bottom: 4px; }
+  h2 { font-size: 1.7rem; color: var(--tpl-yellow); margin: 36px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--tpl-red); }
+  h3 { font-size: 1.2rem; color: var(--tpl-cream); margin: 24px 0 12px; }
+  h4 { font-size: 0.95rem; color: var(--text2); margin: 14px 0 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+  p, li { color: var(--text2); font-size: 0.88rem; line-height: 1.7; }
+  a { color: var(--tpl-yellow); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .subtitle { color: var(--text3); font-size: 0.9rem; margin-bottom: 24px; }
+
+  .header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+  .badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .badge-red { background: var(--tpl-red); color: #fff; }
+  .badge-yellow { background: var(--tpl-yellow); color: #000; }
+  .badge-green { background: var(--green); color: #fff; }
+  .badge-blue { background: var(--blue); color: #fff; }
+
+  .back-link { display: inline-block; margin-bottom: 12px; color: var(--text3); font-size: 0.85rem; }
+  .back-link:hover { color: var(--tpl-yellow); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 24px; border-bottom: 1px solid var(--bg4); padding-bottom: 0; }
+  .tab-btn {
+    padding: 10px 20px; background: var(--bg2); border: 1px solid var(--bg4);
+    color: var(--text2); border-radius: 8px 8px 0 0; cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem;
+    font-weight: 600; transition: all 0.2s; margin-bottom: -1px;
+  }
+  .tab-btn:hover { background: var(--bg3); }
+  .tab-btn.active { background: var(--bg3); color: var(--tpl-yellow); border-color: var(--tpl-yellow); border-bottom-color: var(--bg3); }
+  .tab-content { display: none; padding-top: 8px; }
+  .tab-content.active { display: block; }
+
+  /* ORG TREE */
+  .org-tree { text-align: center; margin: 24px 0; }
+  .org-level { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 32px; position: relative; }
+  .org-level::after {
+    content: ''; display: block; width: 60%; height: 2px; background: var(--bg4);
+    position: absolute; bottom: -16px; left: 20%;
+  }
+  .org-level:last-child::after { display: none; }
+  .org-node {
+    background: var(--bg3); border-radius: 12px; padding: 14px 20px;
+    border: 1px solid var(--bg4); min-width: 180px; max-width: 240px;
+    transition: all 0.2s; position: relative;
+  }
+  .org-node:hover { transform: translateY(-2px); border-color: var(--tpl-yellow); }
+  .org-node .name { font-weight: 700; color: var(--text); font-size: 0.85rem; }
+  .org-node .role { font-size: 0.7rem; color: var(--text3); margin-top: 2px; }
+  .org-node .tag {
+    display: inline-block; padding: 1px 8px; border-radius: 10px;
+    font-size: 0.6rem; font-weight: 600; margin-top: 4px;
+  }
+  .tag-ai { background: rgba(59,130,246,0.25); color: var(--blue); }
+  .tag-human { background: rgba(16,185,166,0.25); color: var(--teal); }
+  .tag-dan { background: rgba(230,59,46,0.25); color: var(--tpl-red); }
+  .tag-p0 { background: rgba(245,158,11,0.25); color: var(--amber); }
+  .org-node.ceo { border-color: var(--tpl-red); border-width: 2px; }
+  .org-node.level-1 { border-color: var(--tpl-yellow); }
+  .org-node.level-2 { border-color: var(--blue); }
+  .org-node.level-3 { border-color: var(--green); }
+
+  /* JOURNEY */
+  .journey-container { overflow-x: auto; margin: 16px 0; }
+  .journey-table { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 0.75rem; }
+  .journey-table th {
+    background: var(--bg3); color: var(--tpl-yellow); padding: 10px 8px;
+    text-align: center; font-weight: 600; border: 1px solid var(--bg4);
+    position: sticky; top: 0; min-width: 100px;
+  }
+  .journey-table th:first-child { min-width: 80px; }
+  .journey-table td { padding: 8px; border: 1px solid var(--bg4); color: var(--text2); vertical-align: top; text-align: center; }
+  .journey-table tr:hover td { background: var(--bg3); }
+  .journey-table .phase-header { background: rgba(230,59,46,0.1); font-weight: 600; }
+  .journey-table td.owner-ai { border-left: 3px solid var(--blue); }
+  .journey-table td.owner-human { border-left: 3px solid var(--teal); }
+  .journey-table td.owner-both { border-left: 3px solid var(--tpl-yellow); }
+
+  .phase-step {
+    display: inline-block; padding: 2px 10px; border-radius: 12px;
+    font-size: 0.65rem; font-weight: 600;
+  }
+  .step-external { background: rgba(139,92,246,0.2); color: var(--purple); }
+  .step-internal { background: rgba(59,130,246,0.2); color: var(--blue); }
+  .step-customer { background: rgba(16,185,166,0.2); color: var(--teal); }
+
+  /* SWIMLANE */
+  .swimlane { margin: 16px 0; }
+  .swimlane-row { display: grid; grid-template-columns: 140px 1fr; border-bottom: 1px solid var(--bg4); min-height: 48px; }
+  .swimlane-row:first-child { border-top: 1px solid var(--bg4); }
+  .swimlane-label { padding: 10px 12px; font-weight: 600; font-size: 0.78rem; color: var(--tpl-cream); background: var(--bg2); border-right: 2px solid var(--bg4); display: flex; align-items: center; }
+  .swimlane-content { padding: 8px 12px; display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+  .swimlane-step {
+    display: inline-block; padding: 6px 12px; border-radius: 6px;
+    font-size: 0.72rem; font-weight: 500; background: var(--bg3);
+    border: 1px solid var(--bg4); position: relative;
+  }
+  .swimlane-step .owner { font-size: 0.6rem; color: var(--text3); display: block; margin-top: 2px; }
+  .swimlane-step.discover { border-color: var(--purple); }
+  .swimlane-step.evaluate { border-color: var(--blue); }
+  .swimlane-step.purchase { border-color: var(--green); }
+  .swimlane-step.fulfill { border-color: var(--amber); }
+  .swimlane-step.retain { border-color: var(--tpl-red); }
+  .swimlane-step.scale { border-color: var(--teal); }
+  .swimlane-arrow { color: var(--text3); font-size: 1.2rem; padding: 0 4px; }
+
+  /* REQUIREMENTS */
+  .req-section { margin: 20px 0; }
+  .req-group { margin-bottom: 16px; }
+  .req-group h4 { margin-bottom: 8px; }
+  .req-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 12px; background: var(--bg3); border-radius: 6px;
+    border: 1px solid var(--bg4); margin-bottom: 4px;
+  }
+  .req-check { width: 18px; height: 18px; border: 2px solid var(--text3); border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+  .req-check.done { background: var(--green); border-color: var(--green); position: relative; }
+  .req-check.done::after { content: '✓'; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+  .req-check.pending { background: transparent; border-color: var(--amber); }
+  .req-check.blocked { background: rgba(230,59,46,0.2); border-color: var(--tpl-red); }
+  .req-text { flex: 1; }
+  .req-text .title { font-weight: 600; color: var(--text); font-size: 0.82rem; }
+  .req-text .detail { font-size: 0.75rem; color: var(--text3); margin-top: 2px; }
+  .req-text .team { font-size: 0.68rem; color: var(--tpl-yellow); margin-top: 2px; }
+  .req-status { font-size: 0.68rem; padding: 2px 8px; border-radius: 10px; font-weight: 500; white-space: nowrap; }
+  .status-done { background: rgba(16,185,166,0.2); color: var(--green); }
+  .status-progress { background: rgba(59,130,246,0.2); color: var(--blue); }
+  .status-blocked { background: rgba(230,59,46,0.2); color: var(--tpl-red); }
+  .status-pending { background: rgba(245,158,11,0.2); color: var(--amber); }
+
+  /* CARDS */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 16px 0; }
+  .card {
+    background: var(--bg3); border-radius: 10px; padding: 14px;
+    border: 1px solid var(--bg4); transition: all 0.2s;
+  }
+  .card:hover { border-color: var(--tpl-yellow); }
+  .card h4 { margin-top: 0; padding-bottom: 6px; border-bottom: 2px solid; margin-bottom: 8px; }
+  .card.strategy h4 { border-color: var(--purple); }
+  .card.build h4 { border-color: var(--blue); }
+  .card.creative h4 { border-color: var(--pink); }
+  .card.ops h4 { border-color: var(--amber); }
+  .card.growth h4 { border-color: var(--green); }
+  .card.finance h4 { border-color: var(--teal); }
+  .card .desc { font-size: 0.78rem; color: var(--text2); line-height: 1.6; }
+  .card .deps { font-size: 0.68rem; color: var(--text3); margin-top: 6px; }
+  .card .deps span { color: var(--tpl-yellow); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+
+  .callout {
+    background: var(--bg3); border-left: 3px solid var(--tpl-yellow);
+    padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 16px 0;
+  }
+  .callout.red { border-left-color: var(--tpl-red); }
+  .callout.green { border-left-color: var(--green); }
+  .callout.blue { border-left-color: var(--blue); }
+
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.65rem; font-weight: 500; }
+  .pill.ai { background: rgba(59,130,246,0.2); color: var(--blue); }
+  .pill.human { background: rgba(16,185,166,0.2); color: var(--teal); }
+  .pill.both { background: rgba(245,158,11,0.2); color: var(--amber); }
+
+  .function-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 12px 0; }
+  .function-card {
+    background: var(--bg3); border-radius: 8px; padding: 12px;
+    border: 1px solid var(--bg4); text-align: center;
+  }
+  .function-card .count { font-size: 1.8rem; font-weight: 700; color: var(--tpl-yellow); font-family: 'Barlow Condensed', sans-serif; }
+  .function-card .label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .workflow-card {
+    background: var(--bg3); border-radius: 8px; padding: 16px;
+    border: 1px solid var(--bg4); margin-bottom: 12px;
+  }
+  .workflow-card h5 { color: var(--tpl-cream); font-size: 0.95rem; margin-bottom: 6px; }
+  .workflow-card .flow { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font-size: 0.78rem; color: var(--text2); }
+  .workflow-card .flow .step { background: var(--bg4); padding: 3px 10px; border-radius: 4px; }
+  .workflow-card .flow .arrow { color: var(--text3); }
+  .workflow-card .owner-info { font-size: 0.72rem; color: var(--text3); margin-top: 6px; }
+
+  hr { border: none; border-top: 1px solid var(--bg4); margin: 36px 0 20px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <a href="TPL-COMPLETE-ANALYSIS-AND-ORG-KANBAN.html" class="back-link">← Back to Analysis & Org Kanban</a>
+    <h1>THE PRODUCT LAB</h1>
+    <div class="subtitle">Full-Stak Org Chart · Customer Journey · Launch & Scale Requirements</div>
+  </div>
+  <div class="header-badges">
+    <span class="badge badge-red">Phase 4 Active</span>
+    <span class="badge badge-yellow">₹48L Revenue</span>
+    <span class="badge badge-green">Dan + 25 AI Agents</span>
+    <span class="badge badge-blue">Linked to Org Kanban</span>
+  </div>
+</div>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="orgchart">Org Chart</button>
+  <button class="tab-btn" data-tab="journey">Customer Journey</button>
+  <button class="tab-btn" data-tab="workflows">Workflows & Swimlanes</button>
+  <button class="tab-btn" data-tab="launch">Launch Requirements</button>
+  <button class="tab-btn" data-tab="scale">Scale Requirements</button>
+  <button class="tab-btn" data-tab="teams">All Teams & Functions</button>
+</nav>
+
+<!-- ================================================================ -->
+<!-- TAB 1: ORG CHART -->
+<!-- ================================================================ -->
+<section id="orgchart" class="tab-content active">
+
+<h2>Full-Stack Org Chart — Launch Phase (Dan + AI Agents)</h2>
+<p class="subtitle"><span class="pill ai">AI Agent</span> <span class="pill human">Human</span> <span class="pill both">AI + Human (planned)</span></p>
+
+<div class="org-tree">
+
+  <div class="org-level">
+    <div class="org-node ceo">
+      <div class="name">Dan 👑</div>
+      <div class="role">CEO / Founder / Sole Operator</div>
+      <span class="tag tag-dan">HUMAN</span>
+      <span class="tag tag-p0">P0</span>
+    </div>
+  </div>
+
+  <div class="org-level">
+    <div class="org-node level-1">
+      <div class="name">Harley</div>
+      <div class="role">Program Director</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+  </div>
+
+  <div class="org-level" style="grid-template-columns: repeat(4, 1fr); display: grid; gap: 16px;">
+    <div class="org-node level-2">
+      <div class="name">Heyward</div>
+      <div class="role">Brand Strategist</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-2">
+      <div class="name">Sean</div>
+      <div class="role">Creative Director</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-2">
+      <div class="name">Tobi</div>
+      <div class="role">Build Lead</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-2">
+      <div class="name">Nik</div>
+      <div class="role">Growth Launch Lead</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+  </div>
+
+  <div class="org-level" style="grid-template-columns: repeat(5, 1fr); display: grid; gap: 12px;">
+    <div class="org-node level-3">
+      <div class="name">Weiss</div>
+      <div class="role">Customer Insight</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Kurt</div>
+      <div class="role">UX / Conversion</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">James</div>
+      <div class="role">QA Lead 🛡️</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Chase</div>
+      <div class="role">Marketing</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Patrick</div>
+      <div class="role">Finance</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+  </div>
+
+  <div class="org-level" style="grid-template-columns: repeat(5, 1fr); display: grid; gap: 10px;">
+    <div class="org-node level-3">
+      <div class="name">Shreyas</div>
+      <div class="role">Product Strategist</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Jenna</div>
+      <div class="role">Merchandising</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Julie</div>
+      <div class="role">UI Designer</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Joanna</div>
+      <div class="role">Copy Lead</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Raj</div>
+      <div class="role">Logistics</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+  </div>
+
+  <div class="org-level" style="grid-template-columns: repeat(4, 1fr); display: grid; gap: 10px;">
+    <div class="org-node level-3">
+      <div class="name">Andy</div>
+      <div class="role">Product/Catalog</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Casey</div>
+      <div class="role">Content/Assets</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Eli</div>
+      <div class="role">Retention/Flows</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Rachel</div>
+      <div class="role">Seeding/PR</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+  </div>
+</div>
+
+<div class="callout green">
+  <strong>Launch Phase:</strong> 1 Human (Dan) + 17 AI Agents across Strategy, Creative, Build, Growth, Ops, Finance. All AI agents report to Harley (Program Director). QA Lead (James) has final launch sign-off — no one overrules James on QA.
+</div>
+
+<hr>
+
+<h2>Full-Stak Org Chart — Scale Phase (Humans + AI)</h2>
+<p class="subtitle">Target state at ₹1Cr+ D2C run rate (Month 12-18 post-launch)</p>
+
+<div class="org-tree">
+
+  <div class="org-level">
+    <div class="org-node ceo" style="max-width: 300px;">
+      <div class="name">Dan 👑</div>
+      <div class="role">CEO / Brand Owner</div>
+      <span class="tag tag-dan">HUMAN</span>
+    </div>
+    <div class="org-node level-1" style="max-width: 240px;">
+      <div class="name">Harley</div>
+      <div class="role">Program Director → COO</div>
+      <span class="tag tag-ai">AI → Human P3</span>
+    </div>
+  </div>
+
+  <div class="org-level" style="grid-template-columns: repeat(5, 1fr); display: grid; gap: 14px;">
+    <div class="org-node level-2">
+      <div class="name">Heyward + Weiss</div>
+      <div class="role">Strategy & Insight (AI)</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-2">
+      <div class="name">Sean + Joanna + Julie + Kurt</div>
+      <div class="role">Creative & UX (AI)</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-2">
+      <div class="name">Full-Stack Dev</div>
+      <div class="role">Engineering Lead</div>
+      <span class="tag tag-human">HUMAN P2</span>
+    </div>
+    <div class="org-node level-2">
+      <div class="name">Growth Marketing Mgr</div>
+      <div class="role">Growth Lead</div>
+      <span class="tag tag-human">HUMAN P2</span>
+    </div>
+    <div class="org-node level-2">
+      <div class="name">Store + Ops Lead</div>
+      <div class="role">Operations Lead</div>
+      <span class="tag tag-human">HUMAN P1</span>
+    </div>
+  </div>
+
+  <div class="org-level" style="grid-template-columns: repeat(5, 1fr); display: grid; gap: 12px;">
+    <div class="org-node level-3">
+      <div class="name">Product Designer</div>
+      <div class="role">Graphic/Prod Design</div>
+      <span class="tag tag-human">HUMAN P2</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Content Creator</div>
+      <div class="role">Social/Reels</div>
+      <span class="tag tag-human">HUMAN P2</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Tobi + James (AI)</div>
+      <div class="role">Build + QA (AI)</div>
+      <span class="tag tag-ai">AI</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Fulfillment Coord</div>
+      <div class="role">Shiprocket/COD</div>
+      <span class="tag tag-human">HUMAN P2</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Bookkeeper</div>
+      <div class="role">Part-time Finance</div>
+      <span class="tag tag-human">HUMAN P3</span>
+    </div>
+  </div>
+
+  <div class="org-level" style="grid-template-columns: repeat(3, 1fr); display: grid; gap: 12px;">
+    <div class="org-node level-3">
+      <div class="name">Artist Relations Mgr</div>
+      <div class="role">Artist Platform</div>
+      <span class="tag tag-human">HUMAN P3</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Data / Analytics</div>
+      <div class="role">Freelance Analyst</div>
+      <span class="tag tag-human">HUMAN P3</span>
+    </div>
+    <div class="org-node level-3">
+      <div class="name">Product Manager</div>
+      <div class="role">Roadmap / Drops</div>
+      <span class="tag tag-human">HUMAN P3</span>
+    </div>
+  </div>
+</div>
+
+<div class="callout blue">
+  <strong>Scale Phase:</strong> 7-10 Humans + 15 AI Agents. Core principle (D-014): Systems documented by AI before any human hired. Every role has an AI predecessor that already defined the SOPs, checklists, and workflows.
+</div>
+
+<hr>
+
+<h2>Role Dependency Map — Who Depends on Whom</h2>
+<div class="card-grid">
+  <div class="card build"><h4>🔄 Tobi (Build)</h4><div class="desc">Depends: Fynd access from <strong>Dan</strong>. CSS tokens from <strong>Julie</strong>. Page specs from <strong>Kurt</strong>. Unblocks: <strong>James</strong> (QA), <strong>Eli</strong> (flows), <strong>Chase</strong> (content publishing), <strong>Nik</strong> (launch).</div><div class="deps">Critical path: <span>Dan → Tobi → James → Launch</span></div></div>
+  <div class="card creative"><h4>🔄 Sean (Creative)</h4><div class="desc">Depends: Brand positioning from <strong>Heyward</strong>. Unblocks: <strong>Julie</strong> (UI), <strong>Joanna</strong> (copy), <strong>Casey</strong> (assets), <strong>Kurt</strong> (UX).</div><div class="deps">Critical path: <span>Heyward → Sean → Julie → Tobi</span></div></div>
+  <div class="card growth"><h4>🔄 Nik (Growth)</h4><div class="desc">Depends: Launch narrative from <strong>Chase</strong>. Seeding plan from <strong>Rachel</strong>. Flows from <strong>Eli</strong>. Unblocks: <strong>Andrew</strong> (runbook), <strong>Avinash</strong> (paid ads).</div><div class="deps">Critical path: <span>Chase + Rachel + Eli → Nik → Launch Day</span></div></div>
+  <div class="card ops"><h4>🔄 James (QA)</h4><div class="desc">Depends: Everything from <strong>Tobi</strong>. QA checklist already written. Unblocks: <strong>Launch</strong>. James holds the gate — no one overrules.</div><div class="deps">Gate: <span>James sign-off = Launch go</span></div></div>
+  <div class="card strategy"><h4>🔄 Dan (CEO)</h4><div class="desc">Depends: AI agents produce all artifacts. Dan provides: Fynd access, product photography, product copy, artist approvals, launch date decision.</div><div class="deps">Constraints: <span>Dan is bottleneck for 3 current blockers</span></div></div>
+  <div class="card finance"><h4>🔄 Harley (Program Director)</h4><div class="desc">Depends: All agents reporting status. Unblocks: Deadlocks, sequencing decisions, phase gate reviews, escalation to Dan.</div><div class="deps">Owner: <span>Total outcome, timeline, quality bar</span></div></div>
+</div>
+
+</section>
+
+<!-- ================================================================ -->
+<!-- TAB 2: CUSTOMER JOURNEY -->
+<!-- ================================================================ -->
+<section id="journey" class="tab-content">
+
+<h2>Customer Journey — End-to-End Mapped to Teams & Touchpoints</h2>
+<p class="subtitle">Full journey from first discovery to repeat purchase, with every touchpoint owned by a team/role.</p>
+
+<div class="journey-container">
+<table class="journey-table">
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Step</th>
+      <th>Customer Action</th>
+      <th>Touchpoint</th>
+      <th>Owner</th>
+      <th>AI Agent(s)</th>
+      <th>Human(s)</th>
+      <th>System / Tool</th>
+      <th>Success Metric</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="phase-header"><td colspan="9">🟣 PHASE 1: DISCOVERY (Awareness)</td></tr>
+    <tr>
+      <td><span class="phase-step step-external">Discovery</span></td>
+      <td>1.1</td>
+      <td>Scrolls Instagram → sees TPL Reel/post</td>
+      <td>Instagram Feed/Reels</td>
+      <td class="owner-both">Marketing</td>
+      <td>Chase (content strategy)</td>
+      <td>Content Creator (P2)</td>
+      <td>Instagram, Meta Business</td>
+      <td>Reach, engagement rate</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-external">Discovery</span></td>
+      <td>1.2</td>
+      <td>Sees gifted product from friend/influencer</td>
+      <td>WhatsApp, In-person</td>
+      <td class="owner-ai">Seeding</td>
+      <td>Rachel (gift strategy)</td>
+      <td>Dan (gift selection)</td>
+      <td>WhatsApp, Instagram DM</td>
+      <td>Gifted → visit rate</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-external">Discovery</span></td>
+      <td>1.3</td>
+      <td>Hears about TPL via word-of-mouth</td>
+      <td>WhatsApp forward</td>
+      <td class="owner-ai">Product</td>
+      <td>Joanna (copy shareability)</td>
+      <td>—</td>
+      <td>WhatsApp</td>
+      <td>Forward rate</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-external">Discovery</span></td>
+      <td>1.4</td>
+      <td>Searches Google → finds TPL site</td>
+      <td>Google Search</td>
+      <td class="owner-ai">Growth</td>
+      <td>Nik (SEO strategy)</td>
+      <td>—</td>
+      <td>GA4, Google Search Console</td>
+      <td>Organic traffic</td>
+    </tr>
+
+    <tr class="phase-header"><td colspan="9">🔵 PHASE 2: EVALUATION (Consideration)</td></tr>
+    <tr>
+      <td><span class="phase-step step-external">Evaluate</span></td>
+      <td>2.1</td>
+      <td>Lands on Homepage → sees visual identity</td>
+      <td>Homepage</td>
+      <td class="owner-both">Creative + UX</td>
+      <td>Sean (visual), Kurt (IA)</td>
+      <td>Dan (photography)</td>
+      <td>Fynd storefront</td>
+      <td>Bounce rate, time on page</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-external">Evaluate</span></td>
+      <td>2.2</td>
+      <td>Browses collections → card stickers, pins</td>
+      <td>Collection Pages</td>
+      <td class="owner-both">Merchandising + UX</td>
+      <td>Jenna (hierarchy), Kurt (flow)</td>
+      <td>—</td>
+      <td>Fynd collections</td>
+      <td>Collection → PDP rate</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-external">Evaluate</span></td>
+      <td>2.3</td>
+      <td>Reads opinion text on product</td>
+      <td>PDP</td>
+      <td class="owner-ai">Copy</td>
+      <td>Joanna (voice system)</td>
+      <td>Dan (hero copy)</td>
+      <td>Fynd PDP</td>
+      <td>Add-to-cart rate</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-external">Evaluate</span></td>
+      <td>2.4</td>
+      <td>Checks pricing → sees ₹149-999 range</td>
+      <td>PDP / Pricing</td>
+      <td class="owner-ai">Finance</td>
+      <td>Patrick (pricing D-006)</td>
+      <td>—</td>
+      <td>Fynd pricing</td>
+      <td>Price acceptance</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-external">Evaluate</span></td>
+      <td>2.5</td>
+      <td>Explores gift personas → finds a gift</td>
+      <td>Gifting Hub</td>
+      <td class="owner-both">Product + Growth</td>
+      <td>Andy (catalog), Nik (mechanics)</td>
+      <td>—</td>
+      <td>Fynd gifting page</td>
+      <td>Gift add-to-cart</td>
+    </tr>
+
+    <tr class="phase-header"><td colspan="9">🟢 PHASE 3: PURCHASE (Conversion)</td></tr>
+    <tr>
+      <td><span class="phase-step step-internal">Purchase</span></td>
+      <td>3.1</td>
+      <td>Adds to cart → sees bundle deals</td>
+      <td>Cart</td>
+      <td class="owner-ai">UX + Growth</td>
+      <td>Kurt (cart logic), Nik (bundles)</td>
+      <td>—</td>
+      <td>Fynd cart</td>
+      <td>Cart → checkout rate</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-internal">Purchase</span></td>
+      <td>3.2</td>
+      <td>Chooses payment → UPI/Card/COD</td>
+      <td>Checkout</td>
+      <td class="owner-ai">Build</td>
+      <td>Tobi (Razorpay integration)</td>
+      <td>—</td>
+      <td>Razorpay</td>
+      <td>Checkout completion</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-internal">Purchase</span></td>
+      <td>3.3</td>
+      <td>Prepaid discount applied vs COD minimum</td>
+      <td>Payment</td>
+      <td class="owner-ai">Finance</td>
+      <td>Patrick (pricing rules)</td>
+      <td>—</td>
+      <td>Razorpay, Fynd</td>
+      <td>Prepaid vs COD ratio</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-internal">Purchase</span></td>
+      <td>3.4</td>
+      <td>Receives order confirmation</td>
+      <td>Email / WhatsApp</td>
+      <td class="owner-ai">Retention</td>
+      <td>Eli (flow setup)</td>
+      <td>—</td>
+      <td>Klaviyo, MSG91</td>
+      <td>Confirmation delivery</td>
+    </tr>
+
+    <tr class="phase-header"><td colspan="9">🟡 PHASE 4: FULFILLMENT (Delivery)</td></tr>
+    <tr>
+      <td><span class="phase-step step-internal">Fulfill</span></td>
+      <td>4.1</td>
+      <td>Order → production trigger</td>
+      <td>Production</td>
+      <td class="owner-both">Ops</td>
+      <td>Raj (fulfillment SOP)</td>
+      <td>Dan / Store Associate (P1)</td>
+      <td>Ink Fish production</td>
+      <td>Production TAT</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-internal">Fulfill</span></td>
+      <td>4.2</td>
+      <td>Packaging → branding experience</td>
+      <td>Packaging</td>
+      <td class="owner-both">Creative + Ops</td>
+      <td>Sean (packaging design)</td>
+      <td>Store Associate (P1)</td>
+      <td>Packaging materials</td>
+      <td>Unboxing share rate</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-internal">Fulfill</span></td>
+      <td>4.3</td>
+      <td>Shipped via Shiprocket</td>
+      <td>Shipping</td>
+      <td class="owner-both">Ops + Logistics</td>
+      <td>Raj (carrier setup)</td>
+      <td>Fulfillment Coord (P2)</td>
+      <td>Shiprocket</td>
+      <td>AWB generation, TAT</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-internal">Fulfill</span></td>
+      <td>4.4</td>
+      <td>Tracking updates sent to customer</td>
+      <td>WhatsApp/Email</td>
+      <td class="owner-ai">Retention</td>
+      <td>Eli (tracking flows)</td>
+      <td>—</td>
+      <td>Klaviyo, MSG91</td>
+      <td>Tracking open rate</td>
+    </tr>
+
+    <tr class="phase-header"><td colspan="9">🔴 PHASE 5: EXPERIENCE (Post-Purchase)</td></tr>
+    <tr>
+      <td><span class="phase-step step-customer">Experience</span></td>
+      <td>5.1</td>
+      <td>Unboxes → experiences packaging delight</td>
+      <td>Physical Package</td>
+      <td class="owner-both">Creative</td>
+      <td>Sean (packaging design)</td>
+      <td>Store Associate</td>
+      <td>Packaging</td>
+      <td>Unboxing satisfaction</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-customer">Experience</span></td>
+      <td>5.2</td>
+      <td>Places sticker on opinion wall → shares on Insta</td>
+      <td>Opinion Wall + Instagram</td>
+      <td class="owner-both">Product + Growth</td>
+      <td>Andy (wall feature), Nik (UGC)</td>
+      <td>Content Creator (P2)</td>
+      <td>Website, Instagram</td>
+      <td>UGC posts, wall uploads</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-customer">Experience</span></td>
+      <td>5.3</td>
+      <td>Receives post-purchase WhatsApp/Email</td>
+      <td>WhatsApp/Email</td>
+      <td class="owner-ai">Retention</td>
+      <td>Eli (post-purchase flow)</td>
+      <td>—</td>
+      <td>Klaviyo, MSG91</td>
+      <td>Post-purchase engagement</td>
+    </tr>
+
+    <tr class="phase-header"><td colspan="9">🟠 PHASE 6: RETENTION & REPEAT</td></tr>
+    <tr>
+      <td><span class="phase-step step-customer">Retain</span></td>
+      <td>6.1</td>
+      <td>Collects more stickers → completes a set</td>
+      <td>Collection/Set</td>
+      <td class="owner-both">Product</td>
+      <td>Andy (collect sets), Nik (mechanics)</td>
+      <td>—</td>
+      <td>Website, Fynd</td>
+      <td>Set completion rate</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-customer">Retain</span></td>
+      <td>6.2</td>
+      <td>Gifts a sticker set to a friend</td>
+      <td>Gifting Hub</td>
+      <td class="owner-both">Growth + Product</td>
+      <td>Nik (gift personas), Eli (flows)</td>
+      <td>—</td>
+      <td>Fynd gifting</td>
+      <td>Gift purchase rate</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-customer">Retain</span></td>
+      <td>6.3</td>
+      <td>Subscribes for Drop 2 announcement</td>
+      <td>Email/WhatsApp</td>
+      <td class="owner-ai">Retention</td>
+      <td>Eli (drop flow)</td>
+      <td>—</td>
+      <td>Klaviyo, MSG91</td>
+      <td>Subscriber → purchaser</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-customer">Retain</span></td>
+      <td>6.4</td>
+      <td>Returns for artist collab Drop 2</td>
+      <td>Drop Hub</td>
+      <td class="owner-both">Product + Growth</td>
+      <td>Andy (drops), Nik (campaign)</td>
+      <td>Artist Relations Mgr (P3)</td>
+      <td>Website, Instagram</td>
+      <td>Drop 2 conversion</td>
+    </tr>
+    <tr>
+      <td><span class="phase-step step-customer">Retain</span></td>
+      <td>6.5</td>
+      <td>Joins WhatsApp broadcast community</td>
+      <td>WhatsApp Broadcast</td>
+      <td class="owner-both">Growth + Retention</td>
+      <td>Eli (broadcast flows)</td>
+      <td>Content Creator (P2)</td>
+      <td>MSG91, WhatsApp API</td>
+      <td>Community engagement</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout">
+  <strong>Customer Journey Principle:</strong> The journey is designed around <strong>Find. Collect. Gift.</strong> (D-019). Every phase feeds into the next — Discovery → Purchase → Experience → Repeat. The gift mechanic in Phase 6 loops back to Discovery for a new customer (zero CAC).
+</div>
+
+</section>
+
+<!-- ================================================================ -->
+<!-- TAB 3: WORKFLOWS & SWIMLANES -->
+<!-- ================================================================ -->
+<section id="workflows" class="tab-content">
+
+<h2>Core Workflows — Swimlane Diagrams</h2>
+<p class="subtitle">End-to-end processes mapped by role/team showing handoffs, dependencies, and ownership.</p>
+
+<h3>Workflow 1: Product Creation → PDP Launch</h3>
+<div class="swimlane">
+  <div class="swimlane-row">
+    <div class="swimlane-label">🎨 Dan (CEO)</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step discover">Approve concept</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step evaluate">Shoot photos</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step purchase">Write copy</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">📋 Andy (Product)</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step evaluate">Define SKU + specs</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step purchase">Assign collection + tags</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">🎨 Sean/Joanna (Creative)</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step discover">Design packaging</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step evaluate">Write product narrative</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">⚙️ Tobi (Build)</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step purchase">Upload to Fynd</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step fulfill">Configure pricing + variants</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step retain">Set GA4 tracking</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">✅ James (QA)</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step fulfill">Verify PDP on staging</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step scale">Sign off → Publish</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">🚀 Chase (Marketing)</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step scale">Create launch post</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step scale">Schedule + publish</span>
+    </div>
+  </div>
+</div>
+
+<h3>Workflow 2: Order → Fulfillment</h3>
+<div class="swimlane">
+  <div class="swimlane-row">
+    <div class="swimlane-label">🛒 Customer</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step evaluate">Places order</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step purchase">Pays (UPI/Card/COD)</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">⚙️ Tobi + Fynd</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step purchase">Capture order</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step fulfill">Send confirmation</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step retain">GA4 event logged</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">📦 Store Associate</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step fulfill">Print order slip</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step fulfill">Pick + pack product</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step fulfill">Apply TPL packaging</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">🚚 Fulfillment Coord</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step fulfill">Generate Shiprocket AWB</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step fulfill">Hand to courier</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step retain">Update tracking</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">🤖 Eli (Retention)</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step fulfill">Trigger tracking WhatsApp</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step retain">Post-delivery follow-up</span>
+    </div>
+  </div>
+</div>
+
+<h3>Workflow 3: Artist Collab Drop</h3>
+<div class="swimlane">
+  <div class="swimlane-row">
+    <div class="swimlane-label">🎨 Dan + Artist</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step discover">Sign collab agreement</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step evaluate">Artist creates designs</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step purchase">Final approval</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">🎨 Sean/Kurt (Creative)</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step purchase">Adapt for merch format</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step fulfill">Design PDP + campaign</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">⚙️ Andy + Tobi</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step fulfill">Create SKUs + upload</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step retain">Set Drop 2 pricing</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">🚀 Nik + Chase</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step retain">Build launch campaign</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step scale">Seed to artist's audience</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step scale">Publish on Drop Day</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">🤖 Eli (Retention)</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step scale">Subscriber drop announcement</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step scale">Post-drop engagement</span>
+    </div>
+  </div>
+</div>
+
+<h3>Workflow 4: Customer Support & Returns</h3>
+<div class="swimlane">
+  <div class="swimlane-row">
+    <div class="swimlane-label">🛒 Customer</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step evaluate">Raises issue (WhatsApp/Email)</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">📞 Store Associate</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step purchase">Triage issue</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step fulfill">Resolve (replacement/refund)</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">🚚 Fulfillment Coord</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step fulfill">Process return label</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step retain">Inspect return</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step scale">Restock or discard</span>
+    </div>
+  </div>
+  <div class="swimlane-row">
+    <div class="swimlane-label">🤖 Eli + Raj</div>
+    <div class="swimlane-content">
+      <span class="swimlane-step retain">Log issue in tracker</span>
+      <span class="swimlane-arrow">→</span>
+      <span class="swimlane-step scale">Flag patterns to product</span>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<h2>All Workflows Summary</h2>
+<div class="workflow-card">
+  <h5>1. Product Creation → PDP Launch</h5>
+  <div class="flow">
+    <span class="step">Dan: Approve</span><span class="arrow">→</span>
+    <span class="step">Sean: Design</span><span class="arrow">→</span>
+    <span class="step">Andy: SKU + Tags</span><span class="arrow">→</span>
+    <span class="step">Tobi: Upload Fynd</span><span class="arrow">→</span>
+    <span class="step">James: QA</span><span class="arrow">→</span>
+    <span class="step">Chase: Launch Post</span>
+  </div>
+  <div class="owner-info">👤 Owners: Dan, Andy, Sean, Tobi, James, Chase | ⏱ Target: 3 days per SKU</div>
+</div>
+<div class="workflow-card">
+  <h5>2. Order → Fulfillment</h5>
+  <div class="flow">
+    <span class="step">Customer: Order</span><span class="arrow">→</span>
+    <span class="step">Fynd: Capture</span><span class="arrow">→</span>
+    <span class="step">Store: Pack</span><span class="arrow">→</span>
+    <span class="step">Shiprocket: AWB</span><span class="arrow">→</span>
+    <span class="step">Courier: Deliver</span><span class="arrow">→</span>
+    <span class="step">Eli: Tracking Flow</span>
+  </div>
+  <div class="owner-info">👤 Owners: Store Associate, Fulfillment Coord, Raj, Eli | ⏱ Target: 24hr dispatch</div>
+</div>
+<div class="workflow-card">
+  <h5>3. Artist Collab Drop</h5>
+  <div class="flow">
+    <span class="step">Dan + Artist: Sign</span><span class="arrow">→</span>
+    <span class="step">Artist: Create</span><span class="arrow">→</span>
+    <span class="step">Sean: Adapt</span><span class="arrow">→</span>
+    <span class="step">Andy + Tobi: Upload</span><span class="arrow">→</span>
+    <span class="step">Nik: Campaign</span><span class="arrow">→</span>
+    <span class="step">Eli: Notify</span>
+  </div>
+  <div class="owner-info">👤 Owners: Dan, Artist, Sean, Andy, Tobi, Nik, Eli | ⏱ Target: 4-week drop cycle</div>
+</div>
+<div class="workflow-card">
+  <h5>4. Customer Support</h5>
+  <div class="flow">
+    <span class="step">Customer: Issue</span><span class="arrow">→</span>
+    <span class="step">Store: Triage</span><span class="arrow">→</span>
+    <span class="step">Fulfillment: Process</span><span class="arrow">→</span>
+    <span class="step">Eli: Log + Track</span>
+  </div>
+  <div class="owner-info">👤 Owners: Store Associate, Fulfillment Coord, Eli | ⏱ Target: <24hr response</div>
+</div>
+<div class="workflow-card">
+  <h5>5. Performance Review & Optimization</h5>
+  <div class="flow">
+    <span class="step">GA4: Collect</span><span class="arrow">→</span>
+    <span class="step">Tobi: Dashboard</span><span class="arrow">→</span>
+    <span class="step">Harley: Review</span><span class="arrow">→</span>
+    <span class="step">Nik: Recommend</span><span class="arrow">→</span>
+    <span class="step">Dan: Decide</span><span class="arrow">→</span>
+    <span class="step">All: Execute</span>
+  </div>
+  <div class="owner-info">👤 Owners: Tobi, Harley, Nik, Dan, All agents | ⏱ Cadence: Weekly</div>
+</div>
+
+</section>
+
+<!-- ================================================================ -->
+<!-- TAB 4: LAUNCH REQUIREMENTS -->
+<!-- ================================================================ -->
+<section id="launch" class="tab-content">
+
+<h2>Launch Requirements — Everything Needed to Go Live</h2>
+<p class="subtitle">Complete checklist grouped by function. Status reflects current progress as of 2026-06-06.</p>
+
+<div class="function-grid">
+  <div class="function-card"><div class="count">32</div><div class="label">Total Requirements</div></div>
+  <div class="function-card"><div class="count">8</div><div class="label">Done</div></div>
+  <div class="function-card"><div class="count">14</div><div class="label">In Progress</div></div>
+  <div class="function-card"><div class="count">3</div><div class="label">Blocked</div></div>
+  <div class="function-card"><div class="count">7</div><div class="label">Pending (Phase 5)</div></div>
+</div>
+
+<div class="req-section">
+
+  <div class="req-group">
+    <h4>🖥️ Platform & Technical (Lead: Tobi)</h4>
+    <div class="req-item">
+      <div class="req-check blocked"></div>
+      <div class="req-text"><div class="title">Fynd/Commerce.com store access credentials</div><div class="detail">Tobi cannot start build without this. Dan holds the credentials.</div><div class="team">Team: Dan → Tobi</div></div>
+      <span class="req-status status-blocked">BLOCKED</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">Fynd store configuration</div><div class="detail">Domain setup, GST config (29APFPH6495C1ZP), tax zones, shipping zones, payment gateway config.</div><div class="team">Team: Tobi</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">Razorpay integration</div><div class="detail">UPI, credit/debit cards, net banking, wallets. Test mode + live mode. COD minimum ₹299 enforced. Prepaid discount ₹30.</div><div class="team">Team: Tobi</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">Shiprocket integration</div><div class="detail">Multi-carrier setup, COD enabled, AWB generation, return label automation. COD end-to-end tested before launch.</div><div class="team">Team: Tobi + Raj</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">GA4 + Clarity integration</div><div class="detail">All key events tracked: page_view, view_item, add_to_cart, begin_checkout, purchase. Enhanced measurement. Clarity session recording.</div><div class="team">Team: Tobi</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">Darkroom/Light+Bold CSS theme implementation</div><div class="detail">CSS tokens per ui-system.md. Components: header, footer, product cards, buttons, typography system. Mobile-first responsive.</div><div class="team">Team: Tobi</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">Performance: <3s LCP on 4G</div><div class="detail">Hard launch requirement. Image optimization, lazy loading, font subsetting, reduced JS. Test on actual 4G throttling.</div><div class="team">Team: Tobi + James</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+  </div>
+
+  <div class="req-group">
+    <h4>📦 Product & Catalog (Lead: Andy + Dan)</h4>
+    <div class="req-item">
+      <div class="req-check blocked"></div>
+      <div class="req-text"><div class="title">Hero product photography (15 SKUs)</div><div class="detail">Dark background, phone camera setup per asset-list.md shot list. Dark posterboard + desk lamp setup.</div><div class="team">Team: Dan</div></div>
+      <span class="req-status status-blocked">BLOCKED</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check blocked"></div>
+      <div class="req-text"><div class="title">Product copy for 15 hero SKUs</div><div class="detail">Using voice rules from copy-system.md. Opinionated, short enough to forward, group chat register.</div><div class="team">Team: Dan (brief in asset-list.md)</div></div>
+      <span class="req-status status-blocked">BLOCKED</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">3+ collections live with correct products</div><div class="detail">Card stickers (hero), No Filter attitude collection, original-design lapel pins. Products correctly tagged.</div><div class="team">Team: Andy + Tobi</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">Gifting hub + bundles configured</div><div class="detail">Gift personas UI, bundle pricing (₹399-999), set completion mechanic. Find.Collect.Gift mechanic (D-019).</div><div class="team">Team: Andy + Tobi</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">Pricing applied per D-006</div><div class="detail">Entry ₹149-199, Core ₹249, Premium ₹299-349, Bundles ₹399-999. Free shipping ₹499+. COD min ₹299. Prepaid discount ₹30.</div><div class="team">Team: Patrick → Andy</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+  </div>
+
+  <div class="req-group">
+    <h4>🎨 Design & Creative (Lead: Sean + Julie)</h4>
+    <div class="req-item">
+      <div class="req-check done"></div>
+      <div class="req-text"><div class="title">Visual identity system approved</div><div class="detail">Darkroom/Light+Bold complete. Colors (#1A1A1A, #F5F0EB, #E63B2E, #F2D024), typography (Barlow Condensed + Inter), logo expressions (3 variants). D-015/D-018 approved.</div><div class="team">Team: Sean</div></div>
+      <span class="req-status status-done">DONE</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check done"></div>
+      <div class="req-text"><div class="title">Copy system + voice rules locked</div><div class="detail">5 voice rules: opinionated, group chat register, edge on humor, name the person not the product, short enough to forward. Banned words list. All copy contexts defined.</div><div class="team">Team: Joanna</div></div>
+      <span class="req-status status-done">DONE</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check done"></div>
+      <div class="req-text"><div class="title">Hi-fi page designs completed</div><div class="detail">8 pages fully specced: Homepage, Collection, PDP, Cart, Checkout, Gifting Hub, About, Drop Hub. Section-by-section specs for Tobi.</div><div class="team">Team: Julie</div></div>
+      <span class="req-status status-done">DONE</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check done"></div>
+      <div class="req-text"><div class="title">UI system + CSS tokens complete</div><div class="detail">Every component defined with Fynd constraints. 2,432-line spec. Colors, spacing, typography, buttons, cards, navigation, forms.</div><div class="team">Team: Julie</div></div>
+      <span class="req-status status-done">DONE</span>
+    </div>
+  </div>
+
+  <div class="req-group">
+    <h4>📱 Marketing & Pre-Launch (Lead: Nik + Chase)</h4>
+    <div class="req-item">
+      <div class="req-check done"></div>
+      <div class="req-text"><div class="title">Launch narrative memo written</div><div class="detail">Full launch story, pre-launch sequence, launch week plan, post-launch momentum strategy.</div><div class="team">Team: Nik</div></div>
+      <span class="req-status status-done">DONE</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check done"></div>
+      <div class="req-text"><div class="title">Content calendar — 10 pre-launch posts</div><div class="detail">Full copy for each post. Brand voice aligned. Opinion-first, product-second content approach.</div><div class="team">Team: Chase + Casey</div></div>
+      <span class="req-status status-done">DONE</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">Pre-launch Instagram presence established</div><div class="detail">@the.product.lab rebranded with new visual identity. Bio, highlights, story covers updated. At least 5 posts using new voice.</div><div class="team">Team: Chase + Dan</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">Gift seeding: 20+ products to Design Yatra contacts</div><div class="detail">Prioritised list from D-013. Products shipped with unboxing experience. UGC seeding campaign.</div><div class="team">Team: Rachel + Dan</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">500+ email/WhatsApp subscribers before Drop 1</div><div class="detail">Incentivised signup (pre-launch discount, early access). Multi-channel capture (site popup, Instagram bio, store walk-in).</div><div class="team">Team: Nik + Eli + Chase</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+  </div>
+
+  <div class="req-group">
+    <h4>📧 Retention & Communication (Lead: Eli)</h4>
+    <div class="req-item">
+      <div class="req-check done"></div>
+      <div class="req-text"><div class="title">Email + WhatsApp flows designed</div><div class="detail">Welcome flow, abandoned cart flow, post-purchase flow, drop announcement flow. Full copy for each.</div><div class="team">Team: Eli</div></div>
+      <span class="req-status status-done">DONE</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">Klaviyo/Mailchimp account setup</div><div class="detail">List created, signup forms embedded, flows configured, GA4 events connected. Budget constraint: <₹5K/month.</div><div class="team">Team: Eli</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">MSG91/Gupshup WhatsApp setup</div><div class="detail">WhatsApp Business API configured. Templates approved. Broadcast and flow capabilities tested.</div><div class="team">Team: Eli</div></div>
+      <span class="req-status status-pending">PENDING</span>
+    </div>
+  </div>
+
+  <div class="req-group">
+    <h4>⚖️ Operations & Legal (Lead: Raj + Dan)</h4>
+    <div class="req-item">
+      <div class="req-check done"></div>
+      <div class="req-text"><div class="title">Store operations manual written</div><div class="detail">Full SOPs for order → dispatch, packaging standards, returns/exchange policy, customer communication templates.</div><div class="team">Team: Raj + Tony</div></div>
+      <span class="req-status status-done">DONE</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">Launch-day runbook written</div><div class="detail">Hour-by-hour T-0 operations: monitoring cadence, escalation contacts, rollback triggers, communication plan.</div><div class="team">Team: Andrew + Tony</div></div>
+      <span class="req-status status-pending">PENDING (ready)</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">QA checklist completed — all P0/P1 signed off</div><div class="detail">James has checklist. All P0 (payment, shipping, core browse) and P1 (non-critical features) issues resolved. P2 deferred.</div><div class="team">Team: James</div></div>
+      <span class="req-status status-progress">IN PROGRESS</span>
+    </div>
+    <div class="req-item">
+      <div class="req-check pending"></div>
+      <div class="req-text"><div class="title">Launch date decision</div><div class="detail">Dan decides. Harley surfaces when Phase 4 is 80% complete.</div><div class="team">Team: Dan + Harley</div></div>
+      <span class="req-status status-pending">ESCALATE</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="callout red">
+  <strong>3 Blockers Holding Up Launch:</strong> (1) Fynd access credentials from Dan → blocks Tobi's entire build. (2) Hero product photography from Dan → blocks PDP pages. (3) Product copy from Dan → blocks PDP content. All three are Dan-dependencies that can start right now.
+</div>
+
+</section>
+
+<!-- ================================================================ -->
+<!-- TAB 5: SCALE REQUIREMENTS -->
+<!-- ================================================================ -->
+<section id="scale" class="tab-content">
+
+<h2>Scale Requirements — From Launch to ₹1Cr+ D2C Revenue</h2>
+<p class="subtitle">What changes after launch. New capabilities, team growth, infrastructure, and systems needed at each stage.</p>
+
+<div class="function-grid">
+  <div class="function-card"><div class="count">3</div><div class="label">Scale Gates</div></div>
+  <div class="function-card"><div class="count">6</div><div class="label">New Functions</div></div>
+  <div class="function-card"><div class="count">10</div><div class="label">Human Hires</div></div>
+  <div class="function-card"><div class="count">₹15-20L</div><div class="label">Annual People Cost</div></div>
+  <div class="function-card"><div class="count">₹5Cr+</div><div class="label">Revenue Target</div></div>
+  <div class="function-card"><div class="count">18-24mo</div><div class="label">Timeline to Scale</div></div>
+</div>
+
+<h3>Scale Gate 1: PMF Validation (Day 30)</h3>
+<div class="card-grid">
+  <div class="card build"><h4>🎯 Go/No-Go Criteria</h4><div class="desc">
+    <strong>GO if:</strong> >1.5% conversion rate, ₹350+ AOV, >500 subscribers, >20 UGC posts from gifting, zero P0 outages<br>
+    <strong>NO-GO if:</strong> Below thresholds. Extend Phase 5 optimisation. Fix underlying issues before investing in scale.
+  </div></div>
+  <div class="card ops"><h4>🆕 New Capabilities</h4><div class="desc">
+    <strong>First human hire:</strong> Store + Packaging Associate (P1). ₹15-25K/mo. Handles daily store ops, packaging, walk-in customers.<br>
+    <strong>Systems:</strong> Daily order tracker, inventory reconciliation, weekly cash flow check.
+  </div></div>
+  <div class="card growth"><h4>📊 Decision: Medusa</h4><div class="desc">
+    Re-evaluate Medusa + Supabase migration (D-022). 3 leads (QA/Ops/Analytics) must independently recommend. If yes, begin spike; if no, stay on Fynd for 6 more months.
+  </div></div>
+</div>
+
+<h3>Scale Gate 2: Repeat & Retention (Day 90)</h3>
+<div class="card-grid">
+  <div class="card build"><h4>🎯 Go/No-Go Criteria</h4><div class="desc">
+    <strong>GO if:</strong> >15% repeat purchase rate, >2.5% conversion rate, ₹400+ AOV, positive unit economics at 2x ad spend, 5K+ Instagram followers<br>
+    <strong>NO-GO if:</strong> Repeat rate <10%. Focus on retention mechanics (opinion wall, WhatsApp broadcast, collect sets, gifting).
+  </div></div>
+  <div class="card ops"><h4>🆕 Team Additions</h4><div class="desc">
+    <strong>P2 Hires:</strong> Content Creator (₹25-40K/mo), Graphic Designer freelance (₹30-50K/mo), Fulfillment Coordinator (₹20-30K/mo)<br>
+    <strong>New functions:</strong> Daily content production, product design capacity, dedicated fulfillment.
+  </div></div>
+  <div class="card growth"><h4>📊 Drop 2 + Artist Platform</h4><div class="desc">
+    Artist collab collection goes live. Tiered revenue share model activated. 3+ artists in pipeline. Drop 2 launch campaign with paid ad pilot (₹30-50K budget).
+  </div></div>
+</div>
+
+<h3>Scale Gate 3: Full-Scale Operations (Month 12-18)</h3>
+<div class="card-grid">
+  <div class="card build"><h4>🎯 Target State</h4><div class="desc">
+    ₹1Cr+ D2C run rate. 50/50 B2B/D2C revenue split. 6+ active artists on platform. Opinion wall community active. Corporate gifting vertical live via Meta/Diageo/Coca-Cola/Amazon.
+  </div></div>
+  <div class="card ops"><h4>🆕 Full Team</h4><div class="desc">
+    <strong>P3 Hires:</strong> Artist Relations Manager (₹25-35K/mo), Product Manager (₹40-60K/mo), Bookkeeper (₹10-15K/mo), Data Analyst freelance (₹30-50K/mo)<br>
+    7-10 humans + 15 AI agents total. Total people cost: ₹2.5-3.5L/month.
+  </div></div>
+  <div class="card growth"><h4>📊 Expansion Areas</h4><div class="desc">
+    International shipping (UAE, Singapore). Second store consideration (Tier 2 city — Indore/Coimbatore/Lucknow). Full omnichannel (Myntra, Amazon, quick-commerce). VC funding exploration.
+  </div></div>
+</div>
+
+<hr>
+
+<h3>New Functions Required at Scale</h3>
+<div class="three-col">
+  <div class="card strategy"><h4>🆕 Paid Advertising</h4><div class="desc">Meta + Instagram ads. Google Shopping. Retargeting. Audience building. Budget allocation. Phase 5 is organic-only; paid ads begin at Phase 6 go/no-go. Requires Growth Marketing Manager (P2). Budget: ₹30-50K/month pilot → ₹2-3L/month at scale.</div></div>
+  <div class="card build"><h4>🆕 Omnichannel Expansion</h4><div class="desc">Myntra/Amazon marketplace listing. Quick-commerce (Zepto/Blinkit) for sticker accessories. Franchise retail for Tier 2 expansion. Requires Full-Stack Developer to manage integrations + catalog sync. 70% revenue from online marketplaces (Nasher Miles benchmark).</div></div>
+  <div class="card ops"><h4>🆕 International Shipping</h4><div class="desc">UAE (large Indian diaspora), Singapore, US. Shiprocket international rates. Pricing adjustment for international (₹149-999 INR = ~$2-12 USD). Requires Ops lead to configure zones + Fulfillment Coord for international packing.</div></div>
+  <div class="card growth"><h4>🆕 B2B Corporate Gifting</h4><div class="desc">Leverage existing enterprise clients (Meta, Diageo, Coca-Cola, Amazon). Corporate gifting vertical on website. Bulk order UI, custom branding option. Requires Product Manager + Relationship Manager.</div></div>
+  <div class="card creative"><h4>🆕 Artist Platform</h4><div class="desc">Structured artist onboarding. Tiered revenue share (60/40 → 70/30). Drop calendar (monthly). Co-marketing with artist audience. Requires Artist Relations Manager (P3) + full workflow from sign to launch.</div></div>
+  <div class="card finance"><h4>🆕 Data Infrastructure</h4><div class="desc">GA4 → BigQuery pipeline. Customer 360 view. Cohort analysis. LTV modelling. A/B testing framework. Automated reporting dashboard. Requires Data Analyst (P3 freelance). Budget: ₹30-50K/mo.</div></div>
+</div>
+
+<hr>
+
+<h3>Infrastructure Decisions at Scale</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table" style="width:100%;border-collapse:collapse;font-size:0.78rem;margin:12px 0;">
+  <thead><tr>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Decision</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Current State</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Scale State</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Trigger</th>
+  </tr></thead>
+  <tbody>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Platform</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Fynd (D-022)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--green);">Medusa + Supabase</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--amber);">₹2Cr+ run rate OR custom feature requirement Fynd cannot meet</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Analytics</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">GA4 + Clarity</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--green);">GA4 + BigQuery + Looker Studio</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--amber);">>500 orders/month OR need for cohort/LTV analysis</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Email</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Klaviyo (Free tier)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--green);">Klaviyo (Paid ~$45/mo)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--amber);">>500 contacts (Klaviyo free cutoff)</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">WhatsApp</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">MSG91/Gupshup</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--green);">WhatsApp Business API (paid tier)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--amber);">>1K broadcast contacts</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Ad Platform</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">None (organic only)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--green);">Meta Ads + Google Ads</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--amber);">Phase 6 go/no-go from Day 30 data</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Marketplaces</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">D2C only (Fynd)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--green);">Myntra, Amazon, Flipkart</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--amber);">₹25L+ D2C run rate</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Funding</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Bootstrapped</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--amber);">Consider VC or debt</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--amber);">Only if artist platform scaling requires capital beyond organic cash flow</td></tr>
+  </tbody>
+</table>
+</div>
+
+</section>
+
+<!-- ================================================================ -->
+<!-- TAB 6: ALL TEAMS & FUNCTIONS -->
+<!-- ================================================================ -->
+<section id="teams" class="tab-content">
+
+<h2>All Teams, Functions & Domains — Complete Matrix</h2>
+<p class="subtitle">Every function TPL needs to operate, mapped by domain, with team composition for launch and scale.</p>
+
+<h3>Domain: Strategy & Leadership</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table" style="width:100%;border-collapse:collapse;font-size:0.78rem;margin:12px 0;">
+  <thead><tr>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Function</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Launch Team</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Scale Team</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Key Responsibilities</th>
+  </tr></thead>
+  <tbody>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">CEO / Brand Owner</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Dan 👑</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Dan 👑</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Vision, final decisions, artist/enterprise relationships, culture, escalation point</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Program Direction</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Harley (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Harley (AI) → COO (Human P3)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Timeline, quality bar, sequencing, deadlocks, phase gates, escalation to Dan</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Brand Strategy</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Heyward (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Heyward (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Positioning, narrative, audience, messaging hierarchy, brand territory protection</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Customer Insight</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Weiss (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Weiss (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Interviews, review mining, audience signals, evidence quality, NPS tracking</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Product Strategy</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Shreyas (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Shreyas (AI) + PM (Human P3)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">PMF, roadmap, catalog expansion, Drop planning, competition monitoring</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Domain: Creative & Design</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table" style="width:100%;border-collapse:collapse;font-size:0.78rem;margin:12px 0;">
+  <thead><tr>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Function</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Launch Team</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Scale Team</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Key Responsibilities</th>
+  </tr></thead>
+  <tbody>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Creative Direction</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Sean (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Sean (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Visual world, identity system, campaign expression, art direction, photography brief</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">UX / Conversion</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Kurt (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Kurt (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">IA, page logic, interaction design, conversion optimisation, A/B test design</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">UI Design</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Julie (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Julie (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Design system, components, hi-fi pages, CSS tokens, Fynd constraints</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Copy / Content</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Joanna (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Joanna (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Verbal identity, site copy, product narratives, voice consistency, banned words enforcement</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Graphic / Product Design</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text3);">—</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Human (P2 — freelance/part-time)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Product design, packaging, collection visuals, artist collab production, illustration</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Content Production</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Casey (AI — strategy)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Human (P2) + Casey (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Instagram Reels, stories, UGC curation, daily content production, community engagement</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Domain: Engineering & Build</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table" style="width:100%;border-collapse:collapse;font-size:0.78rem;margin:12px 0;">
+  <thead><tr>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Function</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Launch Team</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Scale Team</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Key Responsibilities</th>
+  </tr></thead>
+  <tbody>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Platform Build</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Tobi (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Tobi (AI) + Full-Stack Dev (Human P2)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Fynd build, integrations, CSS theme, performance, analytics setup, QA support</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">QA & Testing</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">James (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">James (AI) + Dev support</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Test scripts, launch gate, P0/P1 criteria, performance audits, regression testing</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Data / Analytics</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Tobi (AI — GA4 setup)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Data Analyst (Human P3 freelance)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Dashboard, cohort analysis, LTV modelling, A/B testing, customer segmentation, insights</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Platform Architecture</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text3);">Not needed (Fynd)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Full-Stack Dev (Human P2) → Medusa (P3)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Medusa migration decision at Day 30, custom feature dev, API integrations</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Domain: Growth & Marketing</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table" style="width:100%;border-collapse:collapse;font-size:0.78rem;margin:12px 0;">
+  <thead><tr>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Function</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Launch Team</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Scale Team</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Key Responsibilities</th>
+  </tr></thead>
+  <tbody>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Growth Launch</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Nik (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Nik (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Launch strategy, channel plan, creator seeding, post-launch experimentation, SEO</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Marketing</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Chase (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Chase (AI) + Growth Mktg Mgr (Human P2)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Content calendar, messaging strategy, paid ads, channel mix, CAC/LTV ownership</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Retention / CRM</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Eli (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Eli (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Email/WhatsApp flows, Klaviyo, MSG91, broadcast, retention analytics, lifecycle management</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Seeding / PR</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Rachel (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Rachel (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Influencer seeding, gifting strategy, Design Yarta activation, community building</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Artist Relations</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text3);">—</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Human (P3)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Artist onboarding, collab management, revenue share, drop calendar, co-marketing</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Domain: Operations & Logistics</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table" style="width:100%;border-collapse:collapse;font-size:0.78rem;margin:12px 0;">
+  <thead><tr>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Function</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Launch Team</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Scale Team</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Key Responsibilities</th>
+  </tr></thead>
+  <tbody>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Store Operations</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Dan</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Store Associate (Human P1)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Walk-in customers, packaging, daily ops, inventory tracking, storefront maintenance</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Fulfillment</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Dan</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Fulfillment Coord (Human P2)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Order processing, Shiprocket AWB, courier handoff, COD verification, returns handling</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Logistics</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Raj (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Raj (AI) + Fulfillment Coord</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Carrier comparison, shipping zones, COD strategy, logistics SOPs, international shipping</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Production</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Ink Fish (Dan manages)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Ink Fish + Production Mgr</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Screen printing, UV, digital, JIT inventory, quality control, material sourcing</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Operations Systems</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Tony (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Tony (AI) → Ops Lead (Human P3)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">SOPs, compliance, vendor management, process optimisation, scale readiness</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Domain: Finance & Administration</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table" style="width:100%;border-collapse:collapse;font-size:0.78rem;margin:12px 0;">
+  <thead><tr>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Function</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Launch Team</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Scale Team</th>
+    <th style="background:var(--bg3);color:var(--tpl-yellow);padding:8px;text-align:left;border-bottom:2px solid var(--bg4);">Key Responsibilities</th>
+  </tr></thead>
+  <tbody>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Finance</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Patrick (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Patrick (AI) + Bookkeeper (Human P3)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Pricing, budgeting, financial modelling, unit economics, GST, invoicing, payroll</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Merchandising</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Jenna (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--blue);">Jenna (AI)</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Product hierarchy, collection structure, MVL, hero SKUs, catalog taxonomy</td></tr>
+    <tr><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">Compliance / Legal</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Dan</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--tpl-cream);">Dan + Bookkeeper</td><td style="padding:8px;border-bottom:1px solid var(--bg4);color:var(--text2);">GST compliance, artist agreements, terms of service, privacy policy, IP protection</td></tr>
+  </tbody>
+</table>
+</div>
+
+<hr>
+
+<h3>Team Composition Summary</h3>
+<div class="card-grid">
+  <div class="card strategy"><h4>🚀 Launch Phase</h4>
+    <div class="desc">
+      <strong>Humans:</strong> 1 (Dan)<br>
+      <strong>AI Agents:</strong> 17 active<br>
+      <strong>Total Team:</strong> 18<br>
+      <strong>Monthly People Cost:</strong> ₹1L (store rent) + AI tooling<br>
+      <strong>Revenue:</strong> ₹48L (current) → Target: ₹15-25L D2C in Phase 5
+    </div>
+  </div>
+  <div class="card build"><h4>📈 Scale Phase (Month 12-18)</h4>
+    <div class="desc">
+      <strong>Humans:</strong> 7-10 (Dan + hires)<br>
+      <strong>AI Agents:</strong> 15 active<br>
+      <strong>Total Team:</strong> 22-25<br>
+      <strong>Monthly People Cost:</strong> ₹2.5-3.5L/month<br>
+      <strong>Revenue:</strong> ₹1Cr+ D2C target
+    </div>
+  </div>
+  <div class="card finance"><h4>💎 Key Metrics to Scale</h4>
+    <div class="desc">
+      <strong>Gross Margin Floor:</strong> 60% (protect 73%)<br>
+      <strong>Repeat Purchase Threshold:</strong> >15% by Day 90<br>
+      <strong>Employee Productivity:</strong> ₹5L+ revenue per hire/year<br>
+      <strong>CAC Payback:</strong> <3 months<br>
+      <strong>AI to Human Ratio:</strong> 2:1 (AI handles strategy/creative/analytics)
+    </div>
+  </div>
+</div>
+
+</section>
+
+<!-- ===== TAB JS ===== -->
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById(this.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

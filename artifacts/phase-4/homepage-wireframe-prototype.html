@@ -1,0 +1,1243 @@
+<!-- last-updated: 2026-03-26 -->
+<!--
+  Title: Homepage Wireframe Prototype
+  Phase: 4 — Build
+  Producing Agent: Tobi (Build Lead) / Harley (Program Director)
+  Date: 2026-03-26
+  Status: draft prototype
+  Reviewer: Harley
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="Homepage prototype for The Product Lab relaunch. Darkroom atmosphere, opinion-first hierarchy, and mobile-first conversion design."
+  />
+  <title>The Product Lab - Homepage Prototype</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --tpl-black: #1a1a1a;
+      --tpl-white: #f5f0eb;
+      --tpl-red: #e63b2e;
+      --tpl-yellow: #f2d024;
+      --tpl-gray-dark: #2d2d2d;
+      --tpl-gray-mid: #8a827c;
+      --tpl-gray-light: #d4cfca;
+      --border-soft: rgba(245, 240, 235, 0.14);
+      --border-strong: rgba(245, 240, 235, 0.24);
+      --panel: rgba(255, 255, 255, 0.04);
+      --panel-strong: rgba(255, 255, 255, 0.07);
+      --shadow-panel: 0 20px 64px rgba(0, 0, 0, 0.34);
+      --font-heading: "Barlow Condensed", sans-serif;
+      --font-body: "Inter", sans-serif;
+      --font-mono: "Space Mono", monospace;
+      --max-width: 1280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 12% 0%, rgba(242, 208, 36, 0.08), transparent 24%),
+        radial-gradient(circle at 88% 12%, rgba(230, 59, 46, 0.14), transparent 22%),
+        linear-gradient(180deg, #101010 0%, #181818 26%, #151515 100%);
+      color: var(--tpl-white);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+      opacity: 0.22;
+      mix-blend-mode: soft-light;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: min(calc(100% - 32px), var(--max-width));
+      margin: 0 auto;
+    }
+
+    .top-strip {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-soft);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .top-strip strong {
+      color: var(--tpl-yellow);
+      font-weight: 400;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 20px;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--border-soft);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(16px);
+      background: rgba(18, 18, 18, 0.78);
+      z-index: 5;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border-strong);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+      font-family: var(--font-heading);
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-copy strong {
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .brand-copy span {
+      display: block;
+      margin-top: 4px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      font-family: var(--font-heading);
+      font-size: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    nav a {
+      color: rgba(245, 240, 235, 0.82);
+      transition: color 160ms ease;
+    }
+
+    nav a:hover,
+    nav a.active {
+      color: var(--tpl-red);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mono-button,
+    .cta-button,
+    .ghost-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 18px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+      white-space: nowrap;
+    }
+
+    .mono-button {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: var(--border-soft);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tpl-white);
+    }
+
+    .cta-button {
+      background: var(--tpl-red);
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--tpl-white);
+      box-shadow: 0 12px 28px rgba(230, 59, 46, 0.25);
+    }
+
+    .ghost-button {
+      background: transparent;
+      border-color: rgba(242, 208, 36, 0.36);
+      color: var(--tpl-yellow);
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .mono-button:hover,
+    .cta-button:hover,
+    .ghost-button:hover {
+      transform: translateY(-1px);
+    }
+
+    main {
+      padding: 22px 0 80px;
+    }
+
+    .section {
+      margin-top: 24px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-panel);
+      backdrop-filter: blur(14px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 26px;
+      padding: 30px;
+      min-height: 720px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tpl-yellow);
+      margin-bottom: 20px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: currentColor;
+    }
+
+    .hero-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 22px;
+    }
+
+    .hero-copy h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(86px, 12vw, 172px);
+      font-weight: 900;
+      line-height: 0.84;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      max-width: 720px;
+    }
+
+    .hero-copy h1 .accent {
+      display: block;
+      color: var(--tpl-red);
+    }
+
+    .hero-sub {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    .hero-sub p {
+      max-width: 560px;
+      font-size: 18px;
+      line-height: 1.72;
+      color: rgba(245, 240, 235, 0.86);
+    }
+
+    .hero-chip {
+      align-self: start;
+      padding: 10px 14px;
+      background: rgba(242, 208, 36, 0.08);
+      border: 1px solid rgba(242, 208, 36, 0.24);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tpl-yellow);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-soft);
+    }
+
+    .metric .label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 8px;
+      font-family: var(--font-heading);
+      font-size: 26px;
+      text-transform: uppercase;
+      line-height: 0.95;
+    }
+
+    .hero-stage {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .stage-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 18px;
+    }
+
+    .stage-top h2 {
+      font-family: var(--font-heading);
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 0.9;
+      text-transform: uppercase;
+      max-width: 300px;
+    }
+
+    .stage-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .stage-board {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 14px;
+      min-height: 460px;
+    }
+
+    .stage-hero-card,
+    .stack-card,
+    .product-card,
+    .gift-card,
+    .trust-card,
+    .drop-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-soft);
+    }
+
+    .stage-hero-card {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        radial-gradient(circle at top right, rgba(230, 59, 46, 0.16), transparent 34%),
+        rgba(255, 255, 255, 0.03);
+    }
+
+    .card-kicker {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tpl-yellow);
+    }
+
+    .stage-hero-card h3 {
+      font-family: var(--font-heading);
+      font-size: clamp(42px, 5vw, 72px);
+      line-height: 0.88;
+      text-transform: uppercase;
+      max-width: 380px;
+    }
+
+    .stage-hero-card p {
+      max-width: 360px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: rgba(245, 240, 235, 0.78);
+    }
+
+    .stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .stack-card {
+      padding: 16px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .stack-card strong {
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 30px;
+      text-transform: uppercase;
+      line-height: 0.92;
+    }
+
+    .stack-card span {
+      font-size: 13px;
+      color: rgba(245, 240, 235, 0.74);
+      line-height: 1.6;
+    }
+
+    .hero-footer {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .footer-stat {
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.16);
+      border: 1px solid var(--border-soft);
+    }
+
+    .footer-stat strong {
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 24px;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+
+    .footer-stat span {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: end;
+      padding: 24px 24px 0;
+    }
+
+    .section-head h2 {
+      font-family: var(--font-heading);
+      font-size: 54px;
+      line-height: 0.9;
+      text-transform: uppercase;
+      max-width: 420px;
+    }
+
+    .section-head p {
+      max-width: 420px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(245, 240, 235, 0.8);
+    }
+
+    .section-kicker {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tpl-yellow);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .collection-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      padding: 24px;
+    }
+
+    .product-card {
+      padding: 14px;
+      min-height: 320px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 14px;
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(230, 59, 46, 0.46);
+    }
+
+    .product-visual {
+      aspect-ratio: 1 / 1;
+      background:
+        radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.12), transparent 24%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.1));
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+
+    .product-visual::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 0%, rgba(242, 208, 36, 0.08) 100%);
+      pointer-events: none;
+    }
+
+    .product-visual .sticker {
+      width: 68%;
+      padding: 16px 12px;
+      border: 1px solid var(--border-strong);
+      background: rgba(26, 26, 26, 0.72);
+      text-align: center;
+      font-family: var(--font-heading);
+      font-size: 28px;
+      text-transform: uppercase;
+      line-height: 0.9;
+    }
+
+    .product-meta {
+      display: grid;
+      gap: 8px;
+    }
+
+    .product-type {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--tpl-yellow);
+    }
+
+    .product-meta h3 {
+      font-family: var(--font-heading);
+      font-size: 28px;
+      line-height: 0.92;
+      text-transform: uppercase;
+    }
+
+    .product-meta p {
+      font-size: 13px;
+      line-height: 1.62;
+      color: rgba(245, 240, 235, 0.76);
+    }
+
+    .product-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    .price {
+      font-family: var(--font-heading);
+      font-size: 30px;
+      text-transform: uppercase;
+      color: var(--tpl-white);
+    }
+
+    .add {
+      padding: 8px 12px;
+      border: 1px solid rgba(230, 59, 46, 0.38);
+      background: rgba(230, 59, 46, 0.12);
+      color: var(--tpl-white);
+      font-family: var(--font-heading);
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .opinion-bar {
+      padding: 26px 24px;
+      background: var(--tpl-yellow);
+      color: var(--tpl-black);
+      border: none;
+      box-shadow: none;
+    }
+
+    .opinion-bar p {
+      font-family: var(--font-heading);
+      font-size: clamp(34px, 6vw, 72px);
+      line-height: 0.9;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      max-width: 1100px;
+    }
+
+    .trust-grid,
+    .gift-grid,
+    .drop-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      padding: 24px;
+    }
+
+    .trust-card,
+    .gift-card,
+    .drop-card {
+      padding: 18px;
+      min-height: 220px;
+    }
+
+    .trust-card strong,
+    .gift-card strong,
+    .drop-card strong {
+      display: block;
+      margin-top: 12px;
+      font-family: var(--font-heading);
+      font-size: 30px;
+      line-height: 0.94;
+      text-transform: uppercase;
+    }
+
+    .trust-card p,
+    .gift-card p,
+    .drop-card p {
+      margin-top: 12px;
+      font-size: 14px;
+      line-height: 1.68;
+      color: rgba(245, 240, 235, 0.78);
+    }
+
+    .gift-card.highlight,
+    .drop-card.highlight {
+      background:
+        radial-gradient(circle at top right, rgba(242, 208, 36, 0.12), transparent 36%),
+        rgba(255, 255, 255, 0.04);
+      border-color: var(--border-strong);
+    }
+
+    .drop-grid {
+      grid-template-columns: 1.2fr 0.8fr 1fr;
+    }
+
+    .timeline {
+      margin-top: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .timeline div {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .mobile-nav {
+      display: none;
+      position: sticky;
+      bottom: 12px;
+      z-index: 6;
+      width: min(calc(100% - 24px), 720px);
+      margin: 18px auto 0;
+      padding: 8px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: rgba(28, 28, 28, 0.92);
+      border: 1px solid var(--border-soft);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow-panel);
+    }
+
+    .mobile-nav a {
+      min-height: 46px;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-heading);
+      font-size: 16px;
+      text-transform: uppercase;
+      color: var(--tpl-white);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-top: 28px;
+      padding: 24px 0 52px;
+      border-top: 1px solid var(--border-soft);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 1120px) {
+      nav {
+        display: none;
+      }
+
+      header {
+        grid-template-columns: auto 1fr;
+      }
+
+      .header-actions {
+        justify-content: end;
+      }
+
+      .hero,
+      .stage-board,
+      .drop-grid,
+      .trust-grid,
+      .gift-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .collection-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .section-head,
+      .hero-sub {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .shell {
+        width: min(calc(100% - 20px), var(--max-width));
+      }
+
+      .top-strip {
+        flex-direction: column;
+      }
+
+      header {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .brand-copy strong {
+        font-size: 22px;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: stretch;
+      }
+
+      .mono-button,
+      .cta-button {
+        flex: 1;
+      }
+
+      .hero,
+      .section {
+        padding: 0;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .hero-copy,
+      .hero-stage,
+      .section-head,
+      .collection-grid,
+      .trust-grid,
+      .gift-grid,
+      .drop-grid,
+      .opinion-bar {
+        padding: 18px;
+      }
+
+      .hero-copy h1 {
+        font-size: clamp(58px, 20vw, 92px);
+      }
+
+      .hero-metrics,
+      .hero-footer,
+      .collection-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head h2,
+      .stage-top h2 {
+        font-size: 36px;
+      }
+
+      .opinion-bar p {
+        font-size: 36px;
+      }
+
+      .mobile-nav {
+        display: grid;
+      }
+
+      footer {
+        flex-direction: column;
+        align-items: start;
+        padding-bottom: 92px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="top-strip">
+      <div><strong>Prototype</strong> · Homepage direction built from phase 2 strategy + phase 3 creative system</div>
+      <div>Darkroom · Type Pressure · Mobile-first conversion</div>
+    </div>
+
+    <header>
+      <a class="brand" href="#">
+        <div class="brand-mark" aria-hidden="true">TPL</div>
+        <div class="brand-copy">
+          <strong>The Product Lab</strong>
+          <span>Wear your opinion.</span>
+        </div>
+      </a>
+
+      <nav aria-label="Primary">
+        <a class="active" href="#">Shop</a>
+        <a href="#">Drop</a>
+        <a href="#">Gifts</a>
+        <a href="#">New In</a>
+        <a href="#">Best Sellers</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="mono-button" type="button">Search</button>
+        <button class="mono-button" type="button">Cart 0</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="section hero">
+        <div class="hero-copy">
+          <div>
+            <div class="eyebrow">Homepage wireframe prototype</div>
+            <h1>
+              Small
+              <span class="accent">Objects.</span>
+              Big Opinions.
+            </h1>
+          </div>
+
+          <div class="hero-sub">
+            <p>
+              The homepage should establish the point of view in the first screen, then route people into the two
+              hero collection worlds, the gifting path, and the bundle logic that pushes toward the ₹499 threshold.
+            </p>
+            <div class="hero-chip">Hero goal · Brand first, then browse</div>
+          </div>
+
+          <div class="hero-actions">
+            <button class="cta-button" type="button">Shop The Sharp Stuff</button>
+            <button class="ghost-button" type="button">See The Drop</button>
+          </div>
+
+          <div class="hero-metrics">
+            <div class="metric">
+              <span class="label">Primary route</span>
+              <strong>Card stickers</strong>
+            </div>
+            <div class="metric">
+              <span class="label">Conversion lever</span>
+              <strong>Bundles at ₹499</strong>
+            </div>
+            <div class="metric">
+              <span class="label">Trust need</span>
+              <strong>Design before reviews</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-stage">
+          <div class="stage-top">
+            <div>
+              <span class="section-kicker">Hero composition</span>
+              <h2>Statement + product tension</h2>
+            </div>
+            <div class="stage-tag">Darkroom product staging</div>
+          </div>
+
+          <div class="stage-board">
+            <article class="stage-hero-card">
+              <div class="card-kicker">Collection hero</div>
+              <h3>Your Card Has A Personality</h3>
+              <p>
+                Make the hero product feel new and useful in one glance. Card stickers get the first commercial spotlight
+                because they are the most ownable product story in the catalog.
+              </p>
+            </article>
+
+            <div class="stack">
+              <article class="stack-card">
+                <div class="card-kicker">Secondary feature</div>
+                <strong>No Filter</strong>
+                <span>Attitude keychains and pins sit beside the hero so the sharper voice is obvious immediately.</span>
+              </article>
+              <article class="stack-card">
+                <div class="card-kicker">Always visible</div>
+                <strong>The Drop</strong>
+                <span>Dedicated path for urgency, scarcity, and the future archive rhythm.</span>
+              </article>
+              <article class="stack-card">
+                <div class="card-kicker">AOV nudge</div>
+                <strong>Opinion Starter Pack</strong>
+                <span>Bundle logic appears early, not buried in a later merchandising block.</span>
+              </article>
+            </div>
+          </div>
+
+          <div class="hero-footer">
+            <div class="footer-stat">
+              <span>Section 2</span>
+              <strong>Focused hero</strong>
+            </div>
+            <div class="footer-stat">
+              <span>Section 3</span>
+              <strong>Featured grid</strong>
+            </div>
+            <div class="footer-stat">
+              <span>Section 4</span>
+              <strong>Collection contrast</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Homepage section 1</span>
+            <h2>Your Card Has A Personality</h2>
+          </div>
+          <p>
+            Product grid for the hero category. The page should lead with the attitude and let the products feel like
+            proof, not like a catalog dump.
+          </p>
+        </div>
+
+        <div class="collection-grid">
+          <article class="product-card">
+            <div class="product-visual"><div class="sticker">No Chill</div></div>
+            <div class="product-meta">
+              <span class="product-type">Card sticker</span>
+              <h3>No Chill</h3>
+              <p>For the person whose bank card deserved a better personality than the bank gave it.</p>
+            </div>
+            <div class="product-foot"><span class="price">₹249</span><button class="add">Add</button></div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-visual"><div class="sticker">No Meetings Before Coffee</div></div>
+            <div class="product-meta">
+              <span class="product-type">Card sticker</span>
+              <h3>No Meetings Before Coffee</h3>
+              <p>Signals taste, exhaustion, and standards in one move. Built for the WhatsApp forward.</p>
+            </div>
+            <div class="product-foot"><span class="price">₹249</span><button class="add">Add</button></div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-visual"><div class="sticker">Seen Enough</div></div>
+            <div class="product-meta">
+              <span class="product-type">Card sticker</span>
+              <h3>Seen Enough</h3>
+              <p>More understated, still sharp. Useful for the customer who wants dry delivery instead of loud copy.</p>
+            </div>
+            <div class="product-foot"><span class="price">₹249</span><button class="add">Add</button></div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-visual"><div class="sticker">Opinion Starter Pack</div></div>
+            <div class="product-meta">
+              <span class="product-type">Bundle</span>
+              <h3>Opinion Starter Pack</h3>
+              <p>Bundle card inside the main collection to make the shipping threshold visible before the user has to think about it.</p>
+            </div>
+            <div class="product-foot"><span class="price">₹499</span><button class="add">Add</button></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Homepage section 2</span>
+            <h2>No Filter</h2>
+          </div>
+          <p>
+            The second featured collection should confirm the brand edge. This is where the sharper humor becomes
+            unavoidable and the visual system earns its darkness.
+          </p>
+        </div>
+
+        <div class="collection-grid">
+          <article class="product-card">
+            <div class="product-visual"><div class="sticker">Idiot Repellent</div></div>
+            <div class="product-meta">
+              <span class="product-type">Keychain</span>
+              <h3>Idiot Repellent</h3>
+              <p>For the person whose patience for nonsense is a finite and rapidly vanishing resource.</p>
+            </div>
+            <div class="product-foot"><span class="price">₹299</span><button class="add">Add</button></div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-visual"><div class="sticker">Bullshit Remover</div></div>
+            <div class="product-meta">
+              <span class="product-type">Pin</span>
+              <h3>Bullshit Remover</h3>
+              <p>Example of why product names must be treated like design assets, not just product titles.</p>
+            </div>
+            <div class="product-foot"><span class="price">₹249</span><button class="add">Add</button></div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-visual"><div class="sticker">Enjoy The ShitShow</div></div>
+            <div class="product-meta">
+              <span class="product-type">Magnet</span>
+              <h3>Enjoy The ShitShow</h3>
+              <p>Cross-format attitude item that helps the collection feel like a world, not a pile of unrelated SKUs.</p>
+            </div>
+            <div class="product-foot"><span class="price">₹249</span><button class="add">Add</button></div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-visual"><div class="sticker">Signal Set</div></div>
+            <div class="product-meta">
+              <span class="product-type">Bundle</span>
+              <h3>Signal Set</h3>
+              <p>Alternate bundle placement inside the collection to keep the commercial logic visible without breaking tone.</p>
+            </div>
+            <div class="product-foot"><span class="price">₹499</span><button class="add">Add</button></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section opinion-bar">
+        <p>Small objects do not have to have small opinions.</p>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Homepage section 3</span>
+            <h2>Trust before proof exists</h2>
+          </div>
+          <p>
+            Since reviews will be light at launch, the homepage has to substitute design confidence, artist framing,
+            logistics clarity, and returns language for missing social proof.
+          </p>
+        </div>
+
+        <div class="trust-grid">
+          <article class="trust-card">
+            <span class="section-kicker">Signal 1</span>
+            <strong>Artist-made</strong>
+            <p>Use artist attribution and original-design framing as a trust device, not just a nice-to-have detail.</p>
+          </article>
+          <article class="trust-card">
+            <span class="section-kicker">Signal 2</span>
+            <strong>7-day returns</strong>
+            <p>Clear reassurance for first-time buyers. This lowers fear without softening the brand voice.</p>
+          </article>
+          <article class="trust-card">
+            <span class="section-kicker">Signal 3</span>
+            <strong>2-4 day shipping</strong>
+            <p>Operational clarity matters because the gifting audience is buying against a date, not abstract desire.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Homepage section 4</span>
+            <h2>Gifting made easier</h2>
+          </div>
+          <p>
+            The gifting route should feel like a personality navigator, not like a backup catalog page.
+          </p>
+        </div>
+
+        <div class="gift-grid">
+          <article class="gift-card highlight">
+            <span class="section-kicker">Route 1</span>
+            <strong>For the sarcastic one</strong>
+            <p>Sharp voice products grouped by recipient personality. This is where gift shopping becomes fast and specific.</p>
+          </article>
+          <article class="gift-card">
+            <span class="section-kicker">Route 2</span>
+            <strong>For the impossible-to-shop-for</strong>
+            <p>Bundle-first route for the buyer who wants appropriateness over endless option-scrolling.</p>
+          </article>
+          <article class="gift-card">
+            <span class="section-kicker">Route 3</span>
+            <strong>Under ₹499, still specific</strong>
+            <p>Price clarity should sit beside personality clarity so the page respects both budget and taste.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Homepage section 5</span>
+            <h2>The Drop stays visible</h2>
+          </div>
+          <p>
+            Scarcity is not a hidden mechanism. The drop hub should be reachable from the homepage at all times and feel editorial, urgent, and slightly different from evergreen browsing.
+          </p>
+        </div>
+
+        <div class="drop-grid">
+          <article class="drop-card highlight">
+            <span class="section-kicker">Drop hero</span>
+            <strong>This Is Fine / March 2026</strong>
+            <p>
+              Example drop block. Use this area for countdown language, hero product photography, and a direct path into the timed collection world.
+            </p>
+            <div class="timeline">
+              <div><span>Reveal</span><span>T-7</span></div>
+              <div><span>Subscriber early access</span><span>T-1</span></div>
+              <div><span>Public launch</span><span>T-0</span></div>
+            </div>
+          </article>
+
+          <article class="drop-card">
+            <span class="section-kicker">Channel job</span>
+            <strong>Instagram first</strong>
+            <p>The block should feel designed to be screenshotted, shared, and recognized back on social.</p>
+          </article>
+
+          <article class="drop-card">
+            <span class="section-kicker">Commerce job</span>
+            <strong>Archive later</strong>
+            <p>Drop blocks should turn into future archive entries so scarcity becomes a repeatable memory system.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>Homepage prototype · The Product Lab relaunch · Mobile-first ecommerce wireframe</div>
+      <div class="footer-links">
+        <a href="#">Collections</a>
+        <a href="#">The Drop</a>
+        <a href="#">Gifts</a>
+        <a href="#">About</a>
+      </div>
+    </footer>
+  </div>
+
+  <div class="mobile-nav" aria-label="Mobile navigation">
+    <a href="#">Shop</a>
+    <a href="#">Drop</a>
+    <a href="#">Gifts</a>
+    <a href="#">Search</a>
+  </div>
+</body>
+</html>

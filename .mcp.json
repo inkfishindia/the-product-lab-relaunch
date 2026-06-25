@@ -1,0 +1,53 @@
+{
+  "mcpServers": {
+    "figma": {
+      "type": "url",
+      "url": "https://mcp.figma.com",
+      "note": "Used by Sean, Kurt, Julie for design read/write. Requires Figma account."
+    },
+    "canva": {
+      "type": "url",
+      "url": "https://mcp.canva.com",
+      "note": "Used by Rachel, Casey for asset creation. Requires Canva account."
+    },
+    "notion": {
+      "type": "url",
+      "url": "https://mcp.notion.com",
+      "note": "Used by Harley, Claire for project management. Requires Notion integration."
+    },
+    "slack": {
+      "type": "url",
+      "url": "https://mcp.slack.com",
+      "note": "Used by Harley, Claire for team communication. Requires Slack workspace."
+    },
+    "gmail": {
+      "type": "url",
+      "url": "https://mcp.gmail.com",
+      "note": "Used by Chase for email draft review. Requires Gmail access."
+    },
+    "google-calendar": {
+      "type": "url",
+      "url": "https://mcp.google-calendar.com",
+      "note": "Used by Claire for scheduling, Nik for launch calendar. Requires Google Calendar access."
+    },
+    "supabase": {
+      "type": "url",
+      "url": "https://mcp.supabase.com",
+      "note": "Optional. For analytics data storage if needed."
+    },
+    "vercel": {
+      "type": "url",
+      "url": "https://mcp.vercel.com",
+      "note": "Used by Tobi for deployment if applicable."
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ],
+      "note": "Live-build browser testing — drive localhost:3000, cart/checkout/COD funnel, mobile responsive, screenshots."
+    }
+  }
+}

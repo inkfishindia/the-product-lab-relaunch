@@ -1,0 +1,1674 @@
+<!-- last-updated: 2026-03-31 — product data updated with real catalog -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Product Lab — Site Prototype v0.3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,900;1,700;1,900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ── DESIGN TOKENS ─────────────────────────────────── */
+:root {
+  --color-surface-base:    #F5F0EB;
+  --color-surface-raised:  #FFFFFF;
+  --color-surface-dark:    #1A1A1A;
+  --color-surface-loud:    #E63B2E;
+  --color-surface-energy:  #F2D024;
+  --color-text-primary:    #1A1A1A;
+  --color-text-secondary:  #6B6B6B;
+  --color-text-on-dark:    #F5F0EB;
+  --color-text-on-yellow:  #1A1A1A;
+  --color-accent-primary:  #E63B2E;
+  --color-accent-secondary:#F2D024;
+  --color-border:          #E0DAD3;
+  --color-border-strong:   #1A1A1A;
+  --color-overlay:         rgba(26,26,26,0.55);
+  --color-success:         #3ECF4C;
+  --font-heading: 'Barlow Condensed', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-mono:    'Space Mono', monospace;
+  --weight-bold: 700; --weight-black: 900; --weight-semibold: 600; --weight-medium: 500;
+  --text-opinion: 3rem; --text-h1: 2rem; --text-h2: 1.5rem; --text-h3: 1.25rem;
+  --text-body: 0.9375rem; --text-body-sm: 0.8125rem; --text-caption: 0.6875rem; --text-price: 1.25rem;
+  --leading-tight: 1.1; --leading-normal: 1.6; --leading-caption: 1.4;
+  --tracking-tight: -0.02em; --tracking-snug: -0.01em;
+  --tracking-wide: 0.02em; --tracking-wider: 0.05em; --tracking-widest: 0.08em;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:20px;
+  --space-6:24px; --space-8:32px; --space-10:40px; --space-12:48px; --space-16:64px;
+  --radius-sm:2px; --radius-md:4px; --radius-lg:8px;
+  --shadow-product: 0 2px 8px rgba(26,26,26,0.10);
+  --shadow-card: 0 6px 20px rgba(26,26,26,0.15);
+  --shadow-sticker: 0 4px 12px rgba(26,26,26,0.20), 0 1px 3px rgba(26,26,26,0.10);
+}
+@media (min-width:1024px) {
+  :root {
+    --text-opinion:4rem; --text-h1:3.5rem; --text-h2:2.5rem; --text-h3:1.75rem;
+    --text-body:1rem; --text-body-sm:0.875rem; --text-caption:0.75rem;
+  }
+}
+
+/* ── RESET ─────────────────────────────────────────── */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--color-surface-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+a { color:inherit; text-decoration:none; cursor:pointer; }
+button { cursor:pointer; }
+
+/* Paper grain texture overlay on body */
+body::before {
+  content:'';
+  position: fixed; inset:0; z-index:0; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.6;
+}
+.page { display:none; position:relative; z-index:1; }
+.page.active { display:block; }
+
+/* ── ANNOUNCEMENT BAR ───────────────────────────────── */
+.ann-bar {
+  background: var(--color-surface-dark);
+  color: var(--color-text-on-dark);
+  text-align:center;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: var(--tracking-wider);
+  text-transform:uppercase;
+  position:relative; z-index:10;
+}
+.ann-bar span { color: var(--color-accent-secondary); }
+
+/* ── HEADER ─────────────────────────────────────────── */
+.site-header {
+  position:sticky; top:0; z-index:100;
+  background: var(--color-surface-base);
+  border-bottom: 2px solid var(--color-surface-dark);
+  height:56px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 var(--space-4);
+}
+.site-header__logo {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-black);
+  font-size: 1.5rem;
+  letter-spacing: var(--tracking-tight);
+  text-transform:uppercase;
+  display:flex; align-items:center; gap: var(--space-2);
+}
+.logo-stamp {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:32px; height:32px;
+  border:2px solid var(--color-surface-dark);
+  font-size:0.75rem;
+}
+.site-nav { display:none; }
+@media (min-width:768px) {
+  .site-header { height:64px; padding:0 var(--space-8); }
+  .site-nav {
+    display:flex; align-items:center; gap: var(--space-8);
+  }
+  .site-nav a {
+    font-family: var(--font-heading);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-body-sm);
+    letter-spacing: var(--tracking-wider);
+    text-transform:uppercase;
+    transition: color 0.15s;
+    position:relative;
+  }
+  .site-nav a::after {
+    content:'';
+    position:absolute; bottom:-4px; left:0; right:0; height:2px;
+    background: var(--color-accent-primary);
+    transform: scaleX(0); transform-origin:left;
+    transition: transform 0.2s;
+  }
+  .site-nav a:hover::after { transform:scaleX(1); }
+  .site-nav a:hover { color: var(--color-accent-primary); }
+}
+.header-actions { display:flex; align-items:center; gap: var(--space-2); }
+.icon-btn {
+  background:none; border:none; padding: var(--space-2);
+  display:flex; align-items:center; color: var(--color-text-primary);
+}
+.cart-wrap { position:relative; }
+.cart-dot {
+  position:absolute; top:2px; right:2px;
+  width:16px; height:16px;
+  background: var(--color-accent-primary);
+  border-radius:50%;
+  font-size:9px; font-weight:700; color:#fff;
+  font-family: var(--font-body);
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* ── BOTTOM BAR ─────────────────────────────────────── */
+.bottom-bar {
+  position:fixed; bottom:0; left:0; right:0; z-index:100;
+  background: var(--color-surface-base);
+  border-top: 2px solid var(--color-surface-dark);
+  height:56px; display:flex; align-items:stretch;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bb-item {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size:0.625rem; letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  color: var(--color-text-secondary);
+  gap:3px; border:none; background:none; transition:color 0.15s;
+}
+.bb-item.active, .bb-item:hover { color: var(--color-text-primary); }
+.bb-dot { width:4px; height:4px; border-radius:50%; background: var(--color-accent-primary); opacity:0; }
+.bb-item.active .bb-dot { opacity:1; }
+@media (min-width:768px) { .bottom-bar { display:none; } }
+
+/* ── STAMP COMPONENT ────────────────────────────────── */
+/* Circular stamp — used as decorative brand marks */
+.stamp {
+  display:inline-flex; align-items:center; justify-content:center;
+  position:relative; width:90px; height:90px; flex-shrink:0;
+}
+.stamp svg { position:absolute; inset:0; width:100%; height:100%; }
+.stamp__inner {
+  position:relative; z-index:1;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:1rem; text-transform:uppercase; text-align:center;
+  line-height:1; letter-spacing: var(--tracking-tight);
+}
+.stamp--sm { width:72px; height:72px; }
+.stamp--sm .stamp__inner { font-size:0.75rem; }
+.stamp--lg { width:110px; height:110px; }
+.stamp--lg .stamp__inner { font-size:1.125rem; }
+
+/* ── STICKER BADGE ──────────────────────────────────── */
+/* Rotated badge stuck onto cards */
+.sticker-badge {
+  display:inline-flex; align-items:center; justify-content:center;
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size: var(--text-caption); text-transform:uppercase;
+  letter-spacing: var(--tracking-wider);
+  border-radius: var(--radius-sm);
+  white-space:nowrap;
+  box-shadow: var(--shadow-sticker);
+}
+.sticker-badge--red   { background: var(--color-accent-primary); color:#fff; }
+.sticker-badge--yellow{ background: var(--color-accent-secondary); color: var(--color-text-on-yellow); }
+.sticker-badge--dark  { background: var(--color-surface-dark); color: var(--color-text-on-dark); }
+.sticker-badge--white { background:#fff; color: var(--color-text-primary); border:1.5px solid var(--color-border-strong); }
+
+/* Label tag — vintage price tag style */
+.label-tag {
+  display:inline-block;
+  background: var(--color-surface-base);
+  border: 1.5px solid var(--color-border-strong);
+  padding: 3px 8px 3px 10px;
+  font-family: var(--font-mono);
+  font-size:10px;
+  letter-spacing: var(--tracking-wider);
+  text-transform:uppercase;
+  position:relative;
+  border-radius:2px;
+}
+.label-tag::before {
+  content:'';
+  position:absolute; left:-6px; top:50%; transform:translateY(-50%);
+  width:10px; height:10px; border-radius:50%;
+  border: 1.5px solid var(--color-border-strong);
+  background: var(--color-surface-base);
+}
+
+/* SVG doodle marks */
+.doodle-underline { display:block; margin-top:2px; }
+.doodle-arrow { display:inline-block; }
+.doodle-star { display:inline-block; }
+
+/* ── OPINION WALL ────────────────────────────────────── */
+.opinion-wall {
+  height:100svh;
+  background: var(--color-surface-base);
+  position:relative; overflow:hidden;
+}
+.ow-phrases { position:absolute; inset:0; pointer-events:none; user-select:none; }
+.phrase {
+  position:absolute;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  text-transform:uppercase; color: var(--color-text-primary); line-height:1; white-space:nowrap;
+}
+.phrase--xl { font-size:clamp(2.5rem,11vw,7.5rem); opacity:1; }
+.phrase--lg { font-size:clamp(1.75rem,6vw,4.5rem); opacity:0.55; }
+.phrase--md { font-size:clamp(1.25rem,4.5vw,3rem); opacity:0.35; }
+.phrase--sm { font-size:clamp(1rem,3vw,2rem); opacity:0.20; }
+.phrase--xs { font-size:clamp(0.75rem,2vw,1.4rem); opacity:0.12; }
+/* A phrase with red accent */
+.phrase--accent { color: var(--color-accent-primary); }
+
+.ow-tagline {
+  position:absolute; bottom:72px; left:50%; transform:translateX(-50%);
+  font-family: var(--font-body);
+  font-size: var(--text-body); color: var(--color-text-secondary);
+  letter-spacing: var(--tracking-wide); white-space:nowrap;
+}
+/* Stamp mark in corner of Opinion Wall */
+.ow-stamp-mark {
+  position:absolute; bottom:var(--space-8); right:var(--space-6);
+  opacity:0.18;
+  transform: rotate(15deg);
+}
+.ow-chevron {
+  position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+  color: var(--color-text-secondary); opacity:0.4;
+  animation: bob 2s ease-in-out infinite;
+}
+@keyframes bob {
+  0%,100% { transform:translateX(-50%) translateY(0); }
+  50%      { transform:translateX(-50%) translateY(6px); }
+}
+
+/* ── RECORD STORE BROWSE ────────────────────────────── */
+.record-browse { padding: var(--space-6) 0 var(--space-8); }
+.rs-label {
+  padding:0 var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption); color: var(--color-text-secondary);
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  margin-bottom: var(--space-3);
+  display:flex; align-items:center; gap: var(--space-3);
+}
+.rs-track {
+  display:flex; gap: var(--space-3);
+  padding:0 var(--space-4);
+  overflow-x:auto; scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch; scrollbar-width:none;
+}
+.rs-track::-webkit-scrollbar { display:none; }
+.rs-card {
+  background: var(--color-surface-dark);
+  border-radius: var(--radius-md);
+  flex-shrink:0; width:80vw; max-width:300px; height:190px;
+  scroll-snap-align:start; padding: var(--space-5);
+  display:flex; flex-direction:column; justify-content:space-between;
+  cursor:pointer; transition:transform 0.2s;
+  position:relative; overflow:hidden;
+}
+.rs-card:hover { transform:translateY(-3px); }
+.rs-card__name {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(1.5rem,8vw,3rem);
+  color: var(--color-text-on-dark); text-transform:uppercase;
+  line-height:0.95; letter-spacing: var(--tracking-tight); max-width:80%;
+}
+.rs-card__foot { display:flex; justify-content:space-between; align-items:flex-end; }
+.rs-card__count {
+  font-family: var(--font-mono); font-size:10px;
+  color: var(--color-text-on-dark); opacity:0.55;
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+}
+.rs-card__arrow { color: var(--color-text-on-dark); opacity:0.35; font-size:1.1rem; }
+/* Small stamp mark on record cards */
+.rs-card__stamp {
+  position:absolute; top:var(--space-4); right:var(--space-4); opacity:0.15;
+}
+.rs-card--red    { background: var(--color-surface-loud); }
+.rs-card--yellow { background: var(--color-surface-energy); }
+.rs-card--yellow .rs-card__name,
+.rs-card--yellow .rs-card__count,
+.rs-card--yellow .rs-card__arrow { color: var(--color-text-primary); }
+@media (min-width:768px) {
+  .rs-label { padding:0 var(--space-8); }
+  .rs-track  { padding:0 var(--space-8); }
+  .rs-card   { width:260px; }
+}
+
+/* ── AOV NUDGE BAR ──────────────────────────────────── */
+.aov-bar {
+  background: var(--color-surface-dark); color: var(--color-text-on-dark);
+  text-align:center; padding: var(--space-3) var(--space-4);
+  font-family: var(--font-body); font-size: var(--text-body-sm);
+}
+.aov-bar strong { color: var(--color-accent-secondary); font-weight:600; }
+
+/* ── SECTION HEADER ─────────────────────────────────── */
+.sec-header {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  padding:0 var(--space-4); margin-bottom: var(--space-5);
+}
+.sec-header__title {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size: var(--text-h3); text-transform:uppercase;
+  letter-spacing: var(--tracking-snug);
+  display:flex; flex-direction:column;
+}
+.sec-header__title-underline {
+  display:block; width:100%; height:3px;
+  background: var(--color-accent-primary);
+  margin-top:3px;
+}
+.sec-header__link {
+  font-family: var(--font-body); font-size: var(--text-caption);
+  color: var(--color-accent-primary);
+  letter-spacing: var(--tracking-wider); text-transform:uppercase; font-weight:600;
+  display:flex; align-items:center; gap:4px;
+  margin-top:4px;
+}
+@media (min-width:768px) { .sec-header { padding:0 var(--space-8); } }
+@media (min-width:1024px) { .sec-header { padding:0 var(--space-16); } }
+
+/* ── PRODUCT SECTION ────────────────────────────────── */
+.product-section     { padding: var(--space-10) 0; }
+.product-section--alt { background:#EDE8E3; }
+.product-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap: var(--space-3); padding:0 var(--space-4);
+}
+@media (min-width:768px) {
+  .product-grid { grid-template-columns:repeat(3,1fr); padding:0 var(--space-8); }
+}
+@media (min-width:1024px) {
+  .product-grid { grid-template-columns:repeat(4,1fr); padding:0 var(--space-16); }
+}
+
+/* ── PRODUCT CARD ───────────────────────────────────── */
+.product-card {
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-md);
+  overflow:hidden;
+  box-shadow: var(--shadow-product);
+  cursor:pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+  position:relative;
+}
+.product-card:hover { box-shadow: var(--shadow-card); transform:translateY(-3px); }
+.pc-image {
+  aspect-ratio:1;
+  background: var(--color-surface-base);
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+.pc-placeholder {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:0.75rem; text-transform:uppercase; text-align:center;
+  padding: var(--space-4); color: var(--color-text-primary); opacity:0.55;
+  letter-spacing: var(--tracking-snug); line-height:1.2;
+}
+/* Rotated sticker badge on card corner */
+.pc-sticker {
+  position:absolute; top:var(--space-2); right:var(--space-2);
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:0.5rem; text-transform:uppercase; letter-spacing: var(--tracking-wider);
+  padding:2px 6px; border-radius: var(--radius-sm);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.pc-sticker--red    { background: var(--color-accent-primary); color:#fff; transform:rotate(-2deg); }
+.pc-sticker--yellow { background: var(--color-accent-secondary); color:#1A1A1A; transform:rotate(2deg); }
+.pc-sticker--dark   { background: var(--color-surface-dark); color: var(--color-text-on-dark); transform:rotate(-1deg); }
+/* Red strip at bottom (like a price label) */
+.pc-strip {
+  background: var(--color-surface-dark);
+  padding: 4px var(--space-3);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.pc-strip__sku {
+  font-family: var(--font-mono); font-size:8px;
+  color: var(--color-text-on-dark); opacity:0.5;
+  text-transform:uppercase; letter-spacing: var(--tracking-widest);
+}
+.pc-strip__site {
+  font-family: var(--font-mono); font-size:8px;
+  color: var(--color-accent-secondary); opacity:0.7;
+  text-transform:uppercase; letter-spacing: var(--tracking-wider);
+}
+.pc-body { padding: var(--space-3); }
+.pc-type {
+  font-size: var(--text-caption); color: var(--color-text-secondary);
+  text-transform:uppercase; letter-spacing: var(--tracking-widest); margin-bottom:2px;
+}
+.pc-name {
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-body-sm); text-transform:uppercase;
+  line-height:1.3;
+  display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.pc-row { display:flex; align-items:center; justify-content:space-between; margin-top: var(--space-2); }
+.pc-price {
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-price); color: var(--color-accent-primary);
+  letter-spacing: var(--tracking-wide);
+}
+.pc-add {
+  background: var(--color-accent-primary); color:#fff; border:none;
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-caption); letter-spacing: var(--tracking-wider); text-transform:uppercase;
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm);
+  transition:background 0.15s;
+}
+.pc-add:hover { background:#c92f23; }
+
+/* ── STICKER WALL ───────────────────────────────────── */
+/* Organised chaos layout — products pinned at angles */
+.sticker-wall {
+  padding: var(--space-10) var(--space-4) var(--space-12);
+  overflow:hidden;
+  position:relative;
+}
+@media (min-width:768px) { .sticker-wall { padding: var(--space-10) var(--space-8) var(--space-12); } }
+.sticker-wall__headline {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(1.75rem,7vw,4rem); text-transform:uppercase;
+  letter-spacing: var(--tracking-tight); line-height:1;
+  margin-bottom: var(--space-8);
+  display:flex; align-items:flex-end; gap: var(--space-4);
+}
+.sticker-wall__headline em {
+  font-style:italic; color: var(--color-accent-primary);
+}
+.sw-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+}
+@media (min-width:768px) { .sw-grid { grid-template-columns:repeat(4,1fr); } }
+/* Each item gets a placement class with rotation/offset */
+.sw-item {
+  padding: var(--space-3);
+  display:flex; align-items:center; justify-content:center;
+}
+.sw-card {
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-sticker);
+  width:100%;
+  position:relative; overflow:hidden;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.sw-card:hover { box-shadow: 0 12px 32px rgba(26,26,26,0.25); z-index:10; }
+.sw-card .pc-image { aspect-ratio:1; }
+.sw-card .pc-body { padding: var(--space-2) var(--space-3) var(--space-3); }
+/* Rotation classes — intentional, deterministic (not random) */
+.sw-item:nth-child(1)  .sw-card { transform: rotate(-3deg); }
+.sw-item:nth-child(1)  .sw-card:hover { transform: rotate(-3deg) scale(1.05); }
+.sw-item:nth-child(2)  .sw-card { transform: rotate(2deg) translateY(-8px); }
+.sw-item:nth-child(2)  .sw-card:hover { transform: rotate(2deg) translateY(-8px) scale(1.05); }
+.sw-item:nth-child(3)  .sw-card { transform: rotate(-1deg) translateY(6px); }
+.sw-item:nth-child(3)  .sw-card:hover { transform: rotate(-1deg) translateY(6px) scale(1.05); }
+.sw-item:nth-child(4)  .sw-card { transform: rotate(3deg) translateY(-4px); }
+.sw-item:nth-child(4)  .sw-card:hover { transform: rotate(3deg) translateY(-4px) scale(1.05); }
+.sw-item:nth-child(5)  .sw-card { transform: rotate(1deg) translateY(10px); }
+.sw-item:nth-child(5)  .sw-card:hover { transform: rotate(1deg) translateY(10px) scale(1.05); }
+.sw-item:nth-child(6)  .sw-card { transform: rotate(-2deg) translateY(-6px); }
+.sw-item:nth-child(6)  .sw-card:hover { transform: rotate(-2deg) translateY(-6px) scale(1.05); }
+.sw-item:nth-child(7)  .sw-card { transform: rotate(2.5deg) translateY(4px); }
+.sw-item:nth-child(7)  .sw-card:hover { transform: rotate(2.5deg) translateY(4px) scale(1.05); }
+.sw-item:nth-child(8)  .sw-card { transform: rotate(-1.5deg) translateY(-10px); }
+.sw-item:nth-child(8)  .sw-card:hover { transform: rotate(-1.5deg) translateY(-10px) scale(1.05); }
+/* Push-pin marker */
+.sw-card::before {
+  content:'';
+  position:absolute; top:-4px; left:50%; transform:translateX(-50%);
+  width:10px; height:10px;
+  background: var(--color-accent-primary);
+  border-radius:50%;
+  z-index:5; box-shadow:0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* ── OPINION INTERRUPT ──────────────────────────────── */
+/* Mid-page break — full-width opinion statement between product sections */
+.opinion-interrupt {
+  background: var(--color-surface-base);
+  padding: var(--space-10) var(--space-4);
+  position:relative; overflow:hidden;
+  border-top: 2px solid var(--color-surface-dark);
+  border-bottom: 2px solid var(--color-surface-dark);
+}
+.oi-bg-text {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(4rem,20vw,14rem); text-transform:uppercase;
+  color: var(--color-surface-dark); opacity:0.04;
+  letter-spacing: var(--tracking-tight); white-space:nowrap;
+  pointer-events:none; user-select:none;
+}
+.oi-content {
+  position:relative; z-index:1;
+  display:flex; flex-direction:column; gap: var(--space-4);
+  max-width:700px;
+}
+.oi-eyebrow {
+  font-family: var(--font-mono); font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  display:flex; align-items:center; gap: var(--space-3);
+}
+.oi-eyebrow-line {
+  flex:1; height:1px; background: var(--color-border);
+  display:none;
+}
+@media (min-width:768px) { .oi-eyebrow-line { display:block; } }
+.oi-statement {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(2rem,8vw,5rem); text-transform:uppercase;
+  letter-spacing: var(--tracking-tight); line-height:1;
+}
+.oi-statement em { font-style:italic; color: var(--color-accent-primary); }
+.oi-sub {
+  font-family: var(--font-body); font-size: var(--text-body);
+  color: var(--color-text-secondary); max-width:400px;
+  line-height: var(--leading-normal);
+}
+.oi-cta {
+  display:inline-flex; align-items:center; gap: var(--space-3);
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-body-sm); text-transform:uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-text-primary);
+  border-bottom: 2px solid var(--color-accent-primary);
+  padding-bottom: 2px;
+}
+/* Stamps decorating the interrupt */
+.oi-stamps {
+  position:absolute; right: var(--space-6); top:50%; transform:translateY(-50%);
+  display:none; flex-direction:column; align-items:center; gap: var(--space-4);
+}
+@media (min-width:900px) { .oi-stamps { display:flex; } }
+
+/* ── STAMP ICONS (SVG-based) ────────────────────────── */
+/* Rendered inline, no external deps */
+
+/* ── OPINION BAR ────────────────────────────────────── */
+.opinion-bar {
+  background: var(--color-accent-secondary);
+  padding: var(--space-10) var(--space-4);
+  text-align:center; position:relative; overflow:hidden;
+}
+.opinion-bar::before {
+  content:'BIG OPINIONS BIG OPINIONS BIG OPINIONS BIG OPINIONS BIG OPINIONS';
+  position:absolute; bottom:8px; left:0; right:0;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:0.625rem; text-transform:uppercase; letter-spacing: var(--tracking-widest);
+  color: var(--color-text-on-yellow); opacity:0.2; white-space:nowrap;
+  overflow:hidden; text-overflow:clip;
+}
+.opinion-bar p {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(1.5rem,6vw,3rem); text-transform:uppercase;
+  color: var(--color-text-on-yellow);
+  letter-spacing: var(--tracking-tight); line-height:1.1;
+  max-width:700px; margin:0 auto;
+  position:relative; z-index:1;
+}
+
+/* ── TRUST BLOCK ────────────────────────────────────── */
+.trust-block { padding: var(--space-10) var(--space-4); }
+.trust-grid { display:grid; grid-template-columns:1fr; gap: var(--space-6); }
+@media (min-width:768px) {
+  .trust-block { padding: var(--space-10) var(--space-8); }
+  .trust-grid { grid-template-columns:repeat(3,1fr); }
+}
+.trust-item { display:flex; gap: var(--space-4); align-items:flex-start; }
+.trust-item__stamp { flex-shrink:0; }
+.trust-title { font-family: var(--font-body); font-weight:600; font-size: var(--text-body-sm); margin-bottom: var(--space-2); }
+.trust-copy { font-size: var(--text-caption); color: var(--color-text-secondary); line-height: var(--leading-caption); max-width:220px; }
+
+/* ── STAMP GALLERY (Brand Elements showcase section) ── */
+.brand-elements {
+  padding: var(--space-10) var(--space-4);
+  background: var(--color-surface-dark);
+  color: var(--color-text-on-dark);
+}
+@media (min-width:768px) { .brand-elements { padding: var(--space-10) var(--space-8); } }
+.be-label {
+  font-family: var(--font-mono); font-size: var(--text-caption);
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  color: var(--color-text-on-dark); opacity:0.4; margin-bottom: var(--space-6);
+}
+.be-row {
+  display:flex; flex-wrap:wrap; gap: var(--space-5); align-items:center;
+  margin-bottom: var(--space-8);
+}
+.be-row-label {
+  width:100%; font-family: var(--font-mono); font-size:9px;
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  color: var(--color-text-on-dark); opacity:0.3; margin-bottom: var(--space-3);
+}
+
+/* ── FOOTER ─────────────────────────────────────────── */
+.site-footer {
+  background: var(--color-surface-dark); color: var(--color-text-on-dark);
+  padding: var(--space-10) var(--space-4);
+  padding-bottom:calc(var(--space-10) + 56px);
+}
+@media (min-width:768px) { .site-footer { padding-bottom: var(--space-10); } }
+.footer-logo {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:2rem; letter-spacing: var(--tracking-tight); text-transform:uppercase;
+  margin-bottom: var(--space-2);
+  display:flex; align-items:center; gap: var(--space-3);
+}
+.footer-tagline { font-size: var(--text-body-sm); opacity:0.4; margin-bottom: var(--space-8); }
+.footer-links { display:flex; flex-wrap:wrap; gap: var(--space-4); margin-bottom: var(--space-8); }
+.footer-links a {
+  font-size: var(--text-caption); opacity:0.45;
+  letter-spacing: var(--tracking-wider); text-transform:uppercase; transition:opacity 0.15s;
+}
+.footer-links a:hover { opacity:1; }
+.footer-copy { font-size: var(--text-caption); opacity:0.25; }
+
+/* ── COLLECTION PAGE ────────────────────────────────── */
+.coll-hero {
+  padding: var(--space-10) var(--space-4) var(--space-8);
+  border-bottom: 2px solid var(--color-surface-dark);
+  position:relative; overflow:hidden;
+}
+@media (min-width:768px) { .coll-hero { padding: var(--space-12) var(--space-8); } }
+.coll-hero__bg {
+  position:absolute; inset:0;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(5rem,25vw,18rem); text-transform:uppercase;
+  color: var(--color-surface-dark); opacity:0.035;
+  letter-spacing: var(--tracking-tight); white-space:nowrap;
+  display:flex; align-items:center;
+  pointer-events:none; user-select:none;
+}
+.coll-eyebrow {
+  font-family: var(--font-mono); font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  margin-bottom: var(--space-3);
+  position:relative; z-index:1;
+}
+.coll-title {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(2.5rem,10vw,6rem); text-transform:uppercase;
+  letter-spacing: var(--tracking-tight); line-height:0.95;
+  margin-bottom: var(--space-4);
+  position:relative; z-index:1;
+}
+.coll-title span { color: var(--color-accent-primary); }
+.coll-desc {
+  font-size: var(--text-body); color: var(--color-text-secondary);
+  max-width:480px; position:relative; z-index:1;
+}
+.coll-meta {
+  margin-top: var(--space-5);
+  display:flex; align-items:center; gap: var(--space-4);
+  flex-wrap:wrap;
+  position:relative; z-index:1;
+}
+.filter-bar {
+  display:flex; gap: var(--space-2); padding: var(--space-4);
+  overflow-x:auto; border-bottom:1px solid var(--color-border); scrollbar-width:none;
+}
+.filter-bar::-webkit-scrollbar { display:none; }
+.chip {
+  flex-shrink:0;
+  background:transparent; border:1.5px solid var(--color-border-strong);
+  color: var(--color-text-primary);
+  font-family: var(--font-body); font-size: var(--text-caption);
+  font-weight:500; letter-spacing: var(--tracking-wider); text-transform:uppercase;
+  padding: var(--space-2) var(--space-3); border-radius:2rem;
+  transition:background 0.15s, color 0.15s;
+}
+.chip.active,.chip:hover { background: var(--color-text-primary); color: var(--color-surface-base); }
+.coll-grid { padding: var(--space-6) var(--space-4); }
+@media (min-width:768px) { .coll-grid { padding: var(--space-8); } }
+@media (min-width:1024px) { .coll-grid { padding: var(--space-10) var(--space-16); } }
+
+/* ── PDP ────────────────────────────────────────────── */
+.pdp { padding-bottom:calc(80px + env(safe-area-inset-bottom)); }
+.pdp-image {
+  background: var(--color-surface-raised); aspect-ratio:1;
+  display:flex; align-items:center; justify-content:center; position:relative;
+}
+.pdp-img-placeholder {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(2rem,9vw,5rem); text-transform:uppercase;
+  text-align:center; padding: var(--space-8);
+  color: var(--color-text-primary); line-height:1.05;
+}
+/* Rotated stamp overlaid on product image */
+.pdp-image__stamp {
+  position:absolute; bottom: var(--space-5); right: var(--space-5);
+  transform:rotate(12deg); opacity:0.75;
+}
+.pdp-body { padding: var(--space-6) var(--space-4); }
+@media (min-width:768px) {
+  .pdp { display:grid; grid-template-columns:1fr 1fr; padding-bottom:0; }
+  .pdp-image { aspect-ratio:unset; min-height:500px; }
+  .pdp-body { padding: var(--space-10) var(--space-8); }
+}
+.pdp-eyebrow {
+  font-family: var(--font-mono); font-size: var(--text-caption);
+  color: var(--color-text-secondary); letter-spacing: var(--tracking-widest);
+  text-transform:uppercase; margin-bottom: var(--space-2);
+  display:flex; align-items:center; gap: var(--space-3);
+}
+.pdp-name {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(2rem,7vw,3.5rem); text-transform:uppercase;
+  letter-spacing: var(--tracking-tight); line-height:1;
+  margin-bottom: var(--space-3);
+}
+.pdp-price-row {
+  display:flex; align-items:center; gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.pdp-price {
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size:1.75rem; color: var(--color-accent-primary);
+  letter-spacing: var(--tracking-wide);
+}
+.pdp-sku {
+  font-family: var(--font-mono); font-size:10px;
+  color: var(--color-text-secondary); letter-spacing: var(--tracking-wider);
+  text-transform:uppercase;
+}
+.pdp-desc {
+  font-size: var(--text-body); color: var(--color-text-secondary);
+  line-height: var(--leading-normal); margin-bottom: var(--space-5);
+}
+.pdp-badges { display:flex; flex-wrap:wrap; gap: var(--space-2); margin-bottom: var(--space-6); }
+.pdp-ctas { display:flex; flex-direction:column; gap: var(--space-3); margin-bottom: var(--space-6); }
+.btn-primary {
+  background: var(--color-accent-primary); color:#fff; border:none;
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-body); letter-spacing: var(--tracking-wider); text-transform:uppercase;
+  padding: var(--space-4) var(--space-6); border-radius: var(--radius-sm);
+  width:100%; transition:background 0.15s;
+  display:flex; align-items:center; justify-content:center; gap: var(--space-3);
+}
+.btn-primary:hover { background:#c92f23; }
+.btn-secondary {
+  background:transparent; color: var(--color-text-primary);
+  border:1.5px solid var(--color-border-strong);
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-body); letter-spacing: var(--tracking-wider); text-transform:uppercase;
+  padding: var(--space-4) var(--space-6); border-radius: var(--radius-sm);
+  width:100%; transition:background 0.15s, color 0.15s;
+}
+.btn-secondary:hover { background: var(--color-text-primary); color: var(--color-surface-base); }
+.pdp-meta { display:flex; flex-direction:column; gap: var(--space-2); padding-top: var(--space-4); border-top:1px solid var(--color-border); }
+.pdp-meta-row { display:flex; align-items:center; gap: var(--space-3); font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+.pdp-meta-icon { color: var(--color-accent-primary); width:18px; flex-shrink:0; text-align:center; }
+.pdp-sticky {
+  position:fixed; bottom:56px; left:0; right:0; z-index:90;
+  background: var(--color-surface-base); border-top:1px solid var(--color-border);
+  padding: var(--space-3) var(--space-4); display:flex; gap: var(--space-3);
+}
+@media (min-width:768px) { .pdp-sticky { display:none; } }
+
+/* ── CART DRAWER ────────────────────────────────────── */
+.cart-overlay {
+  position:fixed; inset:0; background: var(--color-overlay);
+  z-index:200; opacity:0; pointer-events:none; transition:opacity 0.25s;
+}
+.cart-overlay.open { opacity:1; pointer-events:all; }
+.cart-drawer {
+  position:fixed; top:0; right:0; bottom:0; width:min(400px,100vw);
+  background: var(--color-surface-raised); z-index:201;
+  transform:translateX(100%); transition:transform 0.3s ease;
+  display:flex; flex-direction:column;
+}
+.cart-drawer.open { transform:translateX(0); }
+.cart-head {
+  padding: var(--space-5); border-bottom:2px solid var(--color-surface-dark);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.cart-head__title {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size: var(--text-h3); text-transform:uppercase; letter-spacing: var(--tracking-snug);
+}
+.cart-close { background:none; border:none; font-size:1.375rem; line-height:1; }
+.cart-body { flex:1; overflow-y:auto; padding: var(--space-5); }
+.cart-item { display:flex; gap: var(--space-4); padding-bottom: var(--space-5); border-bottom:1px solid var(--color-border); margin-bottom: var(--space-5); }
+.cart-item__thumb {
+  width:72px; height:72px; border-radius: var(--radius-md); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:0.45rem; text-transform:uppercase; text-align:center;
+  padding: var(--space-2); color: var(--color-text-primary); opacity:0.55;
+}
+.cart-item__name { font-family: var(--font-heading); font-weight: var(--weight-bold); font-size: var(--text-body-sm); text-transform:uppercase; margin-bottom:2px; }
+.cart-item__type { font-size: var(--text-caption); color: var(--color-text-secondary); margin-bottom:4px; }
+.cart-item__price { font-family: var(--font-heading); font-weight: var(--weight-bold); color: var(--color-accent-primary); font-size:1rem; }
+.cart-foot { padding: var(--space-5); border-top:1px solid var(--color-border); }
+.cart-subtotal { display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-2); }
+.cart-subtotal__label { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+.cart-subtotal__val { font-family: var(--font-heading); font-weight: var(--weight-bold); font-size: var(--text-h3); }
+.cart-ship-note { text-align:center; font-size: var(--text-caption); color: var(--color-success); font-weight:600; margin-bottom: var(--space-4); }
+
+/* ── PROTO BADGE ────────────────────────────────────── */
+.proto-badge {
+  position:fixed; top:50%; right:-30px;
+  transform:translateY(-50%) rotate(90deg);
+  background: var(--color-accent-secondary); color: var(--color-text-on-yellow);
+  font-family: var(--font-mono); font-size:8px;
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  padding:2px 8px; z-index:999; pointer-events:none;
+}
+</style>
+</head>
+<body>
+
+<div class="proto-badge">Prototype v0.3 — Light+Bold</div>
+
+<!-- ── SVG DEFS (stamps, icons, doodles — reused inline) ── -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Circular text stamp path -->
+    <path id="circle-path-90" d="M 45,5 A 40,40 0 1,1 44.999,5"/>
+    <path id="circle-path-72" d="M 36,4 A 32,32 0 1,1 35.999,4"/>
+    <path id="circle-path-110" d="M 55,5 A 50,50 0 1,1 54.999,5"/>
+  </defs>
+</svg>
+
+<!-- Announcement bar -->
+<div class="ann-bar">
+  Free shipping over <span>₹499</span> &nbsp;·&nbsp; COD available &nbsp;·&nbsp; <span>Artist-made</span> in Bengaluru
+</div>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="site-header__logo" onclick="showPage('home')" style="cursor:pointer">
+    <span class="logo-stamp">TPL</span>
+    <span>The Product Lab</span>
+  </div>
+  <nav class="site-nav">
+    <a onclick="showPage('collection')">Find</a>
+    <a href="#">Collect</a>
+    <a href="#">Gift</a>
+    <a href="#">Artists</a>
+  </nav>
+  <div class="header-actions">
+    <button class="icon-btn" aria-label="Search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </button>
+    <div class="cart-wrap">
+      <button class="icon-btn" aria-label="Cart" onclick="toggleCart()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+      </button>
+      <div class="cart-dot">2</div>
+    </div>
+  </div>
+</header>
+
+
+<!-- ════════════════════════════════════════
+     PAGE: HOME
+════════════════════════════════════════ -->
+<div id="page-home" class="page active">
+
+  <!-- Opinion Wall -->
+  <section class="opinion-wall" aria-label="Brand statement">
+    <div class="ow-phrases" aria-hidden="true">
+      <span class="phrase phrase--xl" style="top:6%;left:2%;transform:rotate(-2deg)">BULLSHIT</span>
+      <span class="phrase phrase--xl phrase--accent" style="top:6%;left:43%;transform:rotate(1deg)">REMOVER</span>
+      <span class="phrase phrase--lg" style="top:28%;left:4%;transform:rotate(2deg)">SELECTIVE LISTENER</span>
+      <span class="phrase phrase--lg" style="top:46%;left:18%;transform:rotate(-1deg)">YOUR CARD HAS</span>
+      <span class="phrase phrase--lg" style="top:54%;left:10%;transform:rotate(1deg)">A PERSONALITY</span>
+      <span class="phrase phrase--md" style="top:20%;left:55%;transform:rotate(-3deg)">enjoy the SHITSHOW</span>
+      <span class="phrase phrase--md" style="top:66%;left:2%;transform:rotate(2deg)">no meetings before coffee</span>
+      <span class="phrase phrase--sm" style="top:38%;left:60%;transform:rotate(1deg)">IDIOT REPELLENT</span>
+      <span class="phrase phrase--sm phrase--accent" style="top:76%;left:42%;transform:rotate(-2deg)">straight outta f#_ks</span>
+      <span class="phrase phrase--xs" style="top:13%;left:68%;transform:rotate(3deg)">NO FILTER</span>
+      <span class="phrase phrase--xs" style="top:84%;left:5%;transform:rotate(-1deg)">CHAOS COORDINATOR</span>
+    </div>
+
+    <!-- Corner stamp mark -->
+    <div class="ow-stamp-mark">
+      <!-- Circular stamp: BENGALURU ORIGINAL -->
+      <svg width="110" height="110" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="55" cy="55" r="50" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+        <circle cx="55" cy="55" r="42" fill="none" stroke="#1A1A1A" stroke-width="1" stroke-dasharray="3 3"/>
+        <path id="cp110-outer" d="M 55,8 A 47,47 0 1,1 54.999,8" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="10" fill="#1A1A1A" letter-spacing="3" text-transform="uppercase">
+          <textPath href="#cp110-outer">BENGALURU · ORIGINAL · ARTIST-MADE · MMXXVI ·</textPath>
+        </text>
+        <text x="55" y="50" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="14" fill="#1A1A1A" letter-spacing="-1">TPL</text>
+        <text x="55" y="64" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="700" font-size="7" fill="#1A1A1A" letter-spacing="2">EST. 2026</text>
+      </svg>
+    </div>
+
+    <p class="ow-tagline">small objects. big opinions.</p>
+    <div class="ow-chevron" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Record Store Browse -->
+  <section class="record-browse" aria-label="Browse collections">
+    <p class="rs-label">
+      <!-- Doodle arrow -->
+      <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 7h16M13 1l6 6-6 6" stroke="#6B6B6B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Browse by mood
+    </p>
+    <div class="rs-track">
+      <a class="rs-card" onclick="showPage('collection')" aria-label="Browse Your Card Has a Personality">
+        <!-- Faint stamp on dark card -->
+        <div class="rs-card__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="none" stroke="#F5F0EB" stroke-width="1.5"/><text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#F5F0EB" letter-spacing="0">TPL</text></svg>
+        </div>
+        <span class="rs-card__name">Your Card Has a Personality</span>
+        <div class="rs-card__foot">
+          <span class="rs-card__count">12 designs</span>
+          <span class="rs-card__arrow">→</span>
+        </div>
+      </a>
+      <a class="rs-card rs-card--red" href="#" aria-label="Browse No Filter">
+        <span class="rs-card__name" style="color:#fff">No Filter</span>
+        <div class="rs-card__foot">
+          <span class="rs-card__count" style="color:#fff">18 designs</span>
+          <span class="rs-card__arrow" style="color:#fff">→</span>
+        </div>
+      </a>
+      <a class="rs-card" href="#" aria-label="Browse Best Sellers">
+        <span class="rs-card__name">Best Sellers</span>
+        <div class="rs-card__foot">
+          <span class="rs-card__count">8 designs</span>
+          <span class="rs-card__arrow">→</span>
+        </div>
+      </a>
+      <a class="rs-card rs-card--yellow" href="#" aria-label="Browse The Drop">
+        <span class="rs-card__name">The Drop</span>
+        <div class="rs-card__foot">
+          <span class="rs-card__count">Coming soon</span>
+          <span class="rs-card__arrow">→</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- AOV nudge -->
+  <div class="aov-bar"><strong>₹250 away from free shipping.</strong> Add one more and you're there.</div>
+
+  <!-- ── STICKER WALL ── -->
+  <section class="sticker-wall">
+    <div class="sticker-wall__headline">
+      <span>The Opinion<br><em>Wall</em></span>
+      <!-- Doodle star -->
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="margin-bottom:6px;flex-shrink:0">
+        <path d="M16 2l2.5 9.5H28l-7.5 5.5 2.5 9.5L16 21l-7 5.5 2.5-9.5L4 11.5h9.5z" fill="#E63B2E"/>
+      </svg>
+    </div>
+    <div class="sw-grid">
+      <!-- 8 sticker-wall items — real catalog -->
+      <div class="sw-item">
+        <div class="sw-card" onclick="showPage('pdp')" style="cursor:pointer">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/Coca-cola-keychains.jpg" alt="Coca Cola Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+            <span class="pc-sticker pc-sticker--red">Fan Fave</span>
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">KC-001</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Keychain</p>
+            <p class="pc-name">Coca Cola</p>
+            <div class="pc-row">
+              <span class="pc-price">₹199</span>
+              <button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/06/Less-Panic-More-Disco-earrings-Earings.png" alt="Less Panic More Disco Earrings" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">ER-001</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Earrings</p>
+            <p class="pc-name">Less Panic More Disco</p>
+            <div class="pc-row">
+              <span class="pc-price">₹199</span>
+              <button class="pc-add" onclick="addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/Cartoon-network-CARD-STICKER.jpg" alt="Cartoon Network Card Sticker" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+            <span class="pc-sticker pc-sticker--yellow">New</span>
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">CS-001</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Card sticker</p>
+            <p class="pc-name">Cartoon Network</p>
+            <div class="pc-row">
+              <span class="pc-price">₹149</span>
+              <button class="pc-add" onclick="addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/RICH-AF-CARD-STICKER-STICKER.jpg" alt="Rich AF Card Sticker" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">CS-002</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Card sticker</p>
+            <p class="pc-name">Rich AF</p>
+            <div class="pc-row">
+              <span class="pc-price">₹149</span>
+              <button class="pc-add" onclick="addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/Arsenal-magnet.jpg" alt="Arsenal Fridge Magnet" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">FM-001</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Fridge magnet</p>
+            <p class="pc-name">Arsenal</p>
+            <div class="pc-row">
+              <span class="pc-price">₹225</span>
+              <button class="pc-add" onclick="addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/premium-boy-tears-magnet-1.jpg" alt="Boy Tears Fridge Magnet" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+            <span class="pc-sticker pc-sticker--dark">Fan Fave</span>
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">FM-006</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Fridge magnet</p>
+            <p class="pc-name">Boy Tears</p>
+            <div class="pc-row">
+              <span class="pc-price">₹225</span>
+              <button class="pc-add" onclick="addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/Homer-Simpsons-duff-Keychain.jpg" alt="Homer Simpsons Beer Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">KC-010</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Keychain</p>
+            <p class="pc-name">Homer Simpsons Beer</p>
+            <div class="pc-row">
+              <span class="pc-price">₹199</span>
+              <button class="pc-add" onclick="addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/SHUT-UP-TAKE-MY-MONEY-card-sticker.jpg" alt="Shut Up &amp; Take My Money Card Sticker" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+            <span class="pc-sticker pc-sticker--yellow">Bestseller</span>
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">CS-003</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Card sticker</p>
+            <p class="pc-name">Shut Up &amp; Take My Money</p>
+            <div class="pc-row">
+              <span class="pc-price">₹149</span>
+              <button class="pc-add" onclick="addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── OPINION INTERRUPT ── -->
+  <div class="opinion-interrupt">
+    <div class="oi-bg-text" aria-hidden="true">FIND</div>
+    <div class="oi-content">
+      <div class="oi-eyebrow">
+        <!-- Doodle star small -->
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="#E63B2E"><path d="M6 0l1 3.8H10L7.5 6l1 3.8L6 7.5 3.5 9.8l1-3.8L2 3.8h3z"/></svg>
+        The Purchase Mechanic
+        <div class="oi-eyebrow-line"></div>
+      </div>
+      <p class="oi-statement">Find<em>.</em> Collect<em>.</em> Gift<em>.</em></p>
+      <p class="oi-sub">Find the one that's exactly you. Build the collection that says something. Send the one that's exactly someone else.</p>
+      <a class="oi-cta" onclick="showPage('collection')">
+        Shop All Products
+        <!-- Doodle arrow right -->
+        <svg width="20" height="12" viewBox="0 0 20 12" fill="none">
+          <path d="M1 6h16M13 1l6 5-6 5" stroke="#1A1A1A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+    <!-- Stamps in corner -->
+    <div class="oi-stamps">
+      <!-- Artist Made stamp -->
+      <svg width="90" height="90" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg" style="opacity:0.65">
+        <circle cx="45" cy="45" r="42" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+        <circle cx="45" cy="45" r="34" fill="none" stroke="#1A1A1A" stroke-width="1" stroke-dasharray="2 4"/>
+        <path id="cp90" d="M 45,6 A 39,39 0 1,1 44.999,6" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9.5" fill="#1A1A1A" letter-spacing="2">
+          <textPath href="#cp90">ARTIST-MADE · BENGALURU · MMXXVI ·</textPath>
+        </text>
+        <text x="45" y="42" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="11" fill="#1A1A1A" letter-spacing="-0.5">SINCE</text>
+        <text x="45" y="57" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="13" fill="#E63B2E" letter-spacing="-1">2026</text>
+      </svg>
+      <!-- Quality stamp -->
+      <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" style="opacity:0.50;transform:rotate(-15deg)">
+        <circle cx="36" cy="36" r="33" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+        <path id="cp72" d="M 36,5 A 31,31 0 1,1 35.999,5" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#1A1A1A" letter-spacing="2">
+          <textPath href="#cp72">SMALL OBJECTS · BIG OPINIONS ·</textPath>
+        </text>
+        <text x="36" y="38" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#1A1A1A">✓ APPROVED</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Opinion Bar -->
+  <div class="opinion-bar">
+    <p>Small objects don't have to have small opinions.</p>
+  </div>
+
+  <!-- Trust Block -->
+  <section class="trust-block">
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <!-- Small hexagon stamp icon -->
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#E63B2E">ART</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">Artist-Made</p>
+          <p class="trust-copy">Every design by independent creators. Not mass-produced. Sourced from Bengaluru.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#E63B2E">7D</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">7-Day Returns</p>
+          <p class="trust-copy">Not your vibe? Full refund, no questions. Even if you just changed your mind.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#E63B2E">FAST</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">2–4 Days Delivery</p>
+          <p class="trust-copy">Shipped via Shiprocket. Track in real-time. Free shipping over ₹499.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── BRAND ELEMENTS SHOWCASE ── -->
+  <!-- This section shows Dan the graphic language available — stamps, badges, labels, doodles -->
+  <section class="brand-elements">
+    <p class="be-label">Brand graphic elements — stamps · badges · labels · marks</p>
+
+    <div class="be-row-label">Circular Stamps</div>
+    <div class="be-row">
+      <!-- Full stamp: Bengaluru Original -->
+      <svg width="110" height="110" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="55" cy="55" r="50" fill="none" stroke="#F5F0EB" stroke-width="2"/>
+        <circle cx="55" cy="55" r="42" fill="none" stroke="#F5F0EB" stroke-width="1" stroke-dasharray="3 3"/>
+        <path id="cp110a" d="M 55,8 A 47,47 0 1,1 54.999,8" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="10" fill="#F5F0EB" letter-spacing="3">
+          <textPath href="#cp110a">BENGALURU · ORIGINAL · ARTIST-MADE · MMXXVI ·</textPath>
+        </text>
+        <text x="55" y="51" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="14" fill="#F5F0EB" letter-spacing="-1">TPL</text>
+        <text x="55" y="65" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="700" font-size="7" fill="#F5F0EB" letter-spacing="2">EST. 2026</text>
+      </svg>
+      <!-- Red stamp -->
+      <svg width="90" height="90" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="45" cy="45" r="42" fill="#E63B2E"/>
+        <circle cx="45" cy="45" r="35" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="2 4"/>
+        <path id="cp90r" d="M 45,6 A 39,39 0 1,1 44.999,6" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#fff" letter-spacing="2.5">
+          <textPath href="#cp90r">SMALL OBJECTS · BIG OPINIONS · THE PRODUCT LAB ·</textPath>
+        </text>
+        <text x="45" y="50" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="11" fill="#fff">ONLY</text>
+        <text x="45" y="60" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#fff" letter-spacing="1">AT TPL</text>
+      </svg>
+      <!-- Yellow stamp -->
+      <svg width="90" height="90" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="45" cy="45" r="42" fill="#F2D024"/>
+        <circle cx="45" cy="45" r="35" fill="none" stroke="#1A1A1A" stroke-width="1.5" stroke-dasharray="2 4"/>
+        <path id="cp90y" d="M 45,6 A 39,39 0 1,1 44.999,6" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#1A1A1A" letter-spacing="2.5">
+          <textPath href="#cp90y">NEW DROP · NEW DROP · NEW DROP · NEW DROP ·</textPath>
+        </text>
+        <text x="45" y="47" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="20" fill="#1A1A1A">↓</text>
+        <text x="45" y="62" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#1A1A1A" letter-spacing="1">THE DROP</text>
+      </svg>
+    </div>
+
+    <div class="be-row-label">Sticker Badges (on cards)</div>
+    <div class="be-row">
+      <span class="sticker-badge sticker-badge--red" style="transform:rotate(-3deg)">Only at TPL</span>
+      <span class="sticker-badge sticker-badge--yellow" style="transform:rotate(2deg)">New Drop</span>
+      <span class="sticker-badge sticker-badge--dark" style="transform:rotate(-1deg)">Bundle</span>
+      <span class="sticker-badge sticker-badge--white" style="transform:rotate(1.5deg)">Artist Pick</span>
+      <span class="sticker-badge sticker-badge--red" style="transform:rotate(3deg)">Limited</span>
+    </div>
+
+    <div class="be-row-label">Vintage Label Tags</div>
+    <div class="be-row">
+      <span class="label-tag" style="color:#F5F0EB;background:#1A1A1A;border-color:#F5F0EB">CS-001 / ₹199</span>
+      <span class="label-tag" style="color:#F5F0EB;background:#E63B2E;border-color:#E63B2E">CARD STICKER</span>
+      <span class="label-tag" style="color:#1A1A1A;background:#F2D024;border-color:#1A1A1A">NEW ↓</span>
+      <span class="label-tag" style="color:#F5F0EB;background:#1A1A1A;border-color:#F5F0EB">THEPRODUCTLAB.IN</span>
+    </div>
+
+    <div class="be-row-label">Doodle Marks (underlines, arrows, stars)</div>
+    <div class="be-row" style="align-items:flex-start">
+      <!-- Squiggle underline -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.25rem;color:#F5F0EB;text-transform:uppercase">Opinion</span>
+        <svg width="80" height="10" viewBox="0 0 80 10">
+          <path d="M2 5 Q10 1 18 5 Q26 9 34 5 Q42 1 50 5 Q58 9 66 5 Q74 1 78 5" stroke="#E63B2E" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <!-- Arrow right doodle -->
+      <svg width="48" height="32" viewBox="0 0 48 32" fill="none">
+        <path d="M4 16 Q16 8 28 16 Q36 22 42 14" stroke="#F5F0EB" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <path d="M38 10 L44 14 L40 20" stroke="#F5F0EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <!-- 4-point star -->
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="#E63B2E">
+        <path d="M16 2l2 12 12 2-12 2-2 12-2-12L2 16l12-2z"/>
+      </svg>
+      <!-- 6-point star (asterisk style) -->
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#F2D024" stroke-width="2" stroke-linecap="round">
+        <line x1="16" y1="4" x2="16" y2="28"/>
+        <line x1="4" y1="16" x2="28" y2="16"/>
+        <line x1="7" y1="7" x2="25" y2="25"/>
+        <line x1="25" y1="7" x2="7" y2="25"/>
+      </svg>
+      <!-- Underline bracket mark -->
+      <svg width="60" height="20" viewBox="0 0 60 20" fill="none">
+        <path d="M5 5 L5 15 L55 15 L55 5" stroke="#F5F0EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <!-- Circle emphasis -->
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <ellipse cx="20" cy="20" rx="17" ry="14" stroke="#E63B2E" stroke-width="2" stroke-dasharray="1 3"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-logo">
+      <span class="logo-stamp" style="border-color:#F5F0EB">TPL</span>
+      The Product Lab
+    </div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('collection')">Shop</a>
+      <a href="#">About</a>
+      <a href="#">Artists</a>
+      <a href="#">Gifting</a>
+      <a href="#">Returns</a>
+      <a href="#">Contact</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+
+</div><!-- /page-home -->
+
+
+<!-- ════════════════════════════════════════
+     PAGE: COLLECTION
+════════════════════════════════════════ -->
+<div id="page-collection" class="page">
+
+  <div class="coll-hero">
+    <div class="coll-hero__bg" aria-hidden="true">PERSONALITY</div>
+    <p class="coll-eyebrow">Card Stickers · 12 designs</p>
+    <h1 class="coll-title">Your Card Has a <span>Personality</span></h1>
+    <p class="coll-desc">Your card is out there doing the talking. Might as well give it something worth saying.</p>
+    <div class="coll-meta">
+      <span class="sticker-badge sticker-badge--dark" style="transform:rotate(-1deg)">12 Designs</span>
+      <span class="sticker-badge sticker-badge--red" style="transform:rotate(2deg)">Only at TPL</span>
+      <span class="label-tag">From ₹199</span>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="chip active">All</button>
+    <button class="chip">Card Stickers</button>
+    <button class="chip">Keychains</button>
+    <button class="chip">Enamel Pins</button>
+    <button class="chip">Bundles</button>
+    <button class="chip">Under ₹249</button>
+  </div>
+
+  <div class="coll-grid">
+    <div class="product-grid">
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/Always-tired-key-chain-keychains-1.jpg" alt="Always Tired Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+          <span class="pc-sticker pc-sticker--red">Fan Fave</span>
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">KC-003</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Keychain</p>
+          <p class="pc-name">Always Tired</p>
+          <div class="pc-row"><span class="pc-price">₹199</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/HIMYM-keychains.jpg" alt="HIMYM Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">KC-005</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Keychain</p>
+          <p class="pc-name">HIMYM</p>
+          <div class="pc-row"><span class="pc-price">₹199</span><button class="pc-add" onclick="addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/Ice-Cream-Love-bites-earrings-scaled.jpg" alt="Ice Cream Love Bites Earrings" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">ER-002</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Earrings</p>
+          <p class="pc-name">Ice Cream Love Bites</p>
+          <div class="pc-row"><span class="pc-price">₹199</span><button class="pc-add" onclick="addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/nike-keychain-6.jpg" alt="Nike Air Red Offwhite Lapel Pin" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">LP-001</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Lapel pin</p>
+          <p class="pc-name">Nike Air Red Offwhite</p>
+          <div class="pc-row"><span class="pc-price">₹149</span><button class="pc-add" onclick="addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2025/02/FM-Secret.png" alt="Serotonin Spray Fridge Magnet" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">FM-003</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Fridge magnet</p>
+          <p class="pc-name">Serotonin Spray</p>
+          <div class="pc-row"><span class="pc-price">₹225</span><button class="pc-add" onclick="addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/Suck-it-keychains.jpg" alt="Suck It Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">KC-002</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Keychain</p>
+          <p class="pc-name">Suck It</p>
+          <div class="pc-row"><span class="pc-price">₹199</span><button class="pc-add" onclick="addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="opinion-bar" style="margin-top:32px">
+    <p>"If someone else likes it, that's a bonus."</p>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a href="#">About</a><a href="#">Artists</a><a href="#">Gifting</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+
+</div><!-- /page-collection -->
+
+
+<!-- ════════════════════════════════════════
+     PAGE: PDP
+════════════════════════════════════════ -->
+<div id="page-pdp" class="page">
+
+  <div class="pdp">
+    <div class="pdp-image" style="background:#f0e8ff">
+      <div class="pdp-img-placeholder">BULLSHIT<br>REMOVER</div>
+      <!-- Rotated stamp on image -->
+      <div class="pdp-image__stamp">
+        <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" style="opacity:0.55">
+          <circle cx="36" cy="36" r="33" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+          <circle cx="36" cy="36" r="26" fill="none" stroke="#1A1A1A" stroke-width="1" stroke-dasharray="2 3"/>
+          <path id="cp72b" d="M 36,5 A 31,31 0 1,1 35.999,5" fill="none"/>
+          <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#1A1A1A" letter-spacing="2">
+            <textPath href="#cp72b">ONLY AT TPL · ARTIST-MADE ·</textPath>
+          </text>
+          <text x="36" y="40" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="10" fill="#E63B2E">✓ ORIGINAL</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="pdp-body">
+      <div class="pdp-eyebrow">
+        Card Sticker
+        <!-- Doodle dot separator -->
+        <svg width="4" height="4" viewBox="0 0 4 4"><circle cx="2" cy="2" r="2" fill="#E63B2E"/></svg>
+        Your Card Has a Personality
+      </div>
+      <h1 class="pdp-name">Bullshit Remover</h1>
+      <div class="pdp-price-row">
+        <span class="pdp-price">₹199</span>
+        <span class="pdp-sku">SKU: CS-001</span>
+      </div>
+      <div class="pdp-badges">
+        <span class="sticker-badge sticker-badge--red" style="transform:rotate(-2deg)">Only at TPL</span>
+        <span class="sticker-badge sticker-badge--white">In Stock</span>
+        <span class="label-tag">COD available</span>
+      </div>
+      <p class="pdp-desc">
+        For the one who's tired of nodding along. Stick it where it belongs — your card, your laptop,
+        your cubicle partition. The card does the talking so you don't have to.
+      </p>
+      <div class="pdp-ctas">
+        <button class="btn-primary" onclick="addAndOpenCart()">
+          Ship My Opinions
+          <!-- Arrow icon -->
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><path d="M1 6h14M10 1l6 5-6 5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-secondary">Send as a Gift</button>
+      </div>
+      <div class="pdp-meta">
+        <div class="pdp-meta-row">
+          <span class="pdp-meta-icon">⚡</span>
+          <span>Delivery in 2–4 days · Free shipping over ₹499</span>
+        </div>
+        <div class="pdp-meta-row">
+          <span class="pdp-meta-icon">↩</span>
+          <span>7-day returns, no questions</span>
+        </div>
+        <div class="pdp-meta-row">
+          <span class="pdp-meta-icon">🎨</span>
+          <span>Artist-made · Bengaluru</span>
+        </div>
+        <div class="pdp-meta-row">
+          <span class="pdp-meta-icon">💳</span>
+          <span>COD available · Prepaid saves ₹30</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile sticky CTA -->
+  <div class="pdp-sticky">
+    <button class="btn-secondary" style="flex:1">Gift</button>
+    <button class="btn-primary" style="flex:2" onclick="addAndOpenCart()">Ship My Opinions</button>
+  </div>
+
+  <!-- You might also like -->
+  <section class="product-section" style="margin-top:32px">
+    <div class="sec-header">
+      <h2 class="sec-header__title">
+        Build Your Opinion Wall
+        <span class="sec-header__title-underline"></span>
+      </h2>
+    </div>
+    <div class="product-grid">
+      <div class="product-card">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/Girl-Power-keychains.jpg" alt="Girl Power Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">KC-004</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Keychain</p>
+          <p class="pc-name">Girl Power</p>
+          <div class="pc-row"><span class="pc-price">₹199</span><button class="pc-add" onclick="addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/Rolling-stones-keychains.jpg" alt="Rolling Stones Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">KC-008</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Keychain</p>
+          <p class="pc-name">Rolling Stones</p>
+          <div class="pc-row"><span class="pc-price">₹199</span><button class="pc-add" onclick="addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a onclick="showPage('collection')">Shop</a>
+      <a href="#">Artists</a><a href="#">Gifting</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+
+</div><!-- /page-pdp -->
+
+
+<!-- Mobile Bottom Bar -->
+<nav class="bottom-bar" aria-label="Main navigation">
+  <button class="bb-item active" id="bb-find" onclick="showPage('home');setTab('bb-find')">
+    <div class="bb-dot"></div>Find
+  </button>
+  <button class="bb-item" id="bb-collect" onclick="showPage('collection');setTab('bb-collect')">
+    <div class="bb-dot"></div>Collect
+  </button>
+  <button class="bb-item" id="bb-gift">
+    <div class="bb-dot"></div>Gift
+  </button>
+  <button class="bb-item" id="bb-cart" onclick="toggleCart()">
+    <div class="bb-dot"></div>Cart
+  </button>
+</nav>
+
+<!-- Cart Drawer -->
+<div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cart-drawer">
+  <div class="cart-head">
+    <span class="cart-head__title">Your Opinions (2)</span>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-body">
+    <div class="cart-item">
+      <div class="cart-item__thumb" style="background:#f0e8ff">BULLSHIT REMOVER</div>
+      <div>
+        <p class="cart-item__name">Bullshit Remover</p>
+        <p class="cart-item__type">Card sticker</p>
+        <p class="cart-item__price">₹199</p>
+      </div>
+    </div>
+    <div class="cart-item">
+      <div class="cart-item__thumb" style="background:#ffe8e8">SELECTIVE LISTENER</div>
+      <div>
+        <p class="cart-item__name">Selective Listener</p>
+        <p class="cart-item__type">Card sticker</p>
+        <p class="cart-item__price">₹199</p>
+      </div>
+    </div>
+  </div>
+  <div class="cart-foot">
+    <div class="cart-subtotal">
+      <span class="cart-subtotal__label">Subtotal</span>
+      <span class="cart-subtotal__val">₹398</span>
+    </div>
+    <p class="cart-ship-note">Add ₹101 more for free shipping ↑</p>
+    <button class="btn-primary" style="margin-bottom:12px">Checkout</button>
+    <button class="btn-secondary" onclick="toggleCart()">Continue Shopping</button>
+  </div>
+</div>
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function setTab(id) {
+  document.querySelectorAll('.bb-item').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function toggleCart() {
+  document.getElementById('cart-overlay').classList.toggle('open');
+  document.getElementById('cart-drawer').classList.toggle('open');
+}
+function addAndOpenCart() {
+  document.getElementById('cart-overlay').classList.add('open');
+  document.getElementById('cart-drawer').classList.add('open');
+}
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    chip.closest('.filter-bar').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

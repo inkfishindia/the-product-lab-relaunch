@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Roadmap Kanban</title>
+  <style>
+    body {font-family: Arial, sans-serif; margin: 2rem; background:#f9f9f9;}
+    .board {display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1rem; max-width:1200px;}
+    .col {background:#fff; border:1px solid #ddd; border-radius:4px; padding:1rem; box-shadow:0 1px 3px rgba(0,0,0,.1);}
+    .col h2 {margin-top:0; color:#2c3e50;}
+    .card {background:#eaf7ff; border-left:4px solid #3498db; margin:0.5rem 0; padding:0.5rem; cursor:pointer; user-select:none;}
+    .card:hover {background:#d1e9ff;}
+    /* Simple drag‑drop using HTML5 API */
+    [draggable] {cursor:move;}
+    .dragging {opacity:.5;}
+  </style>
+</head>
+<body>
+<div class="tpl-nav">
+  <span class="nav-brand">tpl<span>_</span>live</span>
+  <a href="../index.html">Hub</a>
+  <a href="../admin/index.html">Admin Hub</a>
+  <a href="command-center.html">Command Center</a>
+  <a href="roadmap.html">Roadmap</a>
+  <a href="kanban.html" class="active" style="color:#F2D024;background:rgba(242,208,36,.12);font-weight:600">Kanban</a>
+  <a href="../FILE-INDEX.html">Files</a>
+</div>
+<style>
+.tpl-nav{background:#1A1A1A;padding:6px 16px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-family:'Inter',sans-serif;border-bottom:1px solid #333;margin:-2rem -2rem 1rem}
+.tpl-nav a{color:#999;text-decoration:none;font-size:11px;padding:3px 10px;border-radius:4px;transition:.15s;white-space:nowrap}
+.tpl-nav a:hover{color:#fff;background:rgba(255,255,255,.1)}
+.tpl-nav a.active{color:#F2D024;background:rgba(242,208,36,.12);font-weight:600}
+.tpl-nav .nav-brand{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:#fff;letter-spacing:.05em;margin-right:8px}
+.tpl-nav .nav-brand span{color:#E63B2E}
+</style>
+  <h1>Product Lab Roadmap</h1>
+  <div class="board" id="board">
+    <div class="col" data-status="horizon0"><strong>Horizon 0 – MVP</strong><br><div class="card" draggable="true" id="mvp1">Deploy on HostGator sub‑domain</div><div class="card" draggable="true" id="mvp2">Enable Razorpay & Shiprocket webhooks</div></div>
+    <div class="col" data-status="horizon1"><strong>Horizon 1 – Stabilization</strong><br><div class="card" draggable="true" id="stab1">CI/CD pipeline with blue‑green deploys</div><div class="card" draggable="true" id="stam2">Automated SSL renewal</div></div>
+    <div class="col" data-status="horizon2"><strong>Horizon 2 – Scale</strong><br><div class="card" draggable="true" id="scale1">MACH decomposition (catalog & checkout services)</div><div class="card" draggable="true" id="scale2">Aurora Serverless v2 or Cloud Run</div></div>
+</div>
+
+<div class="col" data-status="later"><strong>Later</strong><br><div class="card" draggable="true" id="later1">Plan MACH migration</div><div class="card" draggable="true" id="later2">Build advanced CDP loops</div></div>
+
+<script>
+    const board=document.getElementById('board');
+    const cards=document.querySelectorAll('[draggable]');
+    cards.forEach(card=>{card.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',e.target.id);card.classList.add('dragging');});});
+    board.addEventListener('dragover',e=>e.preventDefault());
+    board.addEventListener('drop',e=>{e.preventDefault();const id=e.dataTransfer.getData('text/plain');const target=e.target.closest('.col');if(target&&!target.querySelector('#'+id)){const destCard=document.createElement('div');destCard.className='card';destCard.id=id;destCard.textContent=document.querySelector('#'+id).textContent;target.appendChild(destCard);const src=document.getElementById(id);if(src.parentNode)src.parentNode.removeChild(src);});
+    board.addEventListener('dragend',e=>{e.target.classList.remove('dragging');});
+  </script>
+</body>
+</html>

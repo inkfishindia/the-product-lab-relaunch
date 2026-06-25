@@ -1,0 +1,1383 @@
+<!-- last-updated: 2026-03-26 -->
+<!--
+  Title: Coming Soon Page
+  Phase: 4 — Build
+  Producing Agent: Tobi (Build Lead) / Harley (Program Director)
+  Date: 2026-03-26
+  Status: updated draft
+  Reviewer: Harley
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="The Product Lab is coming back sharper. Pick your opinion, get first access, and be first in when the drop goes live."
+  />
+  <title>The Product Lab — Coming Soon</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --tpl-black: #1a1a1a;
+      --tpl-white: #f5f0eb;
+      --tpl-red: #e63b2e;
+      --tpl-yellow: #f2d024;
+      --tpl-gray-dark: #2d2d2d;
+      --tpl-gray-mid: #8a827c;
+      --tpl-gray-light: #d4cfca;
+      --tpl-off-white: #faf7f3;
+      --surface-panel: rgba(255, 255, 255, 0.04);
+      --surface-panel-strong: rgba(255, 255, 255, 0.08);
+      --border-soft: rgba(245, 240, 235, 0.14);
+      --border-strong: rgba(245, 240, 235, 0.28);
+      --shadow-panel: 0 24px 80px rgba(0, 0, 0, 0.38);
+      --shadow-button: 0 12px 24px rgba(230, 59, 46, 0.24);
+      --radius-sm: 2px;
+      --radius-md: 4px;
+      --radius-lg: 8px;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-12: 48px;
+      --space-16: 64px;
+      --space-24: 96px;
+      --font-heading: "Barlow Condensed", sans-serif;
+      --font-body: "Inter", sans-serif;
+      --font-mono: "Space Mono", monospace;
+      --max-width: 1280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(242, 208, 36, 0.08), transparent 28%),
+        radial-gradient(circle at 85% 18%, rgba(230, 59, 46, 0.14), transparent 22%),
+        linear-gradient(180deg, #101010 0%, #1a1a1a 24%, #171717 100%);
+      color: var(--tpl-white);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+      opacity: 0.28;
+      pointer-events: none;
+      mix-blend-mode: soft-light;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: min(calc(100% - 32px), var(--max-width));
+      margin: 0 auto;
+    }
+
+    .ticker {
+      overflow: hidden;
+      border-bottom: 1px solid var(--border-soft);
+      border-top: 1px solid var(--border-soft);
+      padding: 10px 0;
+      margin-top: 16px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .ticker-track {
+      display: flex;
+      width: max-content;
+      gap: 32px;
+      animation: ticker 26s linear infinite;
+      white-space: nowrap;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .ticker-track span {
+      color: var(--tpl-yellow);
+    }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 24px 0 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--border-strong);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+      font-family: var(--font-heading);
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-copy strong {
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 0.9;
+    }
+
+    .brand-copy span,
+    .header-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    main {
+      padding: 20px 0 64px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .hero-copy,
+    .hero-panel,
+    .section-panel,
+    .wire-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-panel);
+      backdrop-filter: blur(16px);
+    }
+
+    .hero-copy {
+      position: relative;
+      overflow: hidden;
+      padding: 36px;
+      min-height: 640px;
+    }
+
+    .hero-copy::after {
+      content: "";
+      position: absolute;
+      inset: auto -60px -60px auto;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(230, 59, 46, 0.34) 0%, rgba(230, 59, 46, 0) 72%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--tpl-yellow);
+      margin-bottom: 22px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: currentColor;
+    }
+
+    .hero-title {
+      font-family: var(--font-heading);
+      font-size: clamp(80px, 12vw, 156px);
+      font-weight: 900;
+      line-height: 0.86;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      max-width: 760px;
+    }
+
+    .hero-title .accent {
+      color: var(--tpl-red);
+      display: block;
+    }
+
+    .hero-sub {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: start;
+      margin-top: 28px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    .hero-sub p {
+      max-width: 520px;
+      font-size: 18px;
+      line-height: 1.65;
+      color: rgba(245, 240, 235, 0.88);
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid rgba(242, 208, 36, 0.26);
+      background: rgba(242, 208, 36, 0.08);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tpl-yellow);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 30px;
+    }
+
+    .button,
+    .button-ghost,
+    .tone-button,
+    .share-button {
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 22px;
+      background: var(--tpl-red);
+      color: var(--tpl-white);
+      box-shadow: var(--shadow-button);
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .button-ghost {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-color: var(--border-soft);
+      color: var(--tpl-white);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .button:hover,
+    .button-ghost:hover,
+    .tone-button:hover,
+    .share-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .hero-notes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 32px;
+    }
+
+    .note-card {
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-soft);
+    }
+
+    .note-card .label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .note-card strong {
+      display: block;
+      margin-top: 8px;
+      font-family: var(--font-heading);
+      font-size: 24px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--tpl-white);
+    }
+
+    .hero-panel {
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .panel-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .panel-top h2 {
+      font-family: var(--font-heading);
+      font-size: 46px;
+      font-weight: 800;
+      line-height: 0.9;
+      text-transform: uppercase;
+      max-width: 300px;
+    }
+
+    .panel-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .panel-intro {
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(245, 240, 235, 0.84);
+      max-width: 460px;
+    }
+
+    .tone-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .tone-button {
+      text-align: left;
+      padding: 16px 14px;
+      min-height: 104px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-soft);
+      color: var(--tpl-white);
+    }
+
+    .tone-button.active {
+      background: rgba(230, 59, 46, 0.14);
+      border-color: rgba(230, 59, 46, 0.5);
+    }
+
+    .tone-button strong {
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 26px;
+      line-height: 0.95;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .tone-button span {
+      display: block;
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(245, 240, 235, 0.72);
+    }
+
+    .preview-card {
+      display: grid;
+      gap: 18px;
+      padding: 18px;
+      background:
+        linear-gradient(145deg, rgba(242, 208, 36, 0.09), rgba(255, 255, 255, 0.02)),
+        rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-strong);
+    }
+
+    .preview-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .preview-card h3 {
+      font-family: var(--font-heading);
+      font-size: clamp(34px, 5vw, 56px);
+      font-weight: 900;
+      line-height: 0.9;
+      text-transform: uppercase;
+      max-width: 420px;
+    }
+
+    .preview-card p {
+      max-width: 520px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(245, 240, 235, 0.82);
+    }
+
+    .preview-products {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .product-chip {
+      padding: 14px 12px;
+      background: rgba(26, 26, 26, 0.5);
+      border: 1px solid var(--border-soft);
+      min-height: 106px;
+    }
+
+    .product-chip .chip-type {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--tpl-yellow);
+    }
+
+    .product-chip strong {
+      display: block;
+      margin-top: 8px;
+      font-family: var(--font-heading);
+      font-size: 24px;
+      line-height: 0.92;
+      text-transform: uppercase;
+    }
+
+    .product-chip span {
+      display: block;
+      margin-top: 10px;
+      font-size: 13px;
+      color: rgba(245, 240, 235, 0.72);
+    }
+
+    .waitlist {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .waitlist-card,
+    .share-card,
+    .section-panel {
+      padding: 24px;
+    }
+
+    .waitlist-card h3,
+    .share-card h3,
+    .section-heading h2 {
+      font-family: var(--font-heading);
+      font-size: 42px;
+      line-height: 0.92;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .waitlist-card p,
+    .share-card p,
+    .section-heading p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(245, 240, 235, 0.82);
+    }
+
+    .waitlist-form {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .field input {
+      min-height: 52px;
+      padding: 0 14px;
+      border: 1px solid var(--border-soft);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--tpl-white);
+      border-radius: var(--radius-md);
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: rgba(242, 208, 36, 0.52);
+    }
+
+    .consent-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border: 1px solid var(--border-soft);
+      background: rgba(255, 255, 255, 0.03);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tpl-white);
+    }
+
+    .tag input {
+      accent-color: var(--tpl-red);
+    }
+
+    .form-footnote {
+      font-size: 12px;
+      color: var(--tpl-gray-light);
+      line-height: 1.6;
+    }
+
+    .success-state {
+      display: none;
+      margin-top: 12px;
+      padding: 14px 16px;
+      border: 1px solid rgba(242, 208, 36, 0.32);
+      background: rgba(242, 208, 36, 0.08);
+      font-size: 14px;
+      color: var(--tpl-yellow);
+    }
+
+    .success-state.visible {
+      display: block;
+    }
+
+    .share-quote {
+      position: relative;
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid var(--border-soft);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .share-quote strong {
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 36px;
+      line-height: 0.95;
+      text-transform: uppercase;
+    }
+
+    .share-quote span {
+      display: block;
+      margin-top: 10px;
+      font-size: 13px;
+      color: rgba(245, 240, 235, 0.72);
+    }
+
+    .share-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      margin-top: 16px;
+      padding: 0 18px;
+      background: var(--tpl-yellow);
+      color: var(--tpl-black);
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sections {
+      display: grid;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .section-panel {
+      padding: 26px;
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 18px;
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .section-kicker {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tpl-yellow);
+    }
+
+    .engagement-grid,
+    .wire-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .engagement-card,
+    .wire-card {
+      padding: 18px;
+      min-height: 220px;
+    }
+
+    .engagement-card .step,
+    .wire-card .wire-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .engagement-card strong,
+    .wire-card strong {
+      display: block;
+      margin-top: 12px;
+      font-family: var(--font-heading);
+      font-size: 30px;
+      line-height: 0.94;
+      text-transform: uppercase;
+    }
+
+    .engagement-card p,
+    .wire-card p {
+      margin-top: 12px;
+      font-size: 14px;
+      line-height: 1.65;
+      color: rgba(245, 240, 235, 0.78);
+    }
+
+    .mini-bars {
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .mini-bars span {
+      display: block;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .mini-bars span:nth-child(1) { width: 100%; }
+    .mini-bars span:nth-child(2) { width: 78%; }
+    .mini-bars span:nth-child(3) { width: 62%; }
+    .mini-bars span:nth-child(4) { width: 88%; }
+
+    .wireframe-preview {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .wire-pane {
+      min-height: 180px;
+      padding: 16px;
+      border: 1px solid var(--border-soft);
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    .wire-pane .title {
+      font-family: var(--font-heading);
+      font-size: 24px;
+      text-transform: uppercase;
+    }
+
+    .wire-pane .caption {
+      margin-top: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .wire-pane .bars {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .wire-pane .bars span {
+      display: block;
+      height: 22px;
+      border: 1px solid var(--border-soft);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .wire-pane .bars span.hero-line { height: 66px; }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      padding: 26px 0 40px;
+      border-top: 1px solid var(--border-soft);
+      margin-top: 32px;
+    }
+
+    .footer-copy,
+    .footer-links {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tpl-gray-light);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      animation: reveal 0.6s ease forwards;
+    }
+
+    .delay-1 { animation-delay: 0.08s; }
+    .delay-2 { animation-delay: 0.16s; }
+    .delay-3 { animation-delay: 0.24s; }
+    .delay-4 { animation-delay: 0.32s; }
+    .delay-5 { animation-delay: 0.4s; }
+
+    @keyframes reveal {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .hero-grid,
+      .waitlist,
+      .engagement-grid,
+      .wire-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy {
+        min-height: auto;
+      }
+
+      .hero-sub {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-products,
+      .hero-notes,
+      .input-row,
+      .wireframe-preview {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        width: min(calc(100% - 20px), var(--max-width));
+      }
+
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .brand-copy strong {
+        font-size: 22px;
+      }
+
+      .hero-copy,
+      .hero-panel,
+      .waitlist-card,
+      .share-card,
+      .section-panel {
+        padding: 18px;
+      }
+
+      .hero-title {
+        font-size: clamp(56px, 22vw, 88px);
+      }
+
+      .panel-top {
+        flex-direction: column;
+      }
+
+      .panel-top h2,
+      .waitlist-card h3,
+      .share-card h3,
+      .section-heading h2 {
+        font-size: 34px;
+      }
+
+      .tone-grid,
+      .preview-products {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .button,
+      .button-ghost,
+      .share-button {
+        width: 100%;
+      }
+
+      footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track">
+        <div>
+          <span>Early access</span> · Pick your opinion · Card stickers first · WhatsApp-native launch · Small objects. Big opinions.
+        </div>
+        <div>
+          <span>Early access</span> · Pick your opinion · Card stickers first · WhatsApp-native launch · Small objects. Big opinions.
+        </div>
+      </div>
+    </div>
+
+    <header class="reveal delay-1">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">TPL</div>
+        <div class="brand-copy">
+          <strong>The Product Lab</strong>
+          <span>Wear your opinion.</span>
+        </div>
+      </div>
+      <div class="header-meta">Bengaluru · Relaunch sequence · T-minus soon</div>
+    </header>
+
+    <main>
+      <section class="hero-grid">
+        <div class="hero-copy reveal delay-2">
+          <div class="eyebrow">Pre-launch access starts here</div>
+          <h1 class="hero-title">
+            Pick Your
+            <span class="accent">Opinion.</span>
+          </h1>
+
+          <div class="hero-sub">
+            <p>
+              This is not a holding page. It is the first interaction with the relaunch.
+              Choose the version of TPL that feels most like you, unlock your tailored preview,
+              and get on the list before the first drop goes live.
+            </p>
+            <div class="hero-pill">Early list gets first access + launch offer</div>
+          </div>
+
+          <div class="hero-actions">
+            <a class="button" href="#opinion-picker">Start The Taste Test</a>
+            <a class="button-ghost" href="#website-direction">See Site Direction</a>
+          </div>
+
+          <div class="hero-notes">
+            <div class="note-card">
+              <span class="label">Hero mechanic</span>
+              <strong>Opinion Picker</strong>
+            </div>
+            <div class="note-card">
+              <span class="label">Primary capture</span>
+              <strong>Email + WhatsApp</strong>
+            </div>
+            <div class="note-card">
+              <span class="label">Share behavior</span>
+              <strong>Built for WhatsApp</strong>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-panel reveal delay-3" id="opinion-picker">
+          <div class="panel-top">
+            <div>
+              <div class="panel-tag">Engagement concept</div>
+              <h2>Choose your lane</h2>
+            </div>
+            <div class="panel-tag">Act 2 to Act 4 bridge</div>
+          </div>
+
+          <p class="panel-intro">
+            The page turns vague curiosity into self-identification. Once visitors choose a tone,
+            the copy, preview stack, and share line update around that choice.
+          </p>
+
+          <div class="tone-grid" role="tablist" aria-label="Opinion tones">
+            <button class="tone-button active" type="button" data-tone="no-filter">
+              <strong>No Filter</strong>
+              <span>For people who ran out of patience before breakfast.</span>
+            </button>
+            <button class="tone-button" type="button" data-tone="soft-chaos">
+              <strong>Soft Chaos</strong>
+              <span>Looks put together. Internally, not the same story.</span>
+            </button>
+            <button class="tone-button" type="button" data-tone="quiet-flex">
+              <strong>Quiet Flex</strong>
+              <span>Specific taste. No interest in explaining it twice.</span>
+            </button>
+            <button class="tone-button" type="button" data-tone="gift-scout">
+              <strong>Gift Scout</strong>
+              <span>You buy for the friend who says, "this is so me."</span>
+            </button>
+          </div>
+
+          <div class="preview-card" aria-live="polite">
+            <div class="preview-meta">
+              <span id="preview-kicker">Current mood · No Filter</span>
+              <span id="preview-meter">Opinion level · 92%</span>
+            </div>
+            <h3 id="preview-title">For the person who has already written off small talk.</h3>
+            <p id="preview-body">
+              Start with the attitude line. Card stickers that say what your bank card should have been saying anyway.
+              Follow with keychains and pins that do not need an introduction.
+            </p>
+
+            <div class="preview-products">
+              <article class="product-chip">
+                <div class="chip-type" id="chip-1-type">Card sticker</div>
+                <strong id="chip-1-name">No Chill</strong>
+                <span id="chip-1-copy">Hero product for the first reveal.</span>
+              </article>
+              <article class="product-chip">
+                <div class="chip-type" id="chip-2-type">Keychain</div>
+                <strong id="chip-2-name">Idiot Repellent</strong>
+                <span id="chip-2-copy">Attitude-led upsell after the sticker.</span>
+              </article>
+              <article class="product-chip">
+                <div class="chip-type" id="chip-3-type">Bundle</div>
+                <strong id="chip-3-name">Opinion Starter Pack</strong>
+                <span id="chip-3-copy">AOV push toward the ₹499 threshold.</span>
+              </article>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="waitlist">
+        <div class="waitlist-card hero-panel reveal delay-4">
+          <div class="section-kicker">Capture flow</div>
+          <h3>Get first access before everyone else</h3>
+          <p>
+            The page collects intent after the user has picked a side. That makes the signup feel like
+            a continuation of the interaction, not a demand at the top of the page.
+          </p>
+
+          <form class="waitlist-form" id="waitlistForm">
+            <div class="input-row">
+              <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" placeholder="you@domain.com" required />
+              </div>
+              <div class="field">
+                <label for="whatsapp">WhatsApp Number</label>
+                <input id="whatsapp" name="whatsapp" type="tel" placeholder="+91 98XXXXXX98" />
+              </div>
+            </div>
+
+            <div class="input-row">
+              <div class="field">
+                <label for="name">Name</label>
+                <input id="name" name="name" type="text" placeholder="Your name" />
+              </div>
+              <div class="field">
+                <label for="pickedTone">Picked Tone</label>
+                <input id="pickedTone" name="pickedTone" type="text" value="No Filter" readonly />
+              </div>
+            </div>
+
+            <div class="consent-row">
+              <label class="tag"><input type="checkbox" checked /> Early access link</label>
+              <label class="tag"><input type="checkbox" checked /> Launch offer</label>
+              <label class="tag"><input type="checkbox" /> WhatsApp updates</label>
+            </div>
+
+            <button class="button" type="submit">Join The First-Access List</button>
+            <p class="form-footnote">
+              Position this with the teaser campaign messaging: sharper, more specific, and built for forwards.
+              Early subscribers are the audience for the T-1 and T-0 drop messages.
+            </p>
+          </form>
+
+          <div class="success-state" id="successState">
+            You're in. The early list gets the first link, the first offer, and the first look at the card sticker drop.
+          </div>
+        </div>
+
+        <div class="share-card hero-panel reveal delay-5">
+          <div class="section-kicker">WhatsApp prompt</div>
+          <h3>Make it easy to forward</h3>
+          <p>
+            The share line should feel like a DM from a friend who found something before it got crowded.
+            It changes with the selected tone so the page becomes part of the launch loop.
+          </p>
+
+          <div class="share-quote">
+            <strong id="shareText">This brand is building card stickers for people with opinions. Very you.</strong>
+            <span id="shareSubtext">Tap below to copy the current share line.</span>
+          </div>
+
+          <button class="share-button" id="shareButton" type="button">Copy Share Line</button>
+        </div>
+      </section>
+
+      <div class="sections">
+        <section class="section-panel reveal delay-2">
+          <div class="section-heading">
+            <div>
+              <div class="section-kicker">Why this page works</div>
+              <h2>Engagement before conversion</h2>
+            </div>
+            <p>
+              The page mirrors the pre-launch arc: intrigue first, positioning second, reveal third, capture fourth.
+            </p>
+          </div>
+
+          <div class="engagement-grid">
+            <article class="engagement-card">
+              <div class="step">01 · Signal</div>
+              <strong>Lead with a choice, not a form</strong>
+              <p>
+                The hero asks the visitor to identify themselves. That is more on-brand than "enter your email"
+                and creates a stronger emotional handoff into the waitlist.
+              </p>
+            </article>
+            <article class="engagement-card">
+              <div class="step">02 · Reveal</div>
+              <strong>Preview products through attitude</strong>
+              <p>
+                The hero products appear as outcomes of a selected tone. This keeps the page rooted in identity,
+                not in generic product tiles.
+              </p>
+            </article>
+            <article class="engagement-card">
+              <div class="step">03 · Forward</div>
+              <strong>Every state produces a shareable line</strong>
+              <p>
+                Since WhatsApp is part of the conversion path, the page should generate language that people can
+                send without rewriting it.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section-panel reveal delay-3" id="website-direction">
+          <div class="section-heading">
+            <div>
+              <div class="section-kicker">Website direction</div>
+              <h2>Wireframe style for the full relaunch</h2>
+            </div>
+            <p>
+              Darkroom base, type-pressure overlays, mobile-first conversion, and strong product storytelling.
+            </p>
+          </div>
+
+          <div class="wire-grid">
+            <article class="wire-card">
+              <div class="wire-label">Homepage</div>
+              <strong>Hero statement + two collection blocks + gifting route</strong>
+              <p>
+                Big heading first, then "Your Card Has a Personality," then "No Filter," then trust and gifting.
+                The coming-soon page already introduces the same hierarchy.
+              </p>
+              <div class="mini-bars" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </article>
+            <article class="wire-card">
+              <div class="wire-label">Collection</div>
+              <strong>Who it's for before what it is</strong>
+              <p>
+                Every collection opens with an attitude statement, then the grid, then the bundle nudge toward ₹499.
+                Copy names the person, not the object.
+              </p>
+              <div class="mini-bars" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </article>
+            <article class="wire-card">
+              <div class="wire-label">Product page</div>
+              <strong>Massive product name, sharp proof, easy add-to-cart</strong>
+              <p>
+                The product title behaves like a poster. Specs and artist info support the identity hook instead of
+                leading the page.
+              </p>
+              <div class="mini-bars" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </article>
+          </div>
+
+          <div class="wireframe-preview">
+            <div class="wire-pane">
+              <div class="title">Homepage Flow</div>
+              <div class="caption">Hero / Collection / Drop / Trust</div>
+              <div class="bars" aria-hidden="true">
+                <span class="hero-line"></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+            <div class="wire-pane">
+              <div class="title">PDP Flow</div>
+              <div class="caption">Opinion / Visual / Proof / Bundle</div>
+              <div class="bars" aria-hidden="true">
+                <span class="hero-line"></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="footer-copy">The Product Lab · Small objects. Big opinions. · Built for mobile first.</div>
+      <div class="footer-links">
+        <a href="#">Instagram</a>
+        <a href="#">WhatsApp</a>
+        <a href="#">Launch list</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const toneData = {
+      "no-filter": {
+        label: "No Filter",
+        meter: "Opinion level · 92%",
+        title: "For the person who has already written off small talk.",
+        body:
+          "Start with the attitude line. Card stickers that say what your bank card should have been saying anyway. Follow with keychains and pins that do not need an introduction.",
+        chips: [
+          ["Card sticker", "No Chill", "Hero product for the first reveal."],
+          ["Keychain", "Idiot Repellent", "Attitude-led upsell after the sticker."],
+          ["Bundle", "Opinion Starter Pack", "AOV push toward the ₹499 threshold."]
+        ],
+        share:
+          "This brand is building card stickers for people with opinions. Very you.",
+        shareSubtext:
+          "Best used when forwarding to the friend who never sends soft replies."
+      },
+      "soft-chaos": {
+        label: "Soft Chaos",
+        meter: "Opinion level · 78%",
+        title: "Looks together. Privately managing a small internal riot.",
+        body:
+          "This lane pairs dark visuals with slightly wryer copy. It is for the customer who likes understatement, but still wants the object to say something very clear once noticed.",
+        chips: [
+          ["Card sticker", "No Meetings Before Coffee", "Quietly specific. Very screenshotable."],
+          ["Pin", "Fine Art Of Not Caring", "Artist-led proof point with collector energy."],
+          ["Bundle", "Low Battery, High Standards", "Giftable set for the friend who gets it."]
+        ],
+        share:
+          "This feels like a brand for people who look calm and are not, actually, calm.",
+        shareSubtext:
+          "Good share line for the person whose taste is dry, not loud."
+      },
+      "quiet-flex": {
+        label: "Quiet Flex",
+        meter: "Opinion level · 84%",
+        title: "Specific taste. No need for an explanatory paragraph.",
+        body:
+          "Lead with original artist work, clean product framing, and product names that feel expensive in tone even when the price stays accessible. This is the sharper premium signal within TPL.",
+        chips: [
+          ["Pin", "Studio Exit", "Original artist drop with tighter scarcity language."],
+          ["Card sticker", "Seen Enough", "Minimal headline, strong identity cue."],
+          ["Bundle", "Signal Set", "Cross-category build for self-purchase and gifting."]
+        ],
+        share:
+          "Found an accessories brand that looks more specific than the usual internet clutter.",
+        shareSubtext:
+          "This version leans harder into artist value and collector behavior."
+      },
+      "gift-scout": {
+        label: "Gift Scout",
+        meter: "Opinion level · 73%",
+        title: "For buying something that makes your friend say, yes, exactly.",
+        body:
+          "This lane converts the thoughtful gifter. More reassurance, still sharp. It should get someone from \"I need a gift under ₹499\" to \"this one is for them specifically.\"",
+        chips: [
+          ["Bundle", "Opinion Starter Pack", "Entry gifting route at the free-shipping threshold."],
+          ["Card sticker", "For The Specific One", "Personality-led gift idea."],
+          ["Guide", "Gift Edit", "Routes users into the gifting hub after launch."]
+        ],
+        share:
+          "This is the kind of site you send when you've found the exact gift before anyone asked.",
+        shareSubtext:
+          "Built for the friend who buys the right thing, not the obvious thing."
+      }
+    };
+
+    const buttons = document.querySelectorAll(".tone-button");
+    const previewKicker = document.getElementById("preview-kicker");
+    const previewMeter = document.getElementById("preview-meter");
+    const previewTitle = document.getElementById("preview-title");
+    const previewBody = document.getElementById("preview-body");
+    const shareText = document.getElementById("shareText");
+    const shareSubtext = document.getElementById("shareSubtext");
+    const pickedTone = document.getElementById("pickedTone");
+    const chipTargets = [
+      ["chip-1-type", "chip-1-name", "chip-1-copy"],
+      ["chip-2-type", "chip-2-name", "chip-2-copy"],
+      ["chip-3-type", "chip-3-name", "chip-3-copy"]
+    ];
+
+    function setTone(toneKey) {
+      const tone = toneData[toneKey];
+      if (!tone) return;
+
+      buttons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.tone === toneKey);
+      });
+
+      previewKicker.textContent = "Current mood · " + tone.label;
+      previewMeter.textContent = tone.meter;
+      previewTitle.textContent = tone.title;
+      previewBody.textContent = tone.body;
+      shareText.textContent = tone.share;
+      shareSubtext.textContent = tone.shareSubtext;
+      pickedTone.value = tone.label;
+
+      tone.chips.forEach((chip, index) => {
+        const ids = chipTargets[index];
+        document.getElementById(ids[0]).textContent = chip[0];
+        document.getElementById(ids[1]).textContent = chip[1];
+        document.getElementById(ids[2]).textContent = chip[2];
+      });
+    }
+
+    setTone("no-filter");
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => setTone(button.dataset.tone));
+    });
+
+    document.getElementById("shareButton").addEventListener("click", async () => {
+      const message = shareText.textContent;
+      try {
+        await navigator.clipboard.writeText(message);
+        shareSubtext.textContent = "Copied. Send it to the friend who will immediately ask for the link.";
+      } catch (error) {
+        shareSubtext.textContent = "Copy failed on this browser. The line is still right above.";
+      }
+    });
+
+    document.getElementById("waitlistForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      document.getElementById("successState").classList.add("visible");
+    });
+  </script>
+</body>
+</html>

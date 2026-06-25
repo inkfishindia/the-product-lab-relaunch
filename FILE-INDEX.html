@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Product Lab — File Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--dark:#1A1A1A;--cream:#F5F0EB;--red:#E63B2E;--yellow:#F2D024;--card-bg:#EDE8E3;--sidebar-w:280px}
+html,body{height:100%;font-family:'Inter',sans-serif;font-size:14px;color:var(--dark);background:var(--cream)}
+h1,h2,h3,h4{font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:0.01em}
+.layout{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--dark);color:#ccc;display:flex;flex-direction:column;overflow:hidden}
+.sidebar h1{padding:20px 18px 12px;font-size:22px;color:#fff;letter-spacing:0.05em;border-bottom:1px solid #333}
+.sidebar h1 span{color:var(--red)}
+.sidebar .cat-count{padding:8px 18px 10px;font-size:11px;color:#888;font-family:'Inter',sans-serif;border-bottom:1px solid #333}
+.cat-tree{flex:1;overflow-y:auto;padding:8px 0}
+.cat-tree::-webkit-scrollbar{width:5px}
+.cat-tree::-webkit-scrollbar-thumb{background:#444;border-radius:3px}
+.cat-item{cursor:pointer;user-select:none}
+.cat-header{display:flex;align-items:center;padding:7px 18px;font-size:13px;color:#bbb;transition:.15s;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:500;letter-spacing:0.02em}
+.cat-header:hover{background:rgba(255,255,255,.06);color:var(--yellow)}
+.cat-header .arrow{font-size:10px;transition:transform .2s;width:12px;text-align:center;color:#666}
+.cat-header .arrow.open{transform:rotate(90deg)}
+.cat-header .badge{background:#333;color:#999;font-size:10px;padding:1px 7px;border-radius:8px;margin-left:auto;font-family:'Inter',sans-serif}
+.cat-header.active{color:var(--yellow);background:rgba(242,208,36,.08)}
+.cat-children{display:none}
+.cat-children.open{display:block}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--cream)}
+.topbar{background:var(--cream);padding:14px 24px;border-bottom:1px solid #ddd;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.topbar .brand{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:600;color:var(--dark);white-space:nowrap}
+.topbar .brand span{color:var(--red)}
+.search-wrap{flex:1;min-width:180px;max-width:420px}
+.search-wrap input{width:100%;padding:8px 14px;border:1px solid #ccc;border-radius:6px;font-size:13px;background:#fff;outline:none;transition:.15s;font-family:'Inter',sans-serif}
+.search-wrap input:focus{border-color:var(--red);box-shadow:0 0 0 2px rgba(230,59,46,.12)}
+.view-all-btn{padding:7px 16px;border:1px solid var(--dark);border-radius:6px;background:transparent;cursor:pointer;font-size:12px;font-weight:500;transition:.15s;font-family:'Inter',sans-serif}
+.view-all-btn:hover{background:var(--dark);color:#fff}
+.counter{font-size:12px;color:#888;white-space:nowrap}
+.content{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column}
+.content::-webkit-scrollbar{width:6px}
+.content::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
+.file-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+.file-card{background:var(--card-bg);border-radius:8px;padding:12px 14px;cursor:pointer;transition:.15s;border:1px solid transparent}
+.file-card:hover{background:#e5ddd6;border-color:var(--yellow);transform:translateY(-1px)}
+.file-card.active{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.file-card .fname{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;color:var(--dark);margin-bottom:2px}
+.file-card .fpath{font-size:11px;color:#888;margin-bottom:6px;word-break:break-all;font-family:'Inter',sans-serif}
+.file-card .fmeta{display:flex;gap:6px;flex-wrap:wrap}
+.badge{display:inline-block;font-size:10px;padding:1px 8px;border-radius:4px;font-weight:500;font-family:'Inter',sans-serif}
+.badge-phase{background:var(--dark);color:#fff}
+.badge-type{background:var(--red);color:#fff}
+.badge-agent{background:var(--yellow);color:var(--dark)}
+.badge-lines{background:#ccc;color:var(--dark)}
+.file-card .fdesc{font-size:11px;color:#777;margin-top:4px;font-style:italic}
+.preview-pane{background:var(--cream);border-top:1px solid #ddd;margin-top:16px;display:none;flex-direction:column}
+.preview-pane.open{display:flex}
+.preview-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--card-bg);border-radius:8px 8px 0 0}
+.preview-header .ptitle{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600}
+.preview-header .pclose{cursor:pointer;background:none;border:none;font-size:18px;color:#888;padding:0 4px}
+.preview-header .pclose:hover{color:var(--red)}
+.preview-body{padding:16px;background:#fff;border-radius:0 0 8px 8px;overflow-x:auto;max-height:50vh;overflow-y:auto;line-height:1.6;font-size:13px}
+.preview-body iframe{width:100%;height:480px;border:none;border-radius:4px}
+.preview-body img{max-width:100%;border-radius:4px}
+.preview-body pre{background:#f8f6f4;padding:12px;border-radius:6px;overflow-x:auto;font-size:12px;line-height:1.5}
+.preview-body code{background:#f0ece8;padding:1px 4px;border-radius:3px;font-size:12px}
+.preview-body pre code{background:none;padding:0}
+.preview-body h1{font-size:20px;margin:16px 0 8px;font-family:'Barlow Condensed',sans-serif}
+.preview-body h2{font-size:17px;margin:14px 0 6px;font-family:'Barlow Condensed',sans-serif}
+.preview-body h3{font-size:15px;margin:12px 0 5px;font-family:'Barlow Condensed',sans-serif}
+.preview-body h4{font-size:14px;margin:10px 0 4px;font-family:'Barlow Condensed',sans-serif}
+.preview-body p{margin:6px 0}
+.preview-body ul,.preview-body ol{padding-left:20px;margin:6px 0}
+.preview-body li{margin:2px 0}
+.preview-body hr{border:none;border-top:1px solid #ddd;margin:16px 0}
+.preview-body a{color:var(--red);text-decoration:underline}
+.preview-body table{border-collapse:collapse;width:100%;margin:10px 0;font-size:12px}
+.preview-body th,.preview-body td{border:1px solid #ddd;padding:6px 10px;text-align:left}
+.preview-body th{background:var(--card-bg);font-family:'Barlow Condensed',sans-serif;font-weight:600}
+.preview-body strong{font-weight:600}
+.preview-body blockquote{border-left:3px solid var(--red);padding:4px 12px;margin:8px 0;background:#faf8f5;color:#555}
+.spinner{display:flex;justify-content:center;align-items:center;padding:40px;gap:8px;color:#888}
+.spinner::after{content:'';width:20px;height:20px;border:2px solid #ddd;border-top-color:var(--red);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:60px 20px;color:#999}
+.empty h3{font-size:20px;color:#bbb}
+.file-grid.hidden{display:none}
+.live-btn{padding:7px 16px;border:1px solid var(--red);border-radius:6px;background:transparent;cursor:pointer;font-size:12px;font-weight:500;transition:.15s;font-family:'Inter',sans-serif;color:var(--red)}
+.live-btn:hover,.live-btn.active{background:var(--red);color:#fff}
+.live-btn.active{border-color:var(--red)}
+.live-view{display:none;flex-direction:column;flex:1;min-height:0}
+.live-view.open{display:flex}
+.live-tabs{display:flex;gap:4px;padding:10px 0;overflow-x:auto;flex-wrap:nowrap;border-bottom:1px solid #ddd}
+.live-tab{padding:7px 14px;border:1px solid #ddd;border-radius:6px 6px 0 0;background:var(--card-bg);cursor:pointer;font-size:12px;font-family:'Barlow Condensed',sans-serif;font-weight:500;white-space:nowrap;transition:.15s;border-bottom:none;color:var(--dark)}
+.live-tab:hover{background:#e0d8d0}
+.live-tab.active{background:#fff;border-color:#ccc;color:var(--dark);font-weight:600;position:relative}
+.live-tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:#fff}
+.live-tab .tab-badge{font-size:9px;background:var(--red);color:#fff;padding:1px 6px;border-radius:8px;margin-left:6px;font-family:'Inter',sans-serif}
+.live-frame-wrap{flex:1;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;overflow:hidden;min-height:0;position:relative}
+.live-frame-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;display:block}
+.file-view{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.file-view.hidden{display:none}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .file-grid{grid-template-columns:1fr}
+  .topbar{padding:10px 14px}
+  .content{padding:14px}
+  .live-tabs{overflow-x:auto}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+<h1>tpl<span>_</span>index</h1>
+<div class="cat-count" id="catCount"></div>
+<div class="cat-tree" id="catTree"></div>
+</nav>
+<div class="main">
+<div class="topbar">
+<div class="brand">The Product Lab <span>//</span> File Index</div>
+<div class="search-wrap"><input type="text" id="searchInput" placeholder="Search files by name or path..." autocomplete="off"></div>
+<button class="view-all-btn" id="viewAllBtn">Browse Files</button>
+<button class="live-btn" id="liveBtn">Live Pages</button>
+<span class="counter" id="counter"></span>
+</div>
+<div class="content" id="content">
+<div class="file-view" id="fileView">
+<div class="file-grid" id="fileGrid"></div>
+<div class="empty" id="empty" style="display:none">
+<h3>No files found</h3>
+<p>Try adjusting your search query.</p>
+</div>
+<div class="preview-pane" id="previewPane">
+<div class="preview-header">
+<span class="ptitle" id="previewTitle"></span>
+<button class="pclose" id="previewClose">&times;</button>
+</div>
+<div class="preview-body" id="previewBody"></div>
+</div>
+</div>
+<div class="live-view" id="liveView">
+<div class="live-tabs" id="liveTabs"></div>
+<div class="live-frame-wrap" id="liveFrameWrap">
+<iframe id="liveFrame" src=""></iframe>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+const FILES = [
+  {path:"design/visual-identity/visual-identity.md",name:"Visual Identity (Darkroom)",category:"Design / Visual Identity",phase:"3",type:"markdown",agent:"Sean",lines:"",description:"Original darkroom-inspired visual identity"},
+  {path:"design/visual-identity/visual-identity-rebrand.md",name:"Visual Identity Rebrand (Light+Bold)",category:"Design / Visual Identity",phase:"4",type:"markdown",agent:"Sean",lines:"",description:"Light + bold rebrand of visual identity"},
+  {path:"design/visual-identity/copy-system.md",name:"Copy System (Original)",category:"Design / Visual Identity",phase:"3",type:"markdown",agent:"Joanna",lines:"",description:"Original copy system and voice guidelines"},
+  {path:"design/visual-identity/copy-system-rebrand.md",name:"Copy System Rebrand",category:"Design / Visual Identity",phase:"4",type:"markdown",agent:"Joanna",lines:"",description:"Rebranded copy system"},
+  {path:"design/visual-identity/brand-positioning-rebrand.md",name:"Brand Positioning Rebrand",category:"Design / Visual Identity",phase:"4",type:"markdown",agent:"Heyward",lines:"",description:"Rebranded brand positioning document"},
+  {path:"design/visual-identity/copy-build-plan.md",name:"Copy Build Plan",category:"Design / Visual Identity",phase:"4",type:"markdown",agent:"Joanna",lines:"",description:"Implementation plan for copy system"},
+  {path:"design/ui-system/ui-system.md",name:"UI Component System",category:"Design / UI System",phase:"3-4",type:"markdown",agent:"Julie",lines:"2432+",description:"Full CSS token + component spec — the build contract"},
+  {path:"design/wireframes/ux-ia-wireframes.md",name:"UX/IA & Wireframes",category:"Design / Wireframes",phase:"3",type:"markdown",agent:"Kurt",lines:"",description:"Sitemap, IA, nav, customer journey"},
+  {path:"design/wireframes/hifi-page-designs.md",name:"Hi-Fi Page Designs",category:"Design / Wireframes",phase:"3",type:"markdown",agent:"Julie",lines:"",description:"8 fully specced pages"},
+  {path:"design/wireframes/website-wireframe-style-design.md",name:"Website Wireframe + Style",category:"Design / Wireframes",phase:"4",type:"markdown",agent:"Tobi",lines:"",description:"Website wireframe and style guide"},
+  {path:"design/reviews/brand-visual-guidelines-walsh-analysis.md",name:"Walsh Brand Visual Analysis",category:"Design / Reviews",phase:"4",type:"markdown",agent:"",lines:"",description:"AI brand visual review by Walsh"},
+  {path:"design/reviews/walsh-gemini-review-iteration-1.html",name:"Walsh Gemini Review",category:"Design / Reviews",phase:"4",type:"html",agent:"",lines:"",description:"Gemini-powered brand review iteration 1"},
+  {path:"design/reviews/gemini-skill-review-iteration-1.html",name:"Gemini Skill Review",category:"Design / Reviews",phase:"4",type:"html",agent:"",lines:"",description:"Gemini skill review iteration 1"},
+  {path:"prototypes/tpl-site-prototype.html",name:"Full Site Prototype",category:"Prototypes",phase:"4",type:"html",agent:"Tobi",lines:"1674",description:"Complete site prototype"},
+  {path:"prototypes/homepage-wireframe-prototype.html",name:"Homepage Wireframe",category:"Prototypes",phase:"4",type:"html",agent:"Tobi",lines:"1243",description:"Homepage wireframe prototype"},
+  {path:"prototypes/coming-soon-page.html",name:"Coming Soon Page",category:"Prototypes",phase:"4",type:"html",agent:"Tobi",lines:"1383",description:"Coming soon/teaser page"},
+  {path:"prototypes/framer/index.html",name:"Framer Interactive Prototype",category:"Prototypes",phase:"4",type:"html",agent:"Tobi",lines:"",description:"Framer-based interactive prototype"},
+  {path:"prototypes/framer/src/styles.css",name:"Framer Styles",category:"Prototypes",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Framer prototype stylesheet"},
+  {path:"storefront/src/app/page.tsx",name:"Homepage",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Next.js storefront homepage"},
+  {path:"storefront/src/app/layout.tsx",name:"Root Layout",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Root layout with providers"},
+  {path:"storefront/src/app/cart/page.tsx",name:"Cart Page",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Server component cart page"},
+  {path:"storefront/src/app/cart/cart-client.tsx",name:"Cart Client Component",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Client-side cart interactions"},
+  {path:"storefront/src/app/checkout/page.tsx",name:"Checkout Page",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Server component checkout page"},
+  {path:"storefront/src/app/checkout/checkout-client.tsx",name:"Checkout Client Component",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Client-side checkout logic"},
+  {path:"storefront/src/app/products/[handle]/page.tsx",name:"Product Detail Page",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Dynamic product detail page"},
+  {path:"storefront/src/app/products/[handle]/add-to-cart-button.tsx",name:"Add to Cart Button",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Add-to-cart button component"},
+  {path:"storefront/src/app/order-confirmed/page.tsx",name:"Order Confirmation",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Post-purchase order confirmation"},
+  {path:"storefront/src/app/analytics-events.tsx",name:"Analytics Events",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Analytics event tracking component"},
+  {path:"storefront/src/app/globals.css",name:"Global Styles",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Global CSS for storefront"},
+  {path:"storefront/src/lib/medusa.ts",name:"Medusa API Client",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Medusa API client library"},
+  {path:"storefront/src/lib/analytics.ts",name:"Analytics Utility",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Analytics utility library"},
+  {path:"storefront/package.json",name:"Storefront Package Config",category:"Storefront (Next.js 16)",phase:"4",type:"code",agent:"Tobi",lines:"",description:"Next.js storefront dependencies"},
+  {path:"backend/medusa/medusa-config.ts",name:"Medusa Configuration",category:"Backend / Medusa",phase:"4",type:"code",agent:"James",lines:"",description:"Medusa backend configuration"},
+  {path:"backend/medusa/src/api/admin/custom/route.ts",name:"Admin API Route",category:"Backend / Medusa",phase:"4",type:"code",agent:"James",lines:"",description:"Custom admin API route"},
+  {path:"backend/medusa/src/api/store/custom/route.ts",name:"Store API Route",category:"Backend / Medusa",phase:"4",type:"code",agent:"James",lines:"",description:"Custom store API route"},
+  {path:"backend/medusa/src/scripts/seed-tpl.ts",name:"TPL Seed Script",category:"Backend / Medusa",phase:"4",type:"code",agent:"James",lines:"",description:"TPL-specific seed data script"},
+  {path:"backend/medusa/src/scripts/seed.ts",name:"Seed Script",category:"Backend / Medusa",phase:"4",type:"code",agent:"James",lines:"",description:"Base seed data script"},
+  {path:"backend/medusa/instrumentation.ts",name:"Instrumentation",category:"Backend / Medusa",phase:"4",type:"code",agent:"James",lines:"",description:"OpenTelemetry instrumentation"},
+  {path:"backend/medusa/src/admin/i18n/index.ts",name:"Admin i18n",category:"Backend / Medusa",phase:"4",type:"code",agent:"James",lines:"",description:"Admin internationalization"},
+  {path:"backend/medusa/integration-tests/setup.js",name:"Integration Test Setup",category:"Backend / Medusa",phase:"4",type:"code",agent:"James",lines:"",description:"Test environment setup"},
+  {path:"backend/medusa/integration-tests/http/health.spec.ts",name:"Health Check Test",category:"Backend / Medusa",phase:"4",type:"code",agent:"James",lines:"",description:"Health endpoint integration test"},
+  {path:"backend/medusa/jest.config.js",name:"Jest Config",category:"Backend / Medusa",phase:"4",type:"code",agent:"James",lines:"",description:"Jest test configuration"},
+  {path:"backend/medusa-eval/01-platform-decision.md",name:"Platform Decision Doc",category:"Backend / Medusa Eval (Deferred)",phase:"0",type:"markdown",agent:"",lines:"",description:"Platform decision evaluation"},
+  {path:"backend/medusa-eval/02-target-architecture.md",name:"Target Architecture",category:"Backend / Medusa Eval (Deferred)",phase:"0",type:"markdown",agent:"",lines:"",description:"Target system architecture"},
+  {path:"backend/medusa-eval/03-data-ownership.md",name:"Data Ownership",category:"Backend / Medusa Eval (Deferred)",phase:"0",type:"markdown",agent:"",lines:"",description:"Data ownership model"},
+  {path:"backend/medusa-eval/phase-0-cto-gate-decision.md",name:"CTO Gate Decision",category:"Backend / Medusa Eval (Deferred)",phase:"0",type:"markdown",agent:"",lines:"",description:"CTO phase gate decision record"},
+  {path:"backend/medusa-eval/phase-0-technical-spike.md",name:"Technical Spike",category:"Backend / Medusa Eval (Deferred)",phase:"0",type:"markdown",agent:"",lines:"",description:"Technical spike findings"},
+  {path:"backend/medusa-eval/phase-0-analytics-validation-plan.md",name:"Analytics Validation Plan",category:"Backend / Medusa Eval (Deferred)",phase:"0",type:"markdown",agent:"",lines:"",description:"Analytics validation plan"},
+  {path:"backend/medusa-eval/phase-0-ops-validation-plan.md",name:"Ops Validation Plan",category:"Backend / Medusa Eval (Deferred)",phase:"0",type:"markdown",agent:"",lines:"",description:"Operations validation plan"},
+  {path:"backend/medusa-eval/phase-0-qa-validation-plan.md",name:"QA Validation Plan",category:"Backend / Medusa Eval (Deferred)",phase:"0",type:"markdown",agent:"",lines:"",description:"QA validation plan"},
+  {path:"backend/medusa-eval/phase-0-agent-handoff.md",name:"Agent Handoff",category:"Backend / Medusa Eval (Deferred)",phase:"0",type:"markdown",agent:"",lines:"",description:"Agent handoff documentation"},
+  {path:"backend/medusa-eval/spike-execution-plan.md",name:"Spike Execution Plan",category:"Backend / Medusa Eval (Deferred)",phase:"0",type:"markdown",agent:"",lines:"",description:"Technical spike execution plan"},
+  {path:"backend/medusa-eval/phase-1-commerce-foundation.md",name:"Phase 1: Commerce Foundation",category:"Backend / Medusa Eval (Deferred)",phase:"1",type:"markdown",agent:"",lines:"",description:"Commerce foundation plan"},
+  {path:"backend/medusa-eval/phase-2-storefront-mvp.md",name:"Phase 2: Storefront MVP",category:"Backend / Medusa Eval (Deferred)",phase:"2",type:"markdown",agent:"",lines:"",description:"Storefront MVP plan"},
+  {path:"backend/medusa-eval/phase-3-india-commerce-integrations.md",name:"Phase 3: India Integrations",category:"Backend / Medusa Eval (Deferred)",phase:"3",type:"markdown",agent:"",lines:"",description:"India-specific integrations plan"},
+  {path:"backend/medusa-eval/phase-4-airtable-ops-sync.md",name:"Phase 4: Airtable Sync",category:"Backend / Medusa Eval (Deferred)",phase:"4",type:"markdown",agent:"",lines:"",description:"Airtable operations sync plan"},
+  {path:"backend/medusa-eval/phase-5-qa-launch.md",name:"Phase 5: QA & Launch",category:"Backend / Medusa Eval (Deferred)",phase:"5",type:"markdown",agent:"",lines:"",description:"QA and launch plan"},
+  {path:"backend/medusa-eval/phase-6-post-launch-hardening.md",name:"Phase 6: Post-Launch Hardening",category:"Backend / Medusa Eval (Deferred)",phase:"6",type:"markdown",agent:"",lines:"",description:"Post-launch hardening plan"},
+  {path:"backend/medusa-eval/README.md",name:"Medusa Eval README",category:"Backend / Medusa Eval (Deferred)",phase:"0",type:"markdown",agent:"",lines:"",description:"Medusa evaluation overview"},
+  {path:"catalogs/product-catalog.md",name:"Product Catalog",category:"Catalogs",phase:"4",type:"markdown",agent:"Shreyas",lines:"",description:"Full TPL product catalog"},
+  {path:"catalogs/inventory-tracker.xlsx",name:"Inventory Tracker",category:"Catalogs",phase:"4",type:"xlsx",agent:"Shreyas",lines:"",description:"Inventory tracking spreadsheet"},
+  {path:"catalogs/spike-products-10-skus.csv",name:"Spike Products (10 SKUs)",category:"Catalogs",phase:"4",type:"csv",agent:"Shreyas",lines:"",description:"10 SKUs for initial spike"},
+  {path:"docs/ops-sop/store-operations-manual.md",name:"Store Operations Manual",category:"Docs / Ops & SOPs",phase:"4",type:"markdown",agent:"Lenny",lines:"",description:"Complete store operations manual"},
+  {path:"docs/ops-sop/fulfillment-packing-sop.md",name:"Fulfillment & Packing SOP",category:"Docs / Ops & SOPs",phase:"4",type:"markdown",agent:"Lenny",lines:"",description:"Fulfillment and packing standard operating procedure"},
+  {path:"docs/ops-sop/returns-exchange-policy.md",name:"Returns & Exchange Policy",category:"Docs / Ops & SOPs",phase:"4",type:"markdown",agent:"Lenny",lines:"",description:"Returns and exchange policy document"},
+  {path:"docs/ops-sop/ops-implementation-plan.md",name:"Ops Implementation Plan",category:"Docs / Ops & SOPs",phase:"4",type:"markdown",agent:"Lenny",lines:"",description:"Operations implementation timeline"},
+  {path:"docs/ops-sop/customer-comms-templates.md",name:"Customer Comms Templates",category:"Docs / Ops & SOPs",phase:"4",type:"markdown",agent:"Lenny",lines:"",description:"Customer communication templates"},
+  {path:"docs/ops-sop/faq-and-help.md",name:"FAQ & Help Content",category:"Docs / Ops & SOPs",phase:"4",type:"markdown",agent:"Lenny",lines:"",description:"FAQ and help center content"},
+  {path:"docs/ops-sop/TPL-Design-Developer-Handoff.docx",name:"Design-Developer Handoff",category:"Docs / Ops & SOPs",phase:"4",type:"docx",agent:"",lines:"",description:"Design-to-development handoff document"},
+  {path:"docs/ARCHITECTURE.md",name:"System Architecture",category:"Docs / Architecture",phase:"all",type:"markdown",agent:"",lines:"",description:"Full system architecture documentation"},
+  {path:"artifacts/phase-1/problem-statement-memo.md",name:"Problem Statement Memo",category:"Artifacts / Phase 1 — Audit",phase:"1",type:"markdown",agent:"",lines:"",description:"Phase 1 problem statement"},
+  {path:"artifacts/phase-1/project-plan.md",name:"Project Plan",category:"Artifacts / Phase 1 — Audit",phase:"1",type:"markdown",agent:"",lines:"",description:"Phase 1 project plan"},
+  {path:"artifacts/phase-1/site-teardown-catalog-audit.md",name:"Site Teardown & Catalog Audit",category:"Artifacts / Phase 1 — Audit",phase:"1",type:"markdown",agent:"",lines:"",description:"Existing site and catalog audit"},
+  {path:"artifacts/phase-1/competitor-research.md",name:"Competitor Research",category:"Artifacts / Phase 1 — Audit",phase:"1",type:"markdown",agent:"",lines:"",description:"Competitive landscape analysis"},
+  {path:"artifacts/phase-1/customer-insight-report.md",name:"Customer Insight Report",category:"Artifacts / Phase 1 — Audit",phase:"1",type:"markdown",agent:"",lines:"",description:"Customer research and insights"},
+  {path:"artifacts/phase-1/baseline-financials.md",name:"Baseline Financials",category:"Artifacts / Phase 1 — Audit",phase:"1",type:"markdown",agent:"",lines:"",description:"Financial baseline analysis"},
+  {path:"artifacts/phase-1/data-audit-tpl-dump.md",name:"Data Audit (TPL Dump)",category:"Artifacts / Phase 1 — Audit",phase:"1",type:"markdown",agent:"",lines:"",description:"TPL data dump audit"},
+  {path:"artifacts/phase-1/logistics-baseline.md",name:"Logistics Baseline",category:"Artifacts / Phase 1 — Audit",phase:"1",type:"markdown",agent:"",lines:"",description:"Logistics and shipping baseline"},
+  {path:"artifacts/phase-1/fulfillment-sop.md",name:"Fulfillment SOP",category:"Artifacts / Phase 1 — Audit",phase:"1",type:"markdown",agent:"",lines:"",description:"Fulfillment standard operating procedure"},
+  {path:"artifacts/phase-1/shipping-partner-evaluation.md",name:"Shipping Partner Evaluation",category:"Artifacts / Phase 1 — Audit",phase:"1",type:"markdown",agent:"",lines:"",description:"Shipping partner assessment"},
+  {path:"artifacts/phase-1/cod-strategy.md",name:"COD Strategy",category:"Artifacts / Phase 1 — Audit",phase:"1",type:"markdown",agent:"",lines:"",description:"Cash on delivery strategy"},
+  {path:"artifacts/phase-2/brand-positioning.md",name:"Brand Positioning",category:"Artifacts / Phase 2 — Strategy",phase:"2",type:"markdown",agent:"Heyward",lines:"",description:"Brand positioning framework"},
+  {path:"artifacts/phase-2/pricing-framework.md",name:"Pricing Framework",category:"Artifacts / Phase 2 — Strategy",phase:"2",type:"markdown",agent:"Heyward",lines:"",description:"Product pricing framework"},
+  {path:"artifacts/phase-2/product-hierarchy.md",name:"Product Hierarchy",category:"Artifacts / Phase 2 — Strategy",phase:"2",type:"markdown",agent:"Shreyas",lines:"",description:"Product categorization and hierarchy"},
+  {path:"artifacts/phase-2/customer-analysis-deep-dive.md",name:"Customer Analysis Deep Dive",category:"Artifacts / Phase 2 — Strategy",phase:"2",type:"markdown",agent:"Weiss",lines:"",description:"In-depth customer analysis"},
+  {path:"artifacts/phase-2/pmf-assessment.md",name:"PMF Assessment",category:"Artifacts / Phase 2 — Strategy",phase:"2",type:"markdown",agent:"Weiss",lines:"",description:"Product-market fit assessment"},
+  {path:"artifacts/phase-3/visual-identity.md",name:"Visual Identity",category:"Artifacts / Phase 3 — Creative",phase:"3",type:"markdown",agent:"Sean",lines:"",description:"Phase 3 visual identity deliverable"},
+  {path:"artifacts/phase-3/ux-ia-wireframes.md",name:"UX/IA & Wireframes",category:"Artifacts / Phase 3 — Creative",phase:"3",type:"markdown",agent:"Kurt",lines:"",description:"Phase 3 wireframes deliverable"},
+  {path:"artifacts/phase-3/hifi-page-designs.md",name:"Hi-Fi Page Designs",category:"Artifacts / Phase 3 — Creative",phase:"3",type:"markdown",agent:"Julie",lines:"",description:"Phase 3 hi-fi designs deliverable"},
+  {path:"artifacts/phase-3/ui-system.md",name:"UI System",category:"Artifacts / Phase 3 — Creative",phase:"3",type:"markdown",agent:"Julie",lines:"",description:"Phase 3 UI system deliverable"},
+  {path:"artifacts/phase-3/copy-system.md",name:"Copy System",category:"Artifacts / Phase 3 — Creative",phase:"3",type:"markdown",agent:"Joanna",lines:"",description:"Phase 3 copy system deliverable"},
+  {path:"artifacts/phase-3/brand-workshop-brief.md",name:"Brand Workshop Brief",category:"Artifacts / Phase 3 — Creative",phase:"3",type:"markdown",agent:"Heyward",lines:"",description:"Brand workshop brief"},
+  {path:"artifacts/phase-3/asset-list.md",name:"Asset List",category:"Artifacts / Phase 3 — Creative",phase:"3",type:"markdown",agent:"",lines:"",description:"Creative asset inventory"},
+  {path:"artifacts/phase-3/phase-gate-review.md",name:"Phase Gate Review",category:"Artifacts / Phase 3 — Creative",phase:"3",type:"markdown",agent:"Harley",lines:"",description:"Phase 3 gate review"},
+  {path:"artifacts/phase-4/tpl-site-prototype.html",name:"Full Site Prototype",category:"Artifacts / Phase 4 — Build",phase:"4",type:"html",agent:"Tobi",lines:"1674",description:"Complete site prototype"},
+  {path:"artifacts/phase-4/homepage-wireframe-prototype.html",name:"Homepage Wireframe",category:"Artifacts / Phase 4 — Build",phase:"4",type:"html",agent:"Tobi",lines:"1243",description:"Homepage wireframe prototype"},
+  {path:"artifacts/phase-4/coming-soon-page.html",name:"Coming Soon Page",category:"Artifacts / Phase 4 — Build",phase:"4",type:"html",agent:"Tobi",lines:"1383",description:"Coming soon/teaser page"},
+  {path:"artifacts/phase-4/visual-identity-rebrand.md",name:"Visual Identity Rebrand",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Sean",lines:"",description:"Rebranded visual identity"},
+  {path:"artifacts/phase-4/copy-system-rebrand.md",name:"Copy System Rebrand",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Joanna",lines:"",description:"Rebranded copy system"},
+  {path:"artifacts/phase-4/copy-build-plan.md",name:"Copy Build Plan",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Joanna",lines:"",description:"Copy implementation plan"},
+  {path:"artifacts/phase-4/brand-positioning-rebrand.md",name:"Brand Positioning Rebrand",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Heyward",lines:"",description:"Rebranded brand positioning"},
+  {path:"artifacts/phase-4/site-build-brief.md",name:"Site Build Brief",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Tobi",lines:"",description:"Website build brief and scope"},
+  {path:"artifacts/phase-4/technical-implementation-plan.md",name:"Technical Implementation Plan",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"James",lines:"",description:"Technical implementation details"},
+  {path:"artifacts/phase-4/visual-build-plan.md",name:"Visual Build Plan",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Sean",lines:"",description:"Visual build implementation plan"},
+  {path:"artifacts/phase-4/ui-system.md",name:"UI System (Rebrand)",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Julie",lines:"",description:"Updated UI system for rebrand"},
+  {path:"artifacts/phase-4/product-catalog.md",name:"Product Catalog",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Shreyas",lines:"",description:"Full product catalog"},
+  {path:"artifacts/phase-4/inventory-tracker.xlsx",name:"Inventory Tracker",category:"Artifacts / Phase 4 — Build",phase:"4",type:"xlsx",agent:"Shreyas",lines:"",description:"Inventory tracking spreadsheet"},
+  {path:"artifacts/phase-4/asset-list.md",name:"Asset List",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"",lines:"",description:"Phase 4 asset inventory"},
+  {path:"artifacts/phase-4/gemini-image-prompts.md",name:"Gemini Image Prompts",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"",lines:"",description:"AI-generated image prompts"},
+  {path:"artifacts/phase-4/brand-visual-guidelines-walsh-analysis.md",name:"Walsh Brand Visual Analysis",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"",lines:"",description:"AI brand visual analysis"},
+  {path:"artifacts/phase-4/customer-insight-rebrand.md",name:"Customer Insight Rebrand",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Weiss",lines:"",description:"Updated customer insights for rebrand"},
+  {path:"artifacts/phase-4/store-operations-manual.md",name:"Store Operations Manual",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Lenny",lines:"",description:"Store operations manual"},
+  {path:"artifacts/phase-4/fulfillment-packing-sop.md",name:"Fulfillment & Packing SOP",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Lenny",lines:"",description:"Fulfillment SOP"},
+  {path:"artifacts/phase-4/returns-exchange-policy.md",name:"Returns & Exchange Policy",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Lenny",lines:"",description:"Returns and exchange policy"},
+  {path:"artifacts/phase-4/ops-implementation-plan.md",name:"Ops Implementation Plan",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Lenny",lines:"",description:"Ops implementation timeline"},
+  {path:"artifacts/phase-4/customer-comms-templates.md",name:"Customer Comms Templates",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Lenny",lines:"",description:"Customer communication templates"},
+  {path:"artifacts/phase-4/faq-and-help.md",name:"FAQ & Help Content",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Lenny",lines:"",description:"FAQ and help content"},
+  {path:"artifacts/phase-4/website-wireframe-style-design.md",name:"Website Wireframe + Style",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Tobi",lines:"",description:"Website wireframe and design"},
+  {path:"artifacts/phase-4/analytics-event-schema.md",name:"Analytics Event Schema",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"Eli",lines:"",description:"Analytics event tracking schema"},
+  {path:"artifacts/phase-4/pre-launch-validation.md",name:"Pre-Launch Validation",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"James",lines:"",description:"Pre-launch validation checklist"},
+  {path:"artifacts/phase-4/qa-checklist.md",name:"QA Checklist",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"James",lines:"",description:"Quality assurance checklist"},
+  {path:"artifacts/phase-4/coming-soon-engagement-concept.md",name:"Coming Soon Engagement Concept",category:"Artifacts / Phase 4 — Build",phase:"4",type:"markdown",agent:"",lines:"",description:"Coming soon engagement strategy"},
+  {path:"artifacts/phase-4/framer-site-prototype/index.html",name:"Framer Site Prototype",category:"Artifacts / Phase 4 — Build",phase:"4",type:"html",agent:"Tobi",lines:"",description:"Framer interactive prototype"},
+  {path:"artifacts/phase-5/launch-narrative.md",name:"Launch Narrative",category:"Artifacts / Phase 5 — Launch",phase:"5",type:"markdown",agent:"Heyward",lines:"",description:"Brand launch narrative"},
+  {path:"artifacts/phase-5/launch-runbook.md",name:"Launch Runbook",category:"Artifacts / Phase 5 — Launch",phase:"5",type:"markdown",agent:"Claire",lines:"",description:"Launch day runbook"},
+  {path:"artifacts/phase-5/teaser-campaign-strategy.md",name:"Teaser Campaign Strategy",category:"Artifacts / Phase 5 — Launch",phase:"5",type:"markdown",agent:"Rachel",lines:"",description:"Pre-launch teaser strategy"},
+  {path:"artifacts/phase-5/seeding-plan.md",name:"Seeding Plan",category:"Artifacts / Phase 5 — Launch",phase:"5",type:"markdown",agent:"Eli",lines:"",description:"Influencer and community seeding plan"},
+  {path:"artifacts/phase-5/content-calendar.md",name:"Content Calendar",category:"Artifacts / Phase 5 — Launch",phase:"5",type:"markdown",agent:"Casey",lines:"",description:"Launch content calendar"},
+  {path:"artifacts/phase-5/email-whatsapp-flows.md",name:"Email & WhatsApp Flows",category:"Artifacts / Phase 5 — Launch",phase:"5",type:"markdown",agent:"Eli",lines:"",description:"Automated communication flows"},
+  {path:"artifacts/phase-6/optimization-plan.md",name:"Optimization Plan",category:"Artifacts / Phase 6 — Optimize",phase:"6",type:"markdown",agent:"",lines:"",description:"Post-launch optimization strategy"},
+  {path:"knowledge/00-MASTER-BRIEF.md",name:"00 - Master Brief",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Program master brief"},
+  {path:"knowledge/01-AGENT-ORG-CHART.md",name:"01 - Agent Org Chart",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Agent organizational structure"},
+  {path:"knowledge/02-AGENT-PERSONAS.md",name:"02 - Agent Personas",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Agent personality profiles"},
+  {path:"knowledge/03-WORKFLOWS.md",name:"03 - Workflows",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Program workflows and processes"},
+  {path:"knowledge/04-RITUALS-AND-CADENCE.md",name:"04 - Rituals & Cadence",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Team rituals and meeting cadence"},
+  {path:"knowledge/05-PROMPTS.md",name:"05 - Prompts",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Agent prompt templates"},
+  {path:"knowledge/06-DELIVERABLES-BY-PHASE.md",name:"06 - Deliverables by Phase",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Phase deliverable inventory"},
+  {path:"knowledge/07-BRAND-RELAUNCH-PLAYBOOK.md",name:"07 - Brand Relaunch Playbook",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Complete brand relaunch playbook"},
+  {path:"knowledge/08-AI-AGENT-TEAM.md",name:"08 - AI Agent Team",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"AI agent team structure"},
+  {path:"knowledge/09-AI-AGENT-PROMPTS.md",name:"09 - AI Agent Prompts",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"AI agent prompt library"},
+  {path:"knowledge/10-AGENT-REFERENCE-MODEL.md",name:"10 - Agent Reference Model",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Agent reference architecture"},
+  {path:"knowledge/11-PLATFORM-AND-TOOLING.md",name:"11 - Platform & Tooling",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Platform and tooling overview"},
+  {path:"knowledge/12-CLAUDE-CODE-RUNTIME.md",name:"12 - Claude Code Runtime",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Claude Code runtime configuration"},
+  {path:"knowledge/13-EXPANDED-AGENT-ROSTER.md",name:"13 - Expanded Agent Roster",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Full agent roster with roles"},
+  {path:"knowledge/14-AGENT-BUILDER-SPEC.md",name:"14 - Agent Builder Spec",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Agent builder specification"},
+  {path:"knowledge/15-HANDOFF-INTAKE.md",name:"15 - Handoff Intake",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Handoff intake process"},
+  {path:"knowledge/16-COMPANY-FACTS.md",name:"16 - Company Facts",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Company facts and background"},
+  {path:"knowledge/17-PRODUCTION-COSTS.md",name:"17 - Production Costs",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Production cost analysis"},
+  {path:"knowledge/18-ARTIST-PLATFORM.md",name:"18 - Artist Platform",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Artist platform strategy"},
+  {path:"knowledge/19-TECH-STACK-LEGACY.md",name:"19 - Tech Stack Legacy",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Legacy tech stack documentation"},
+  {path:"knowledge/20-MARKETING-BASELINE.md",name:"20 - Marketing Baseline",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Marketing baseline analysis"},
+  {path:"knowledge/20-TPL-COMPANY-PROFILE-CONSOLIDATED.md",name:"20 - TPL Company Profile",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Consolidated company profile"},
+  {path:"knowledge/21-TPL-PRODUCTS-PRICING-PRODUCTION-CONSOLIDATED.md",name:"21 - Products Pricing Production",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Products, pricing, production consolidated"},
+  {path:"knowledge/22-TPL-FINANCIALS-CONSOLIDATED.md",name:"22 - TPL Financials",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Consolidated financial data"},
+  {path:"knowledge/23-TPL-TECH-SYSTEMS-CONSOLIDATED.md",name:"23 - TPL Tech Systems",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Consolidated tech systems"},
+  {path:"knowledge/24-TPL-ARTIST-PLATFORM-CONSOLIDATED.md",name:"24 - TPL Artist Platform",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Consolidated artist platform"},
+  {path:"knowledge/25-AGENT-BRIEFING-PACKAGES.md",name:"25 - Agent Briefing Packages",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Agent briefing packages"},
+  {path:"knowledge/26-CURRENT-STATE.md",name:"26 - Current State",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Current program state snapshot"},
+  {path:"knowledge/artifact-map.md",name:"Artifact Map",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Complete artifact map"},
+  {path:"knowledge/INDEX.md",name:"Knowledge Index",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Knowledge base index"},
+  {path:"knowledge/README.md",name:"Knowledge README",category:"Knowledge Base",phase:"all",type:"markdown",agent:"",lines:"",description:"Knowledge base readme"},
+  {path:"decisions/decision-log.md",name:"Decision Log (D-001→D-022)",category:"Decisions",phase:"all",type:"markdown",agent:"",lines:"",description:"All program decisions logged"},
+  {path:"handoffs/2026-03-27-operational-docs-brief.md",name:"Operational Docs Brief",category:"Handoffs",phase:"4",type:"markdown",agent:"",lines:"",description:"Operational documentation brief"},
+  {path:"handoffs/handoff-intake-pod-briefs.md",name:"Handoff Intake Pod Briefs",category:"Handoffs",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod brief intake handoffs"},
+  {path:"handoffs/phase-1-to-2-handoff.md",name:"Phase 1→2 Handoff",category:"Handoffs",phase:"1",type:"markdown",agent:"",lines:"",description:"Phase 1 to 2 transfer record"},
+  {path:"handoffs/phase-2-to-3-handoff.md",name:"Phase 2→3 Handoff",category:"Handoffs",phase:"2",type:"markdown",agent:"",lines:"",description:"Phase 2 to 3 transfer record"},
+  {path:"handoffs/phase-3-to-4-handoff.md",name:"Phase 3→4 Handoff",category:"Handoffs",phase:"3",type:"markdown",agent:"",lines:"",description:"Phase 3 to 4 transfer record"},
+  {path:"handoffs/phase-4-sprint-briefs.md",name:"Phase 4 Sprint Briefs",category:"Handoffs",phase:"4",type:"markdown",agent:"",lines:"",description:"Phase 4 sprint briefs"},
+  {path:"handoffs/phase-4-to-5-handoff.md",name:"Phase 4→5 Handoff",category:"Handoffs",phase:"4",type:"markdown",agent:"",lines:"",description:"Phase 4 to 5 transfer record"},
+  {path:"handoffs/phase-5-to-6-handoff.md",name:"Phase 5→6 Handoff",category:"Handoffs",phase:"5",type:"markdown",agent:"",lines:"",description:"Phase 5 to 6 transfer record"},
+  {path:"templates/artifact-header.md",name:"Artifact Header Template",category:"Templates",phase:"all",type:"markdown",agent:"",lines:"",description:"Standard artifact header format"},
+  {path:"templates/decision-entry.md",name:"Decision Entry Template",category:"Templates",phase:"all",type:"markdown",agent:"",lines:"",description:"Decision log entry format"},
+  {path:"templates/handoff-record.md",name:"Handoff Record Template",category:"Templates",phase:"all",type:"markdown",agent:"",lines:"",description:"Handoff record format"},
+  {path:"templates/phase-gate-review.md",name:"Phase Gate Review Template",category:"Templates",phase:"all",type:"markdown",agent:"",lines:"",description:"Phase gate review format"},
+  {path:"agents/pod-a/harley.md",name:"Harley (Program Director)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod A — Program Director agent"},
+  {path:"agents/pod-a/claire.md",name:"Claire (Program Manager)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod A — Program Manager agent"},
+  {path:"agents/pod-a/maria.md",name:"Maria (Program Coordinator)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod A — Program Coordinator agent"},
+  {path:"agents/pod-b/weiss.md",name:"Weiss (Research Lead)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod B — Research Lead agent"},
+  {path:"agents/pod-b/heyward.md",name:"Heyward (Strategy Lead)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod B — Strategy Lead agent"},
+  {path:"agents/pod-b/jenna.md",name:"Jenna (Brand Strategist)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod B — Brand Strategist agent"},
+  {path:"agents/pod-c/shreyas.md",name:"Shreyas (Product Lead)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod C — Product Lead agent"},
+  {path:"agents/pod-c/andy.md",name:"Andy (Product Manager)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod C — Product Manager agent"},
+  {path:"agents/pod-d/sean.md",name:"Sean (Visual Designer)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod D — Visual Designer agent"},
+  {path:"agents/pod-d/kurt.md",name:"Kurt (UX Designer)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod D — UX Designer agent"},
+  {path:"agents/pod-d/julie.md",name:"Julie (UI Designer)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod D — UI Designer agent"},
+  {path:"agents/pod-d/joanna.md",name:"Joanna (Copywriter)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod D — Copywriter agent"},
+  {path:"agents/pod-e/tobi.md",name:"Tobi (Frontend Lead)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod E — Frontend Lead agent"},
+  {path:"agents/pod-e/james.md",name:"James (QA/Backend)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod E — QA and Backend agent"},
+  {path:"agents/pod-f/nik.md",name:"Nik (Growth Lead)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod F — Growth Lead agent"},
+  {path:"agents/pod-f/avinash.md",name:"Avinash (Analytics)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod F — Analytics agent"},
+  {path:"agents/pod-f/eli.md",name:"Eli (Growth Marketer)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod F — Growth Marketer agent"},
+  {path:"agents/pod-g/andrew.md",name:"Andrew (Marketing Lead)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod G — Marketing Lead agent"},
+  {path:"agents/pod-g/chase.md",name:"Chase (Performance Marketing)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod G — Performance Marketer agent"},
+  {path:"agents/pod-g/rachel.md",name:"Rachel (Social Media)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod G — Social Media agent"},
+  {path:"agents/pod-h/casey.md",name:"Casey (Content Lead)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod H — Content Lead agent"},
+  {path:"agents/pod-i/patrick.md",name:"Patrick (Ops Lead)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod I — Operations Lead agent"},
+  {path:"agents/pod-i/raj.md",name:"Raj (Supply Chain)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod I — Supply Chain agent"},
+  {path:"agents/pod-i/tony.md",name:"Tony (Finance)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod I — Finance agent"},
+  {path:"agents/pod-i/lenny.md",name:"Lenny (Customer Support)",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Pod I — Customer Support agent"},
+  {path:"agents/README.md",name:"Agents README",category:"Agents",phase:"all",type:"markdown",agent:"",lines:"",description:"Agents directory overview"},
+  {path:"status/phase-4-execution-brief.md",name:"Phase 4 Execution Brief",category:"Status",phase:"4",type:"markdown",agent:"",lines:"",description:"Phase 4 execution status"},
+  {path:"status/phase-tracker.md",name:"Phase Tracker",category:"Status",phase:"all",type:"markdown",agent:"",lines:"",description:"Cross-phase status tracker"},
+  {path:"status/sprint-board.md",name:"Sprint Board",category:"Status",phase:"all",type:"markdown",agent:"",lines:"",description:"Active sprint board"},
+  {path:"status/weekly-status.md",name:"Weekly Status Report",category:"Status",phase:"all",type:"markdown",agent:"",lines:"",description:"Weekly program status"},
+  {path:"scripts/credentials-needed.md",name:"Credentials Needed",category:"Scripts",phase:"all",type:"markdown",agent:"",lines:"",description:"Required credentials inventory"},
+  {path:"scripts/tools-manifest.md",name:"Tools Manifest",category:"Scripts",phase:"all",type:"markdown",agent:"",lines:"",description:"Tools and utilities manifest"},
+  {path:"scripts/README.md",name:"Scripts README",category:"Scripts",phase:"all",type:"markdown",agent:"",lines:"",description:"Scripts directory readme"},
+  {path:"tpl ref/Screenshot%202026-03-26%20at%201.47.44%E2%80%AFPM.png",name:"TPL Ref 01",category:"Screenshots (tpl ref/)",phase:"ref",type:"png",agent:"",lines:"",description:"Reference screenshot 01"},
+  {path:"tpl ref/Screenshot%202026-03-26%20at%201.47.55%E2%80%AFPM.png",name:"TPL Ref 02",category:"Screenshots (tpl ref/)",phase:"ref",type:"png",agent:"",lines:"",description:"Reference screenshot 02"},
+  {path:"tpl ref/Screenshot%202026-03-26%20at%201.48.01%E2%80%AFPM.png",name:"TPL Ref 03",category:"Screenshots (tpl ref/)",phase:"ref",type:"png",agent:"",lines:"",description:"Reference screenshot 03"},
+  {path:"tpl ref/Screenshot%202026-03-26%20at%201.48.08%E2%80%AFPM.png",name:"TPL Ref 04",category:"Screenshots (tpl ref/)",phase:"ref",type:"png",agent:"",lines:"",description:"Reference screenshot 04"},
+  {path:"tpl ref/Screenshot%202026-03-26%20at%201.48.15%E2%80%AFPM.png",name:"TPL Ref 05",category:"Screenshots (tpl ref/)",phase:"ref",type:"png",agent:"",lines:"",description:"Reference screenshot 05"},
+  {path:"tpl ref/Screenshot%202026-03-26%20at%201.48.21%E2%80%AFPM.png",name:"TPL Ref 06",category:"Screenshots (tpl ref/)",phase:"ref",type:"png",agent:"",lines:"",description:"Reference screenshot 06"},
+  {path:"tpl ref/Screenshot%202026-03-26%20at%201.48.26%E2%80%AFPM.png",name:"TPL Ref 07",category:"Screenshots (tpl ref/)",phase:"ref",type:"png",agent:"",lines:"",description:"Reference screenshot 07"},
+  {path:"tpl ref/Screenshot%202026-03-26%20at%201.48.30%E2%80%AFPM.png",name:"TPL Ref 08",category:"Screenshots (tpl ref/)",phase:"ref",type:"png",agent:"",lines:"",description:"Reference screenshot 08"},
+  {path:"tpl ref/Screenshot%202026-03-26%20at%201.49.22%E2%80%AFPM.png",name:"TPL Ref 09",category:"Screenshots (tpl ref/)",phase:"ref",type:"png",agent:"",lines:"",description:"Reference screenshot 09"},
+  {path:"tpl ref/Screenshot%202026-03-26%20at%201.49.26%E2%80%AFPM.png",name:"TPL Ref 10",category:"Screenshots (tpl ref/)",phase:"ref",type:"png",agent:"",lines:"",description:"Reference screenshot 10"},
+  {path:"tpl ref/Screenshot%202026-03-26%20at%201.49.33%E2%80%AFPM.png",name:"TPL Ref 11",category:"Screenshots (tpl ref/)",phase:"ref",type:"png",agent:"",lines:"",description:"Reference screenshot 11"}
+];
+
+const LIVE_PAGES = [
+  {name:"Full Site Prototype",path:"prototypes/tpl-site-prototype.html",desc:"Complete site prototype",group:"Prototypes"},
+  {name:"Homepage",path:"prototypes/homepage-wireframe-prototype.html",desc:"Homepage wireframe prototype",group:"Prototypes"},
+  {name:"Coming Soon",path:"prototypes/coming-soon-page.html",desc:"Coming soon/teaser page",group:"Prototypes"},
+  {name:"Framer Interactive",path:"prototypes/framer/index.html",desc:"Framer-based interactive prototype",group:"Prototypes"},
+  {name:"Walsh Review",path:"design/reviews/walsh-gemini-review-iteration-1.html",desc:"Gemini brand review iteration 1",group:"Reviews"},
+  {name:"Gemini Review",path:"design/reviews/gemini-skill-review-iteration-1.html",desc:"Gemini skill review iteration 1",group:"Reviews"},
+  {name:"File Index",path:"FILE-INDEX.html",desc:"This index page",group:"Utility"},
+  {name:"Storefront Routes",path:"storefront/ROUTES-INDEX.html",desc:"Storefront route map",group:"Utility"}
+];
+
+const CATEGORIES = [...new Set(FILES.map(f=>f.category))].sort();
+
+function getTypeBadgeClass(type) {
+  const map={markdown:'badge-type',html:'badge-type',code:'badge-type',xlsx:'badge-type',csv:'badge-type',docx:'badge-type',png:'badge-type'};
+  return map[type]||'badge-type';
+}
+
+function renderCategoryTree(activeCat) {
+  const el=document.getElementById('catTree');
+  const stored={};
+  try{stored=JSON.parse(sessionStorage.getItem('tpl_cat_open')||'{}')}catch(e){}
+  let html='';
+  CATEGORIES.forEach(cat=>{
+    const count=FILES.filter(f=>f.category===cat).length;
+    const isOpen=stored[cat]||false;
+    html+=`<div class="cat-item">
+      <div class="cat-header${cat===activeCat?' active':''}" data-cat="${cat}">
+        <span class="arrow${isOpen?' open':''}">&#9654;</span>
+        <span>${cat}</span>
+        <span class="badge">${count}</span>
+      </div>
+      <div class="cat-children${isOpen?' open':''}">
+        <div class="cat-header sub" data-cat="${cat}" style="padding-left:38px;font-size:11px;color:#888;border-left:1px solid #333;margin-left:22px">
+          View ${count} file${count!==1?'s':''} &rarr;
+        </div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html;
+  document.querySelectorAll('.cat-header:not(.sub)').forEach(h=>{
+    h.addEventListener('click',e=>{
+      e.stopPropagation();
+      const arrow=h.querySelector('.arrow');
+      const children=h.parentElement.querySelector('.cat-children');
+      const isNow=!children.classList.contains('open');
+      children.classList.toggle('open');
+      arrow.classList.toggle('open');
+      const cat=h.dataset.cat;
+      const stored2=JSON.parse(sessionStorage.getItem('tpl_cat_open')||'{}');
+      stored2[cat]=isNow;
+      sessionStorage.setItem('tpl_cat_open',JSON.stringify(stored2));
+    });
+  });
+  document.querySelectorAll('.cat-header.sub').forEach(h=>{
+    h.addEventListener('click',()=>{
+      const cat=h.dataset.cat;
+      filterByCategory(cat);
+      document.querySelectorAll('.cat-header.active').forEach(a=>a.classList.remove('active'));
+      const parent=h.closest('.cat-item').querySelector('.cat-header');
+      if(parent)parent.classList.add('active');
+    });
+  });
+  document.getElementById('catCount').textContent=CATEGORIES.length+' categories';
+}
+
+let currentFilter = null;
+let currentSearch = '';
+
+function filterByCategory(cat) {
+  currentFilter=cat;
+  document.getElementById('searchInput').value='';
+  currentSearch='';
+  renderFiles();
+  document.querySelectorAll('.cat-header.active').forEach(a=>a.classList.remove('active'));
+  document.querySelectorAll(`.cat-header[data-cat="${cat}"]`).forEach(h=>h.classList.add('active'));
+}
+
+function renderFiles() {
+  const grid=document.getElementById('fileGrid');
+  const empty=document.getElementById('empty');
+  const counter=document.getElementById('counter');
+  let filtered=FILES;
+  if(currentFilter){
+    filtered=filtered.filter(f=>f.category===currentFilter);
+  }
+  if(currentSearch){
+    const s=currentSearch.toLowerCase();
+    filtered=filtered.filter(f=>f.name.toLowerCase().includes(s)||f.path.toLowerCase().includes(s)||(f.agent||'').toLowerCase().includes(s));
+  }
+  counter.textContent=`Showing ${filtered.length} of ${FILES.length} files`;
+  if(filtered.length===0){
+    grid.innerHTML='';
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+  let html='';
+  filtered.forEach(f=>{
+    const agentBadge=f.agent?`<span class="badge badge-agent">${f.agent}</span>`:'';
+    const linesBadge=f.lines?`<span class="badge badge-lines">${f.lines}</span>`:'';
+    const desc=f.description?`<div class="fdesc">${f.description}</div>`:'';
+    html+=`<div class="file-card" data-path="${f.path}">
+      <div class="fname">${f.name}</div>
+      <div class="fpath">${f.path}</div>
+      <div class="fmeta">
+        <span class="badge badge-phase">P${f.phase}</span>
+        <span class="badge ${getTypeBadgeClass(f.type)}">${f.type}</span>
+        ${agentBadge}${linesBadge}
+      </div>
+      ${desc}
+    </div>`;
+  });
+  grid.innerHTML=html;
+  document.querySelectorAll('.file-card').forEach(card=>{
+    card.addEventListener('click',()=>{
+      const path=card.dataset.path;
+      document.querySelectorAll('.file-card.active').forEach(a=>a.classList.remove('active'));
+      card.classList.add('active');
+      openPreview(path);
+    });
+  });
+}
+
+function openPreview(path) {
+  const file=FILES.find(f=>f.path===path);
+  if(!file)return;
+  const pane=document.getElementById('previewPane');
+  const title=document.getElementById('previewTitle');
+  const body=document.getElementById('previewBody');
+  pane.classList.add('open');
+  title.textContent=file.name;
+  body.innerHTML='<div class="spinner">Loading</div>';
+  if(file.type==='html'){
+    body.innerHTML=`<iframe src="${file.path}"></iframe>`;
+  }else if(file.type==='png'){
+    body.innerHTML=`<img src="${file.path}" alt="${file.name}" style="max-width:100%">`;
+  }else if(file.type==='xlsx'||file.type==='csv'||file.type==='docx'){
+    body.innerHTML=`<p><a href="${file.path}" target="_blank">Open ${file.type.toUpperCase()} file &rarr;</a></p>`;
+  }else if(file.type==='markdown'||file.type==='code'){
+    fetch(file.path).then(r=>{
+      if(!r.ok)throw new Error('Not found');
+      return r.text();
+    }).then(text=>{
+      if(file.type==='code'){
+        body.innerHTML=`<pre><code>${escapeHtml(text)}</code></pre>`;
+      }else{
+        body.innerHTML=renderMarkdown(text);
+      }
+    }).catch(()=>{
+      body.innerHTML=`<p style="color:var(--red)">Could not load file: ${file.path}</p>`;
+    });
+  }
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderMarkdown(md){
+  let html='';
+  const lines=md.split('\n');
+  let inCode=false,codeContent='',inTable=false,tableContent='',inList=false;
+  for(let i=0;i<lines.length;i++){
+    let line=lines[i];
+    if(inCode){
+      if(line.startsWith('```')){
+        html+=`<pre><code>${escapeHtml(codeContent)}</code></pre>`;
+        codeContent='';inCode=false;
+        continue;
+      }
+      codeContent+=line+'\n';
+      continue;
+    }
+    if(line.startsWith('```')){
+      inCode=true;codeContent='';
+      continue;
+    }
+    if(inTable){
+      if(line.trim()===''||!line.includes('|')){
+        html+=`<table>${tableContent}</table>`;
+        tableContent='';inTable=false;
+      }else{
+        const isHeader=tableContent==='';
+        const cells=line.split('|').filter(c=>c.trim()!=='');
+        if(line.includes('---'))continue;
+        let row='<tr>';
+        cells.forEach(c=>{
+          const tag=isHeader?'th':'td';
+          row+=`<${tag}>${inlineMarkdown(c.trim())}</${tag}>`;
+        });
+        row+='</tr>';
+        tableContent+=row;
+        continue;
+      }
+    }
+    if(line.includes('|')&&line.split('|').length>=3){
+      inTable=true;
+      tableContent='';
+      const cells=line.split('|').filter(c=>c.trim()!=='');
+      let row='<tr>';
+      cells.forEach(c=>{
+        row+=`<th>${inlineMarkdown(c.trim())}</th>`;
+      });
+      row+='</tr>';
+      tableContent+=row;
+      continue;
+    }
+    if(line.trim()===''){
+      if(inList){html+='</ul>';inList=false;}
+      html+=line+'\n';
+      continue;
+    }
+    if(line.startsWith('# ')){
+      if(inList){html+='</ul>';inList=false;}
+      html+=`<h1>${inlineMarkdown(line.slice(2))}</h1>`;
+    }else if(line.startsWith('## ')){
+      if(inList){html+='</ul>';inList=false;}
+      html+=`<h2>${inlineMarkdown(line.slice(3))}</h2>`;
+    }else if(line.startsWith('### ')){
+      if(inList){html+='</ul>';inList=false;}
+      html+=`<h3>${inlineMarkdown(line.slice(4))}</h3>`;
+    }else if(line.startsWith('#### ')){
+      if(inList){html+='</ul>';inList=false;}
+      html+=`<h4>${inlineMarkdown(line.slice(5))}</h4>`;
+    }else if(line.startsWith('- ')){
+      if(!inList){html+='<ul>';inList=true;}
+      html+=`<li>${inlineMarkdown(line.slice(2))}</li>`;
+    }else if(line.match(/^\d+\.\s/)){
+      if(!inList){html+='<ol>';inList=true;}
+      html+=`<li>${inlineMarkdown(line.replace(/^\d+\.\s/,''))}</li>`;
+    }else if(line.startsWith('---')||line.startsWith('***')){
+      if(inList){html+='</ul>';inList=false;}
+      html+='<hr>';
+    }else if(line.startsWith('> ')){
+      if(inList){html+='</ul>';inList=false;}
+      html+=`<blockquote>${inlineMarkdown(line.slice(2))}</blockquote>`;
+    }else{
+      if(inList){html+='</ul>';inList=false;}
+      html+=`<p>${inlineMarkdown(line)}</p>`;
+    }
+  }
+  if(inCode)html+=`<pre><code>${escapeHtml(codeContent)}</code></pre>`;
+  if(inTable)html+=`<table>${tableContent}</table>`;
+  if(inList)html+='</ul>';
+  return html;
+}
+
+function inlineMarkdown(t){
+  if(!t)return '';
+  let s=escapeHtml(t);
+  s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  s=s.replace(/`(.+?)`/g,'<code>$1</code>');
+  s=s.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>');
+  return s;
+}
+
+let liveOpen = false;
+
+function renderLiveTabs() {
+  const el=document.getElementById('liveTabs');
+  let groups={};
+  LIVE_PAGES.forEach(p=>{
+    if(!groups[p.group])groups[p.group]=[];
+    groups[p.group].push(p);
+  });
+  let html='';
+  Object.keys(groups).forEach(group=>{
+    html+=`<span style="font-size:10px;color:#888;padding:4px 4px 0;font-family:'Barlow Condensed';letter-spacing:.05em;align-self:flex-end">${group}</span>`;
+    groups[group].forEach((p,i)=>{
+      html+=`<div class="live-tab" data-path="${p.path}" data-name="${p.name}">${p.name}</div>`;
+    });
+  });
+  el.innerHTML=html;
+  el.querySelectorAll('.live-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      el.querySelectorAll('.live-tab.active').forEach(a=>a.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('liveFrame').src=tab.dataset.path;
+    });
+  });
+  // Activate first tab
+  const first=el.querySelector('.live-tab');
+  if(first){
+    first.classList.add('active');
+    document.getElementById('liveFrame').src=first.dataset.path;
+  }
+}
+
+function toggleLiveView(show) {
+  liveOpen=show;
+  const fileView=document.getElementById('fileView');
+  const liveView=document.getElementById('liveView');
+  const liveBtn=document.getElementById('liveBtn');
+  if(show){
+    fileView.classList.add('hidden');
+    liveView.classList.add('open');
+    liveBtn.classList.add('active');
+    liveBtn.textContent='Browse Files';
+  }else{
+    fileView.classList.remove('hidden');
+    liveView.classList.remove('open');
+    liveBtn.classList.remove('active');
+    liveBtn.textContent='Live Pages';
+  }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  renderCategoryTree();
+  renderFiles();
+  renderLiveTabs();
+  document.getElementById('searchInput').addEventListener('input',e=>{
+    if(liveOpen)return;
+    currentSearch=e.target.value;
+    currentFilter=null;
+    document.querySelectorAll('.cat-header.active').forEach(a=>a.classList.remove('active'));
+    renderFiles();
+  });
+  document.getElementById('viewAllBtn').addEventListener('click',()=>{
+    toggleLiveView(false);
+    currentFilter=null;
+    currentSearch='';
+    document.getElementById('searchInput').value='';
+    document.querySelectorAll('.cat-header.active').forEach(a=>a.classList.remove('active'));
+    renderFiles();
+  });
+  document.getElementById('liveBtn').addEventListener('click',()=>{
+    toggleLiveView(!liveOpen);
+  });
+  document.getElementById('previewClose').addEventListener('click',()=>{
+    document.getElementById('previewPane').classList.remove('open');
+    document.querySelectorAll('.file-card.active').forEach(a=>a.classList.remove('active'));
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!--
+THIS FILE IS AN EXCEL SPREADSHEET (XLSX FORMAT)
+This represents the structure and content in a readable format
+When used, Dan should open/import this as an actual .xlsx file in Excel or Google Sheets
+-->
+
+# INVENTORY TRACKER — TPL
+<!-- last-updated: 2026-03-27 -->
+
+| Field | Value |
+|-------|-------|
+| **Phase** | 4 — Build |
+| **Producing Agent** | Patrick (Finance & Operations) |
+| **Date** | 2026-03-27 |
+| **Status** | draft |
+| **Reviewer** | Dan |
+
+---
+
+## USAGE INSTRUCTIONS FOR DAN
+
+**Time to update daily:** <2 minutes
+**When to update:** End of day (after final pack/dispatch)
+**What you enter:**
+- Units sold that day (from Fynd orders)
+- Units added to stock (from production received)
+- Any damaged/defective units removed
+
+**What updates automatically:**
+- Current stock level per SKU
+- Days until stock-out (based on velocity)
+- Low-stock alerts (when stock falls below threshold)
+- Reorder recommendations (when to contact Ink Fish)
+
+---
+
+## SHEET 1: SKU MASTER REFERENCE
+
+This sheet contains all product metadata. **DO NOT EDIT THIS SHEET** — Harley updates it when product lineup changes. Reference it to find article numbers and pricing.
+
+| Article # | Product Name | Collection | Category | Unit Cost (₹) | Selling Price (₹) | Gross Margin | Notes |
+|-----------|--------------|-----------|----------|---------------|------------------|--------------|-------|
+| CS-001 | Card Sticker — Full Card (attitude/humor design, varies) | Card Stickers | Entry | 9-12 | 199 | 60-65% | Half/Full variants at same price. Assume 9 designs × 2 variants = 18 SKUs |
+| CS-002 | Card Sticker — Half Card (attitude/humor design, varies) | Card Stickers | Entry | 6-8 | 149 | 65-70% | Half card lower cost |
+| KC-101 | Keychain — Attitude/Humor ("Bullshit Remover") | No Filter | Core | 18 | 249 | 73% | Double-sided enamel, 40mm |
+| KC-102 | Keychain — Attitude/Humor ("Idiot Repellent") | No Filter | Core | 18 | 249 | 73% | Double-sided enamel, 40mm |
+| KC-103 | Keychain — Attitude/Humor ("Enjoy the ShitShow") | No Filter | Core | 18 | 249 | 73% | Double-sided enamel, 40mm |
+| KC-104 | Keychain — Attitude/Humor ("Straight outta F#_ks") | No Filter | Core | 18 | 249 | 73% | Double-sided enamel, 40mm |
+| KC-201 | Keychain — Identity/Interest (K-Pop, Music, Art, varies) | Supporting | Core | 15-18 | 249 | 73% | Non-attitude themes. Assume 10+ designs |
+| LP-301 | Lapel Pin — Original Design (artist series, varies) | The Pin Edit | Premium | 18-25 | 299 | 70-75% | Limited runs. Artist attribution. Assume 15+ designs launch |
+| MG-401 | Fridge Magnet — Original Design ("Enjoy the ShitShow", others) | Supporting | Core | 5-7 | 199 | 75% | Attitude + lifestyle designs. 8-10 SKUs |
+| BND-501 | Bundle — Card Sticker Starter (2×full card stickers) | Bundles | Core | 18-20 | 399 | 75% | Pre-packed. Reduces picking labor |
+| BND-502 | Bundle — No Filter Essentials (keychain + card sticker) | Bundles | Core | 28-30 | 499 | 75% | Mix matched from inventory |
+| BND-503 | Bundle — Collector's Set (3× lapel pins + magnet) | Bundles | Premium | 58-65 | 799 | 75% | Curated. High margin. Gifting focus |
+
+**NOTES:**
+- Unit costs shown are **estimated ranges** based on production data in knowledge/17-PRODUCTION-COSTS.md
+- Actual cost per SKU should be confirmed with Ink Fish production after first run
+- Bundles are **pre-packed at launch** to reduce Dan's daily labor (no kitting on demand)
+- All SKUs use rubber/magnetic pin backs and plain card packaging (baseline)
+
+---
+
+## SHEET 2: LIVE STOCK TRACKER
+
+**Update this sheet EVERY DAY.** Columns marked with 🔴 require manual entry. All others auto-calculate.
+
+| Article # | Product Name | Stock (Units) 🔴 | Threshold | Days to Stockout (calc) | Reorder Status (calc) | Velocity (7-day avg) 🔴 | Notes |
+|-----------|--------------|-----------------|-----------|------------------------|----------------------|------------------------|-------|
+| CS-001 | Card Sticker Full (Attitude Mix) | [enter] | 50 | =[C2/(G2+0.1)] | IF(C2<=D2,"LOW","OK") | [enter] | |
+| CS-002 | Card Sticker Half (Attitude Mix) | [enter] | 50 | =[C2/(G2+0.1)] | IF(C2<=D2,"LOW","OK") | [enter] | |
+| KC-101 | Keychain — Bullshit Remover | [enter] | 40 | =[C3/(G3+0.1)] | IF(C3<=D3,"LOW","OK") | [enter] | Hero product — keep full |
+| KC-102 | Keychain — Idiot Repellent | [enter] | 40 | =[C4/(G4+0.1)] | IF(C4<=D4,"LOW","OK") | [enter] | Hero product — keep full |
+| KC-103 | Keychain — Enjoy the ShitShow | [enter] | 40 | =[C5/(G5+0.1)] | IF(C5<=D5,"LOW","OK") | [enter] | Hero product — keep full |
+| KC-104 | Keychain — Straight outta F#_ks | [enter] | 40 | =[C6/(G6+0.1)] | IF(C6<=D6,"LOW","OK") | [enter] | Hero product — keep full |
+| KC-201 | Keychains — Identity/Interest Mix | [enter] | 30 | =[C7/(G7+0.1)] | IF(C7<=D7,"LOW","OK") | [enter] | 10+ SKUs pooled. High SKU velocity |
+| LP-301 | Lapel Pins — Original Designs (mix) | [enter] | 25 | =[C8/(G8+0.1)] | IF(C8<=D8,"LOW","OK") | [enter] | 15+ limited-run SKUs. Track by series |
+| MG-401 | Fridge Magnets — Mix | [enter] | 30 | =[C9/(G9+0.1)] | IF(C9<=D9,"LOW","OK") | [enter] | 8-10 SKUs pooled |
+| BND-501 | Bundle — Card Starter | [enter] | 20 | =[C10/(G10+0.1)] | IF(C10<=D10,"LOW","OK") | [enter] | Pre-packed. Lower velocity (bundling) |
+| BND-502 | Bundle — No Filter Essentials | [enter] | 20 | =[C11/(G11+0.1)] | IF(C11<=D11,"LOW","OK") | [enter] | Pre-packed. Lower velocity |
+| BND-503 | Bundle — Collector's Set | [enter] | 15 | =[C12/(G12+0.1)] | IF(C12<=D12,"LOW","OK") | [enter] | Premium. Lower volume expected |
+
+**HOW TO UPDATE THIS SHEET:**
+
+1. **Stock (Units)** — Enter the count you physically have after packing orders
+2. **Velocity (7-day avg)** — Update weekly (Friday). Calculate: Total units sold in last 7 days ÷ 7
+   - Example: Sold 63 card stickers in 7 days = velocity is 9 units/day
+3. Other columns auto-calculate. If you see an error, check your velocity entry.
+
+**ALERTS THAT TRIGGER REORDER:**
+- ANY product shows "LOW" in **Reorder Status** column → **Contact Ink Fish immediately**
+- ANY product shows ≤7 days in **Days to Stockout** → **Urgent reorder**
+- Bundles stockout faster than components (higher order frequency) → Monitor BND-501 and BND-502 weekly
+
+---
+
+## SHEET 3: DAILY OPERATIONS LOG
+
+Use this to track what happened each day. Helps with inventory accuracy and troubleshooting.
+
+| Date | Orders Received | Units Sold (total) | Units Sold (by collection) | Stock Added from Ink Fish | Damaged/Defects Removed | Notes |
+|------|-----------------|------------------|--------------------------|--------------------------|------------------------|-------|
+| 2026-03-28 | [#] | [#] | CS: [#], KC: [#], LP: [#], MG: [#], BND: [#] | [#] | [#] | [notes] |
+| 2026-03-29 | [#] | [#] | CS: [#], KC: [#], LP: [#], MG: [#], BND: [#] | [#] | [#] | [notes] |
+| 2026-03-30 | [#] | [#] | CS: [#], KC: [#], LP: [#], MG: [#], BND: [#] | [#] | [#] | [notes] |
+
+**Purpose:** Week-by-week velocity is calculated from this log. At end of each Friday, divide total weekly sales by 7 and update SHEET 2.
+
+---
+
+## SHEET 4: REORDER TRACKING
+
+Track all production orders with Ink Fish. Use this to forecast when stock arrives and when to expect it to run out.
+
+| Reorder # | Date Requested | SKUs Ordered (article #s) | Quantity | Lead Time (days) | ETA Arrival | Status | Notes |
+|-----------|----------------|--------------------------|----------|------------------|-------------|--------|-------|
+| INK-001 | 2026-03-27 | CS-001, CS-002, KC-101/102/103/104 (10 each SKU) | 80 units | 14 | 2026-04-10 | Pending | Pre-launch initial stock |
+| INK-002 | [date] | [article #s] | [qty] | [days] | [ETA] | [status] | |
+
+**LEAD TIME REFERENCE (from Ink Fish production):**
+- **Standard reorder:** 14 calendar days from order to delivery
+- **Rush reorder:** 7 calendar days (10% surcharge) — use only if "Days to Stockout" shows ≤7
+- **New design first run:** 21 calendar days (product design approval required)
+
+**USE THIS TRACKER TO:**
+1. Know when stock arrives so you can plan staging area
+2. Forecast stock depletion: When this batch runs out = next ETA date
+3. Decide "do we reorder again or kill this SKU?" — visible 14 days in advance
+
+---
+
+## SHEET 5: COST & MARGIN TRACKING
+
+Snapshot of profitability by collection. Updated monthly (Dan can do this on the first of the month).
+
+| Collection | Total Units Sold (MTD) | Avg Unit Cost (₹) | Avg Selling Price (₹) | Total Revenue (₹) | Total COGS (₹) | Gross Profit (₹) | Gross Margin % | Notes |
+|-----------|------------------------|-------------------|----------------------|------------------|---------------|-----------------|----------------|-------|
+| Card Stickers | [#] | 10 | 160 | [calc] | [calc] | [calc] | [calc] | Entry tier. High volume |
+| No Filter (Keychains) | [#] | 18 | 249 | [calc] | [calc] | [calc] | [calc] | Hero product. Lower volume, higher margin |
+| Pin Edit (Lapel Pins) | [#] | 22 | 299 | [calc] | [calc] | [calc] | [calc] | Premium. Collectible. Vary by artist series |
+| Supporting (Magnets + IK) | [#] | 16 | 224 | [calc] | [calc] | [calc] | [calc] | AOV builders. Mixed bag |
+| Bundles | [#] | 44 | 532 | [calc] | [calc] | [calc] | [calc] | Highest margin. Gifting driver. Lower volume |
+
+**FORMULAS:**
+- Total Revenue = Total Units × Avg Selling Price
+- Total COGS = Total Units × Avg Unit Cost
+- Gross Profit = Total Revenue − Total COGS
+- Gross Margin % = Gross Profit ÷ Total Revenue × 100
+
+**PURPOSE:** Visible at a glance which collections are driving margin and which are just volume. Feeds into Phase 6 optimization decisions.
+
+---
+
+## SHEET 6: STOCK VERIFICATION CHECKLIST
+
+Weekly physical audit of inventory. Protects against loss, miscount, or shrinkage.
+
+| Week Ending | Audited By | Article # | Expected Count | Physical Count | Variance | Notes | Signoff |
+|-------------|-----------|-----------|-----------------|----------------|----------|-------|---------|
+| 2026-03-27 | Dan | CS-001 | [from SHEET 2] | [count] | [diff] | [notes] | [Y/N] |
+| 2026-03-27 | Dan | KC-101 | [from SHEET 2] | [count] | [diff] | [notes] | [Y/N] |
+
+**WHEN:** Friday end of day, before weekend
+**WHAT:** Count every SKU physically. Compare to SHEET 2 "Stock" column.
+**WHY:** Catches data entry errors, damaged inventory not yet logged, or loss in transit
+**IF VARIANCE > 5%:** Investigate. Update SHEET 2 and SHEET 3 with the correct count.
+
+---
+
+## INITIALIZATION CHECKLIST — RUN AT LAUNCH
+
+Before going live, Dan must complete this to ensure accuracy on Day 1:
+
+- [ ] **Confirm all SKUs with Ink Fish** — Get exact unit costs for each product family (confirm assumptions in SKU MASTER REFERENCE)
+- [ ] **Physical inventory count** — Count everything. Enter counts in SHEET 2 as starting balances.
+- [ ] **Set threshold levels** — SHEET 2 thresholds (50/40/30/25/20/15) are defaults. Adjust based on your storage space and lead time.
+- [ ] **Confirm production lead times** — Confirm Ink Fish standard/rush timelines. Update SHEET 4 "Lead Time" column.
+- [ ] **Test bundle pre-packing** — Pack 3× BND-501, 3× BND-502, 3× BND-503. Time yourself. Update packing SOP based on actual labor.
+- [ ] **Label SKUs in storage** — Physical shelf/bin must match Article # in SHEET 2. Use barcode labels if possible (for scaling).
+
+---
+
+## SUMMARY: HOW THIS WORKS IN REAL LIFE
+
+**EVERY DAY (2 min):**
+1. Update SHEET 2: Current stock count for each SKU after packing orders
+2. Update SHEET 2: Daily velocity if you remember, or batch update weekly
+
+**EVERY FRIDAY (5 min):**
+1. Calculate weekly velocity (sales count ÷ 7)
+2. Enter in SHEET 2 "Velocity" column
+3. Scan SHEET 2 for any "LOW" alerts
+4. Physical audit SHEET 6 — spot check 3-4 high-velocity SKUs
+
+**WHEN YOU SEE A "LOW" ALERT:**
+1. Note the ETA of the last reorder in SHEET 4
+2. Decide: Will that shipment cover? Or reorder again now?
+3. If reordering: Add row to SHEET 4, contact Ink Fish with article numbers and quantities
+4. Set a phone reminder for 2 days before ETA (so you have time to unpack and verify)
+
+**MONTHLY (on the 1st, 10 min):**
+1. Calculate margin by collection in SHEET 5 using monthly sales data
+2. Flag any collection with <70% gross margin — possible candidate for killing or repricing
+
+**Result:** Dan knows every morning if any product is about to stock out. Dan knows by Friday if production is keeping pace with demand. Dan knows monthly which products are actually profitable.
+
+---
+
+## NOTES FOR IMPLEMENTATION
+
+**Import this into Google Sheets or Excel:**
+- All formulas should translate directly to either platform
+- Conditional formatting (GREEN for "OK", RED for "LOW") makes alerts visual
+- Set up mobile access so Dan can check stock from the Ink Fish warehouse or while at the post office
+
+**For future scaling (Phase 5-6):**
+- This tracker will feed into demand forecasting (Phase 6 optimization)
+- Collect enough weekly velocity data (4+ weeks) to smooth out launch volatility
+- After Day 30: Analyze high-velocity SKUs vs. slow-movers → Drop 2 recommendations
+
+**If Dan hires ops help in Phase 5+:**
+- This tracker is the accountability document
+- Any team member can see: What's in stock, what needs reordering, what's profitable
+- Reduces friction, increases trust

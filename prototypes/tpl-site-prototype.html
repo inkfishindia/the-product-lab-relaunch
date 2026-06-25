@@ -1,0 +1,3433 @@
+<!-- last-updated: 2026-03-31 — product data updated with real catalog -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Product Lab — Site Prototype v0.3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,900;1,700;1,900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ── DESIGN TOKENS ─────────────────────────────────── */
+:root {
+  --color-surface-base:    #F5F0EB;
+  --color-surface-raised:  #FFFFFF;
+  --color-surface-dark:    #1A1A1A;
+  --color-surface-loud:    #E63B2E;
+  --color-surface-energy:  #F2D024;
+  --color-text-primary:    #1A1A1A;
+  --color-text-secondary:  #6B6B6B;
+  --color-text-on-dark:    #F5F0EB;
+  --color-text-on-yellow:  #1A1A1A;
+  --color-accent-primary:  #E63B2E;
+  --color-accent-secondary:#F2D024;
+  --color-border:          #E0DAD3;
+  --color-border-strong:   #1A1A1A;
+  --color-overlay:         rgba(26,26,26,0.55);
+  --color-success:         #3ECF4C;
+  --font-heading: 'Barlow Condensed', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-mono:    'Space Mono', monospace;
+  --weight-bold: 700; --weight-black: 900; --weight-semibold: 600; --weight-medium: 500;
+  --text-opinion: 3rem; --text-h1: 2rem; --text-h2: 1.5rem; --text-h3: 1.25rem;
+  --text-body: 0.9375rem; --text-body-sm: 0.8125rem; --text-caption: 0.6875rem; --text-price: 1.25rem;
+  --leading-tight: 1.1; --leading-normal: 1.6; --leading-caption: 1.4;
+  --tracking-tight: -0.02em; --tracking-snug: -0.01em;
+  --tracking-wide: 0.02em; --tracking-wider: 0.05em; --tracking-widest: 0.08em;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:20px;
+  --space-6:24px; --space-8:32px; --space-10:40px; --space-12:48px; --space-16:64px;
+  --radius-sm:2px; --radius-md:4px; --radius-lg:8px;
+  --shadow-product: 0 2px 8px rgba(26,26,26,0.10);
+  --shadow-card: 0 6px 20px rgba(26,26,26,0.15);
+  --shadow-sticker: 0 4px 12px rgba(26,26,26,0.20), 0 1px 3px rgba(26,26,26,0.10);
+}
+@media (min-width:1024px) {
+  :root {
+    --text-opinion:4rem; --text-h1:3.5rem; --text-h2:2.5rem; --text-h3:1.75rem;
+    --text-body:1rem; --text-body-sm:0.875rem; --text-caption:0.75rem;
+  }
+}
+
+/* ── RESET ─────────────────────────────────────────── */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--color-surface-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+a { color:inherit; text-decoration:none; cursor:pointer; }
+button { cursor:pointer; }
+
+/* Paper grain texture overlay on body */
+body::before {
+  content:'';
+  position: fixed; inset:0; z-index:0; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.6;
+}
+.page { display:none; position:relative; z-index:1; }
+.page.active { display:block; }
+
+/* ── ANNOUNCEMENT BAR ───────────────────────────────── */
+.ann-bar {
+  background: var(--color-surface-dark);
+  color: var(--color-text-on-dark);
+  text-align:center;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: var(--tracking-wider);
+  text-transform:uppercase;
+  position:relative; z-index:10;
+}
+.ann-bar span { color: var(--color-accent-secondary); }
+
+/* ── HEADER ─────────────────────────────────────────── */
+.site-header {
+  position:sticky; top:0; z-index:100;
+  background: var(--color-surface-base);
+  border-bottom: 2px solid var(--color-surface-dark);
+  height:56px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 var(--space-4);
+}
+.site-header__logo {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-black);
+  font-size: 1.5rem;
+  letter-spacing: var(--tracking-tight);
+  text-transform:uppercase;
+  display:flex; align-items:center; gap: var(--space-2);
+}
+.logo-stamp {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:32px; height:32px;
+  border:2px solid var(--color-surface-dark);
+  font-size:0.75rem;
+}
+.site-nav { display:none; }
+@media (min-width:768px) {
+  .site-header { height:64px; padding:0 var(--space-8); }
+  .site-nav {
+    display:flex; align-items:center; gap: var(--space-8);
+  }
+  .site-nav a {
+    font-family: var(--font-heading);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-body-sm);
+    letter-spacing: var(--tracking-wider);
+    text-transform:uppercase;
+    transition: color 0.15s;
+    position:relative;
+  }
+  .site-nav a::after {
+    content:'';
+    position:absolute; bottom:-4px; left:0; right:0; height:2px;
+    background: var(--color-accent-primary);
+    transform: scaleX(0); transform-origin:left;
+    transition: transform 0.2s;
+  }
+  .site-nav a:hover::after { transform:scaleX(1); }
+  .site-nav a:hover { color: var(--color-accent-primary); }
+}
+.header-actions { display:flex; align-items:center; gap: var(--space-2); }
+.icon-btn {
+  background:none; border:none; padding: var(--space-2);
+  display:flex; align-items:center; color: var(--color-text-primary);
+}
+.cart-wrap { position:relative; }
+.cart-dot {
+  position:absolute; top:2px; right:2px;
+  width:16px; height:16px;
+  background: var(--color-accent-primary);
+  border-radius:50%;
+  font-size:9px; font-weight:700; color:#fff;
+  font-family: var(--font-body);
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* ── BOTTOM BAR ─────────────────────────────────────── */
+.bottom-bar {
+  position:fixed; bottom:0; left:0; right:0; z-index:100;
+  background: var(--color-surface-base);
+  border-top: 2px solid var(--color-surface-dark);
+  height:56px; display:flex; align-items:stretch;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bb-item {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size:0.625rem; letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  color: var(--color-text-secondary);
+  gap:3px; border:none; background:none; transition:color 0.15s;
+}
+.bb-item.active, .bb-item:hover { color: var(--color-text-primary); }
+.bb-dot { width:4px; height:4px; border-radius:50%; background: var(--color-accent-primary); opacity:0; }
+.bb-item.active .bb-dot { opacity:1; }
+@media (min-width:768px) { .bottom-bar { display:none; } }
+
+/* ── STAMP COMPONENT ────────────────────────────────── */
+/* Circular stamp — used as decorative brand marks */
+.stamp {
+  display:inline-flex; align-items:center; justify-content:center;
+  position:relative; width:90px; height:90px; flex-shrink:0;
+}
+.stamp svg { position:absolute; inset:0; width:100%; height:100%; }
+.stamp__inner {
+  position:relative; z-index:1;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:1rem; text-transform:uppercase; text-align:center;
+  line-height:1; letter-spacing: var(--tracking-tight);
+}
+.stamp--sm { width:72px; height:72px; }
+.stamp--sm .stamp__inner { font-size:0.75rem; }
+.stamp--lg { width:110px; height:110px; }
+.stamp--lg .stamp__inner { font-size:1.125rem; }
+
+/* ── STICKER BADGE ──────────────────────────────────── */
+/* Rotated badge stuck onto cards */
+.sticker-badge {
+  display:inline-flex; align-items:center; justify-content:center;
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size: var(--text-caption); text-transform:uppercase;
+  letter-spacing: var(--tracking-wider);
+  border-radius: var(--radius-sm);
+  white-space:nowrap;
+  box-shadow: var(--shadow-sticker);
+}
+.sticker-badge--red   { background: var(--color-accent-primary); color:#fff; }
+.sticker-badge--yellow{ background: var(--color-accent-secondary); color: var(--color-text-on-yellow); }
+.sticker-badge--dark  { background: var(--color-surface-dark); color: var(--color-text-on-dark); }
+.sticker-badge--white { background:#fff; color: var(--color-text-primary); border:1.5px solid var(--color-border-strong); }
+
+/* Label tag — vintage price tag style */
+.label-tag {
+  display:inline-block;
+  background: var(--color-surface-base);
+  border: 1.5px solid var(--color-border-strong);
+  padding: 3px 8px 3px 10px;
+  font-family: var(--font-mono);
+  font-size:10px;
+  letter-spacing: var(--tracking-wider);
+  text-transform:uppercase;
+  position:relative;
+  border-radius:2px;
+}
+.label-tag::before {
+  content:'';
+  position:absolute; left:-6px; top:50%; transform:translateY(-50%);
+  width:10px; height:10px; border-radius:50%;
+  border: 1.5px solid var(--color-border-strong);
+  background: var(--color-surface-base);
+}
+
+/* SVG doodle marks */
+.doodle-underline { display:block; margin-top:2px; }
+.doodle-arrow { display:inline-block; }
+.doodle-star { display:inline-block; }
+
+/* ── OPINION WALL ────────────────────────────────────── */
+.opinion-wall {
+  height:100svh;
+  background: var(--color-surface-base);
+  position:relative; overflow:hidden;
+}
+.ow-phrases { position:absolute; inset:0; pointer-events:none; user-select:none; }
+.phrase {
+  position:absolute;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  text-transform:uppercase; color: var(--color-text-primary); line-height:1; white-space:nowrap;
+}
+.phrase--xl { font-size:clamp(2.5rem,11vw,7.5rem); opacity:1; }
+.phrase--lg { font-size:clamp(1.75rem,6vw,4.5rem); opacity:0.55; }
+.phrase--md { font-size:clamp(1.25rem,4.5vw,3rem); opacity:0.35; }
+.phrase--sm { font-size:clamp(1rem,3vw,2rem); opacity:0.20; }
+.phrase--xs { font-size:clamp(0.75rem,2vw,1.4rem); opacity:0.12; }
+/* A phrase with red accent */
+.phrase--accent { color: var(--color-accent-primary); }
+
+.ow-tagline {
+  position:absolute; bottom:72px; left:50%; transform:translateX(-50%);
+  font-family: var(--font-body);
+  font-size: var(--text-body); color: var(--color-text-secondary);
+  letter-spacing: var(--tracking-wide); white-space:nowrap;
+}
+/* Stamp mark in corner of Opinion Wall */
+.ow-stamp-mark {
+  position:absolute; bottom:var(--space-8); right:var(--space-6);
+  opacity:0.18;
+  transform: rotate(15deg);
+}
+.ow-chevron {
+  position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+  color: var(--color-text-secondary); opacity:0.4;
+  animation: bob 2s ease-in-out infinite;
+}
+@keyframes bob {
+  0%,100% { transform:translateX(-50%) translateY(0); }
+  50%      { transform:translateX(-50%) translateY(6px); }
+}
+
+/* ── RECORD STORE BROWSE ────────────────────────────── */
+.record-browse { padding: var(--space-6) 0 var(--space-8); }
+.rs-label {
+  padding:0 var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption); color: var(--color-text-secondary);
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  margin-bottom: var(--space-3);
+  display:flex; align-items:center; gap: var(--space-3);
+}
+.rs-track {
+  display:flex; gap: var(--space-3);
+  padding:0 var(--space-4);
+  overflow-x:auto; scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch; scrollbar-width:none;
+}
+.rs-track::-webkit-scrollbar { display:none; }
+.rs-card {
+  background: var(--color-surface-dark);
+  border-radius: var(--radius-md);
+  flex-shrink:0; width:80vw; max-width:300px; height:190px;
+  scroll-snap-align:start; padding: var(--space-5);
+  display:flex; flex-direction:column; justify-content:space-between;
+  cursor:pointer; transition:transform 0.2s;
+  position:relative; overflow:hidden;
+}
+.rs-card:hover { transform:translateY(-3px); }
+.rs-card__name {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(1.5rem,8vw,3rem);
+  color: var(--color-text-on-dark); text-transform:uppercase;
+  line-height:0.95; letter-spacing: var(--tracking-tight); max-width:80%;
+}
+.rs-card__foot { display:flex; justify-content:space-between; align-items:flex-end; }
+.rs-card__count {
+  font-family: var(--font-mono); font-size:10px;
+  color: var(--color-text-on-dark); opacity:0.55;
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+}
+.rs-card__arrow { color: var(--color-text-on-dark); opacity:0.35; font-size:1.1rem; }
+/* Small stamp mark on record cards */
+.rs-card__stamp {
+  position:absolute; top:var(--space-4); right:var(--space-4); opacity:0.15;
+}
+.rs-card--red    { background: var(--color-surface-loud); }
+.rs-card--yellow { background: var(--color-surface-energy); }
+.rs-card--yellow .rs-card__name,
+.rs-card--yellow .rs-card__count,
+.rs-card--yellow .rs-card__arrow { color: var(--color-text-primary); }
+@media (min-width:768px) {
+  .rs-label { padding:0 var(--space-8); }
+  .rs-track  { padding:0 var(--space-8); }
+  .rs-card   { width:260px; }
+}
+
+/* ── AOV NUDGE BAR ──────────────────────────────────── */
+.aov-bar {
+  background: var(--color-surface-dark); color: var(--color-text-on-dark);
+  text-align:center; padding: var(--space-3) var(--space-4);
+  font-family: var(--font-body); font-size: var(--text-body-sm);
+}
+.aov-bar strong { color: var(--color-accent-secondary); font-weight:600; }
+
+/* ── SECTION HEADER ─────────────────────────────────── */
+.sec-header {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  padding:0 var(--space-4); margin-bottom: var(--space-5);
+}
+.sec-header__title {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size: var(--text-h3); text-transform:uppercase;
+  letter-spacing: var(--tracking-snug);
+  display:flex; flex-direction:column;
+}
+.sec-header__title-underline {
+  display:block; width:100%; height:3px;
+  background: var(--color-accent-primary);
+  margin-top:3px;
+}
+.sec-header__link {
+  font-family: var(--font-body); font-size: var(--text-caption);
+  color: var(--color-accent-primary);
+  letter-spacing: var(--tracking-wider); text-transform:uppercase; font-weight:600;
+  display:flex; align-items:center; gap:4px;
+  margin-top:4px;
+}
+@media (min-width:768px) { .sec-header { padding:0 var(--space-8); } }
+@media (min-width:1024px) { .sec-header { padding:0 var(--space-16); } }
+
+/* ── PRODUCT SECTION ────────────────────────────────── */
+.product-section     { padding: var(--space-10) 0; }
+.product-section--alt { background:#EDE8E3; }
+.product-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap: var(--space-3); padding:0 var(--space-4);
+}
+@media (min-width:768px) {
+  .product-grid { grid-template-columns:repeat(3,1fr); padding:0 var(--space-8); }
+}
+@media (min-width:1024px) {
+  .product-grid { grid-template-columns:repeat(4,1fr); padding:0 var(--space-16); }
+}
+
+/* ── PRODUCT CARD ───────────────────────────────────── */
+.product-card {
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-md);
+  overflow:hidden;
+  box-shadow: var(--shadow-product);
+  cursor:pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+  position:relative;
+}
+.product-card:hover { box-shadow: var(--shadow-card); transform:translateY(-3px); }
+.pc-image {
+  aspect-ratio:1;
+  background: var(--color-surface-base);
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+.pc-placeholder {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:0.75rem; text-transform:uppercase; text-align:center;
+  padding: var(--space-4); color: var(--color-text-primary); opacity:0.55;
+  letter-spacing: var(--tracking-snug); line-height:1.2;
+}
+/* Rotated sticker badge on card corner */
+.pc-sticker {
+  position:absolute; top:var(--space-2); right:var(--space-2);
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:0.5rem; text-transform:uppercase; letter-spacing: var(--tracking-wider);
+  padding:2px 6px; border-radius: var(--radius-sm);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.pc-sticker--red    { background: var(--color-accent-primary); color:#fff; transform:rotate(-2deg); }
+.pc-sticker--yellow { background: var(--color-accent-secondary); color:#1A1A1A; transform:rotate(2deg); }
+.pc-sticker--dark   { background: var(--color-surface-dark); color: var(--color-text-on-dark); transform:rotate(-1deg); }
+/* Red strip at bottom (like a price label) */
+.pc-strip {
+  background: var(--color-surface-dark);
+  padding: 4px var(--space-3);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.pc-strip__sku {
+  font-family: var(--font-mono); font-size:8px;
+  color: var(--color-text-on-dark); opacity:0.5;
+  text-transform:uppercase; letter-spacing: var(--tracking-widest);
+}
+.pc-strip__site {
+  font-family: var(--font-mono); font-size:8px;
+  color: var(--color-accent-secondary); opacity:0.7;
+  text-transform:uppercase; letter-spacing: var(--tracking-wider);
+}
+.pc-body { padding: var(--space-3); }
+.pc-type {
+  font-size: var(--text-caption); color: var(--color-text-secondary);
+  text-transform:uppercase; letter-spacing: var(--tracking-widest); margin-bottom:2px;
+}
+.pc-name {
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-body-sm); text-transform:uppercase;
+  line-height:1.3;
+  display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.pc-row { display:flex; align-items:center; justify-content:space-between; margin-top: var(--space-2); }
+.pc-price {
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-price); color: var(--color-accent-primary);
+  letter-spacing: var(--tracking-wide);
+}
+.pc-add {
+  background: var(--color-accent-primary); color:#fff; border:none;
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-caption); letter-spacing: var(--tracking-wider); text-transform:uppercase;
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm);
+  transition:background 0.15s;
+}
+.pc-add:hover { background:#c92f23; }
+
+/* ── STICKER WALL ───────────────────────────────────── */
+/* Organised chaos layout — products pinned at angles */
+.sticker-wall {
+  padding: var(--space-10) var(--space-4) var(--space-12);
+  overflow:hidden;
+  position:relative;
+}
+@media (min-width:768px) { .sticker-wall { padding: var(--space-10) var(--space-8) var(--space-12); } }
+.sticker-wall__headline {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(1.75rem,7vw,4rem); text-transform:uppercase;
+  letter-spacing: var(--tracking-tight); line-height:1;
+  margin-bottom: var(--space-8);
+  display:flex; align-items:flex-end; gap: var(--space-4);
+}
+.sticker-wall__headline em {
+  font-style:italic; color: var(--color-accent-primary);
+}
+.sw-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+}
+@media (min-width:768px) { .sw-grid { grid-template-columns:repeat(4,1fr); } }
+/* Each item gets a placement class with rotation/offset */
+.sw-item {
+  padding: var(--space-3);
+  display:flex; align-items:center; justify-content:center;
+}
+.sw-card {
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-sticker);
+  width:100%;
+  position:relative; overflow:hidden;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.sw-card:hover { box-shadow: 0 12px 32px rgba(26,26,26,0.25); z-index:10; }
+.sw-card .pc-image { aspect-ratio:1; }
+.sw-card .pc-body { padding: var(--space-2) var(--space-3) var(--space-3); }
+/* Rotation classes — intentional, deterministic (not random) */
+.sw-item:nth-child(1)  .sw-card { transform: rotate(-3deg); }
+.sw-item:nth-child(1)  .sw-card:hover { transform: rotate(-3deg) scale(1.05); }
+.sw-item:nth-child(2)  .sw-card { transform: rotate(2deg) translateY(-8px); }
+.sw-item:nth-child(2)  .sw-card:hover { transform: rotate(2deg) translateY(-8px) scale(1.05); }
+.sw-item:nth-child(3)  .sw-card { transform: rotate(-1deg) translateY(6px); }
+.sw-item:nth-child(3)  .sw-card:hover { transform: rotate(-1deg) translateY(6px) scale(1.05); }
+.sw-item:nth-child(4)  .sw-card { transform: rotate(3deg) translateY(-4px); }
+.sw-item:nth-child(4)  .sw-card:hover { transform: rotate(3deg) translateY(-4px) scale(1.05); }
+.sw-item:nth-child(5)  .sw-card { transform: rotate(1deg) translateY(10px); }
+.sw-item:nth-child(5)  .sw-card:hover { transform: rotate(1deg) translateY(10px) scale(1.05); }
+.sw-item:nth-child(6)  .sw-card { transform: rotate(-2deg) translateY(-6px); }
+.sw-item:nth-child(6)  .sw-card:hover { transform: rotate(-2deg) translateY(-6px) scale(1.05); }
+.sw-item:nth-child(7)  .sw-card { transform: rotate(2.5deg) translateY(4px); }
+.sw-item:nth-child(7)  .sw-card:hover { transform: rotate(2.5deg) translateY(4px) scale(1.05); }
+.sw-item:nth-child(8)  .sw-card { transform: rotate(-1.5deg) translateY(-10px); }
+.sw-item:nth-child(8)  .sw-card:hover { transform: rotate(-1.5deg) translateY(-10px) scale(1.05); }
+/* Push-pin marker */
+.sw-card::before {
+  content:'';
+  position:absolute; top:-4px; left:50%; transform:translateX(-50%);
+  width:10px; height:10px;
+  background: var(--color-accent-primary);
+  border-radius:50%;
+  z-index:5; box-shadow:0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* ── OPINION INTERRUPT ──────────────────────────────── */
+/* Mid-page break — full-width opinion statement between product sections */
+.opinion-interrupt {
+  background: var(--color-surface-base);
+  padding: var(--space-10) var(--space-4);
+  position:relative; overflow:hidden;
+  border-top: 2px solid var(--color-surface-dark);
+  border-bottom: 2px solid var(--color-surface-dark);
+}
+.oi-bg-text {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(4rem,20vw,14rem); text-transform:uppercase;
+  color: var(--color-surface-dark); opacity:0.04;
+  letter-spacing: var(--tracking-tight); white-space:nowrap;
+  pointer-events:none; user-select:none;
+}
+.oi-content {
+  position:relative; z-index:1;
+  display:flex; flex-direction:column; gap: var(--space-4);
+  max-width:700px;
+}
+.oi-eyebrow {
+  font-family: var(--font-mono); font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  display:flex; align-items:center; gap: var(--space-3);
+}
+.oi-eyebrow-line {
+  flex:1; height:1px; background: var(--color-border);
+  display:none;
+}
+@media (min-width:768px) { .oi-eyebrow-line { display:block; } }
+.oi-statement {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(2rem,8vw,5rem); text-transform:uppercase;
+  letter-spacing: var(--tracking-tight); line-height:1;
+}
+.oi-statement em { font-style:italic; color: var(--color-accent-primary); }
+.oi-sub {
+  font-family: var(--font-body); font-size: var(--text-body);
+  color: var(--color-text-secondary); max-width:400px;
+  line-height: var(--leading-normal);
+}
+.oi-cta {
+  display:inline-flex; align-items:center; gap: var(--space-3);
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-body-sm); text-transform:uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-text-primary);
+  border-bottom: 2px solid var(--color-accent-primary);
+  padding-bottom: 2px;
+}
+/* Stamps decorating the interrupt */
+.oi-stamps {
+  position:absolute; right: var(--space-6); top:50%; transform:translateY(-50%);
+  display:none; flex-direction:column; align-items:center; gap: var(--space-4);
+}
+@media (min-width:900px) { .oi-stamps { display:flex; } }
+
+/* ── STAMP ICONS (SVG-based) ────────────────────────── */
+/* Rendered inline, no external deps */
+
+/* ── OPINION BAR ────────────────────────────────────── */
+.opinion-bar {
+  background: var(--color-accent-secondary);
+  padding: var(--space-10) var(--space-4);
+  text-align:center; position:relative; overflow:hidden;
+}
+.opinion-bar::before {
+  content:'BIG OPINIONS BIG OPINIONS BIG OPINIONS BIG OPINIONS BIG OPINIONS';
+  position:absolute; bottom:8px; left:0; right:0;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:0.625rem; text-transform:uppercase; letter-spacing: var(--tracking-widest);
+  color: var(--color-text-on-yellow); opacity:0.2; white-space:nowrap;
+  overflow:hidden; text-overflow:clip;
+}
+.opinion-bar p {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(1.5rem,6vw,3rem); text-transform:uppercase;
+  color: var(--color-text-on-yellow);
+  letter-spacing: var(--tracking-tight); line-height:1.1;
+  max-width:700px; margin:0 auto;
+  position:relative; z-index:1;
+}
+
+/* ── TRUST BLOCK ────────────────────────────────────── */
+.trust-block { padding: var(--space-10) var(--space-4); }
+.trust-grid { display:grid; grid-template-columns:1fr; gap: var(--space-6); }
+@media (min-width:768px) {
+  .trust-block { padding: var(--space-10) var(--space-8); }
+  .trust-grid { grid-template-columns:repeat(3,1fr); }
+}
+.trust-item { display:flex; gap: var(--space-4); align-items:flex-start; }
+.trust-item__stamp { flex-shrink:0; }
+.trust-title { font-family: var(--font-body); font-weight:600; font-size: var(--text-body-sm); margin-bottom: var(--space-2); }
+.trust-copy { font-size: var(--text-caption); color: var(--color-text-secondary); line-height: var(--leading-caption); max-width:220px; }
+
+/* ── STAMP GALLERY (Brand Elements showcase section) ── */
+.brand-elements {
+  padding: var(--space-10) var(--space-4);
+  background: var(--color-surface-dark);
+  color: var(--color-text-on-dark);
+}
+@media (min-width:768px) { .brand-elements { padding: var(--space-10) var(--space-8); } }
+.be-label {
+  font-family: var(--font-mono); font-size: var(--text-caption);
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  color: var(--color-text-on-dark); opacity:0.4; margin-bottom: var(--space-6);
+}
+.be-row {
+  display:flex; flex-wrap:wrap; gap: var(--space-5); align-items:center;
+  margin-bottom: var(--space-8);
+}
+.be-row-label {
+  width:100%; font-family: var(--font-mono); font-size:9px;
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  color: var(--color-text-on-dark); opacity:0.3; margin-bottom: var(--space-3);
+}
+
+/* ── FOOTER ─────────────────────────────────────────── */
+.site-footer {
+  background: var(--color-surface-dark); color: var(--color-text-on-dark);
+  padding: var(--space-10) var(--space-4);
+  padding-bottom:calc(var(--space-10) + 56px);
+}
+@media (min-width:768px) { .site-footer { padding-bottom: var(--space-10); } }
+.footer-logo {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:2rem; letter-spacing: var(--tracking-tight); text-transform:uppercase;
+  margin-bottom: var(--space-2);
+  display:flex; align-items:center; gap: var(--space-3);
+}
+.footer-tagline { font-size: var(--text-body-sm); opacity:0.4; margin-bottom: var(--space-8); }
+.footer-links { display:flex; flex-wrap:wrap; gap: var(--space-4); margin-bottom: var(--space-8); }
+.footer-links a {
+  font-size: var(--text-caption); opacity:0.45;
+  letter-spacing: var(--tracking-wider); text-transform:uppercase; transition:opacity 0.15s;
+}
+.footer-links a:hover { opacity:1; }
+.footer-copy { font-size: var(--text-caption); opacity:0.25; }
+
+/* ── COLLECTION PAGE ────────────────────────────────── */
+.coll-hero {
+  padding: var(--space-10) var(--space-4) var(--space-8);
+  border-bottom: 2px solid var(--color-surface-dark);
+  position:relative; overflow:hidden;
+}
+@media (min-width:768px) { .coll-hero { padding: var(--space-12) var(--space-8); } }
+.coll-hero__bg {
+  position:absolute; inset:0;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(5rem,25vw,18rem); text-transform:uppercase;
+  color: var(--color-surface-dark); opacity:0.035;
+  letter-spacing: var(--tracking-tight); white-space:nowrap;
+  display:flex; align-items:center;
+  pointer-events:none; user-select:none;
+}
+.coll-eyebrow {
+  font-family: var(--font-mono); font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  margin-bottom: var(--space-3);
+  position:relative; z-index:1;
+}
+.coll-title {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(2.5rem,10vw,6rem); text-transform:uppercase;
+  letter-spacing: var(--tracking-tight); line-height:0.95;
+  margin-bottom: var(--space-4);
+  position:relative; z-index:1;
+}
+.coll-title span { color: var(--color-accent-primary); }
+.coll-desc {
+  font-size: var(--text-body); color: var(--color-text-secondary);
+  max-width:480px; position:relative; z-index:1;
+}
+.coll-meta {
+  margin-top: var(--space-5);
+  display:flex; align-items:center; gap: var(--space-4);
+  flex-wrap:wrap;
+  position:relative; z-index:1;
+}
+.filter-bar {
+  display:flex; gap: var(--space-2); padding: var(--space-4);
+  overflow-x:auto; border-bottom:1px solid var(--color-border); scrollbar-width:none;
+}
+.filter-bar::-webkit-scrollbar { display:none; }
+.chip {
+  flex-shrink:0;
+  background:transparent; border:1.5px solid var(--color-border-strong);
+  color: var(--color-text-primary);
+  font-family: var(--font-body); font-size: var(--text-caption);
+  font-weight:500; letter-spacing: var(--tracking-wider); text-transform:uppercase;
+  padding: var(--space-2) var(--space-3); border-radius:2rem;
+  transition:background 0.15s, color 0.15s;
+}
+.chip.active,.chip:hover { background: var(--color-text-primary); color: var(--color-surface-base); }
+.coll-grid { padding: var(--space-6) var(--space-4); }
+@media (min-width:768px) { .coll-grid { padding: var(--space-8); } }
+@media (min-width:1024px) { .coll-grid { padding: var(--space-10) var(--space-16); } }
+
+/* ── PDP ────────────────────────────────────────────── */
+.pdp { padding-bottom:calc(80px + env(safe-area-inset-bottom)); }
+.pdp-image {
+  background: var(--color-surface-raised); aspect-ratio:1;
+  display:flex; align-items:center; justify-content:center; position:relative;
+}
+.pdp-img-placeholder {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(2rem,9vw,5rem); text-transform:uppercase;
+  text-align:center; padding: var(--space-8);
+  color: var(--color-text-primary); line-height:1.05;
+}
+/* Rotated stamp overlaid on product image */
+.pdp-image__stamp {
+  position:absolute; bottom: var(--space-5); right: var(--space-5);
+  transform:rotate(12deg); opacity:0.75;
+}
+.pdp-body { padding: var(--space-6) var(--space-4); }
+@media (min-width:768px) {
+  .pdp { display:grid; grid-template-columns:1fr 1fr; padding-bottom:0; }
+  .pdp-image { aspect-ratio:unset; min-height:500px; }
+  .pdp-body { padding: var(--space-10) var(--space-8); }
+}
+.pdp-eyebrow {
+  font-family: var(--font-mono); font-size: var(--text-caption);
+  color: var(--color-text-secondary); letter-spacing: var(--tracking-widest);
+  text-transform:uppercase; margin-bottom: var(--space-2);
+  display:flex; align-items:center; gap: var(--space-3);
+}
+.pdp-name {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:clamp(2rem,7vw,3.5rem); text-transform:uppercase;
+  letter-spacing: var(--tracking-tight); line-height:1;
+  margin-bottom: var(--space-3);
+}
+.pdp-price-row {
+  display:flex; align-items:center; gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.pdp-price {
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size:1.75rem; color: var(--color-accent-primary);
+  letter-spacing: var(--tracking-wide);
+}
+.pdp-sku {
+  font-family: var(--font-mono); font-size:10px;
+  color: var(--color-text-secondary); letter-spacing: var(--tracking-wider);
+  text-transform:uppercase;
+}
+.pdp-desc {
+  font-size: var(--text-body); color: var(--color-text-secondary);
+  line-height: var(--leading-normal); margin-bottom: var(--space-5);
+}
+.pdp-badges { display:flex; flex-wrap:wrap; gap: var(--space-2); margin-bottom: var(--space-6); }
+.pdp-ctas { display:flex; flex-direction:column; gap: var(--space-3); margin-bottom: var(--space-6); }
+.btn-primary {
+  background: var(--color-accent-primary); color:#fff; border:none;
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-body); letter-spacing: var(--tracking-wider); text-transform:uppercase;
+  padding: var(--space-4) var(--space-6); border-radius: var(--radius-sm);
+  width:100%; transition:background 0.15s;
+  display:flex; align-items:center; justify-content:center; gap: var(--space-3);
+}
+.btn-primary:hover { background:#c92f23; }
+.btn-secondary {
+  background:transparent; color: var(--color-text-primary);
+  border:1.5px solid var(--color-border-strong);
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-body); letter-spacing: var(--tracking-wider); text-transform:uppercase;
+  padding: var(--space-4) var(--space-6); border-radius: var(--radius-sm);
+  width:100%; transition:background 0.15s, color 0.15s;
+}
+.btn-secondary:hover { background: var(--color-text-primary); color: var(--color-surface-base); }
+.pdp-meta { display:flex; flex-direction:column; gap: var(--space-2); padding-top: var(--space-4); border-top:1px solid var(--color-border); }
+.pdp-meta-row { display:flex; align-items:center; gap: var(--space-3); font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+.pdp-meta-icon { color: var(--color-accent-primary); width:18px; flex-shrink:0; text-align:center; }
+.pdp-sticky {
+  position:fixed; bottom:56px; left:0; right:0; z-index:90;
+  background: var(--color-surface-base); border-top:1px solid var(--color-border);
+  padding: var(--space-3) var(--space-4); display:flex; gap: var(--space-3);
+}
+@media (min-width:768px) { .pdp-sticky { display:none; } }
+
+/* ── CART DRAWER ────────────────────────────────────── */
+.cart-overlay {
+  position:fixed; inset:0; background: var(--color-overlay);
+  z-index:200; opacity:0; pointer-events:none; transition:opacity 0.25s;
+}
+.cart-overlay.open { opacity:1; pointer-events:all; }
+.cart-drawer {
+  position:fixed; top:0; right:0; bottom:0; width:min(400px,100vw);
+  background: var(--color-surface-raised); z-index:201;
+  transform:translateX(100%); transition:transform 0.3s ease;
+  display:flex; flex-direction:column;
+}
+.cart-drawer.open { transform:translateX(0); }
+.cart-head {
+  padding: var(--space-5); border-bottom:2px solid var(--color-surface-dark);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.cart-head__title {
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size: var(--text-h3); text-transform:uppercase; letter-spacing: var(--tracking-snug);
+}
+.cart-close { background:none; border:none; font-size:1.375rem; line-height:1; }
+.cart-body { flex:1; overflow-y:auto; padding: var(--space-5); }
+.cart-item { display:flex; gap: var(--space-4); padding-bottom: var(--space-5); border-bottom:1px solid var(--color-border); margin-bottom: var(--space-5); }
+.cart-item__thumb {
+  width:72px; height:72px; border-radius: var(--radius-md); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:0.45rem; text-transform:uppercase; text-align:center;
+  padding: var(--space-2); color: var(--color-text-primary); opacity:0.55;
+}
+.cart-item__name { font-family: var(--font-heading); font-weight: var(--weight-bold); font-size: var(--text-body-sm); text-transform:uppercase; margin-bottom:2px; }
+.cart-item__type { font-size: var(--text-caption); color: var(--color-text-secondary); margin-bottom:4px; }
+.cart-item__price { font-family: var(--font-heading); font-weight: var(--weight-bold); color: var(--color-accent-primary); font-size:1rem; }
+.cart-foot { padding: var(--space-5); border-top:1px solid var(--color-border); }
+.cart-subtotal { display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-2); }
+.cart-subtotal__label { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+.cart-subtotal__val { font-family: var(--font-heading); font-weight: var(--weight-bold); font-size: var(--text-h3); }
+.cart-ship-note { text-align:center; font-size: var(--text-caption); color: var(--color-success); font-weight:600; margin-bottom: var(--space-4); }
+
+/* ── ARTIST CARD ────────────────────────────────────── */
+.artist-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap: var(--space-4); padding:0 var(--space-4);
+}
+@media (min-width:768px) { .artist-grid { grid-template-columns:repeat(3,1fr); padding:0 var(--space-8); } }
+@media (min-width:1024px) { .artist-grid { grid-template-columns:repeat(4,1fr); padding:0 var(--space-16); } }
+.artist-card {
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-md);
+  overflow:hidden;
+  box-shadow: var(--shadow-product);
+  text-align:center;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.artist-card:hover { box-shadow: var(--shadow-card); transform:translateY(-3px); }
+.artist-avatar {
+  width:80px; height:80px; border-radius:50%;
+  background: var(--color-surface-base);
+  margin: var(--space-6) auto var(--space-3);
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-heading); font-weight: var(--weight-black);
+  font-size:2rem; color: var(--color-text-secondary);
+  position:relative;
+}
+.artist-name {
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-h3); text-transform:uppercase;
+  letter-spacing: var(--tracking-snug);
+  margin-bottom:2px;
+}
+.artist-location {
+  font-size: var(--text-caption); color: var(--color-text-secondary);
+  margin-bottom: var(--space-3);
+}
+.artist-bio {
+  font-size: var(--text-body-sm); color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+  padding:0 var(--space-4); margin-bottom: var(--space-4);
+}
+.artist-cta {
+  font-family: var(--font-heading); font-weight: var(--weight-bold);
+  font-size: var(--text-caption); text-transform:uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-accent-primary);
+  padding-bottom: var(--space-5);
+  display:flex; align-items:center; justify-content:center; gap: var(--space-2);
+}
+
+/* ── ADMIN DASHBOARD ─────────────────────────────────── */
+.admin-dash { padding: var(--space-6) var(--space-4); max-width:1100px; margin:0 auto; }
+.admin-dash h2 { font-family:var(--font-heading); font-weight:var(--weight-black); font-size:var(--text-h2); text-transform:uppercase; letter-spacing:var(--tracking-snug); margin-bottom:var(--space-2); }
+.admin-dash h3 { font-family:var(--font-heading); font-weight:var(--weight-bold); font-size:var(--text-h3); text-transform:uppercase; letter-spacing:var(--tracking-snug); margin-bottom:var(--space-2); }
+.admin-dash p { font-size:var(--text-body-sm); color:var(--color-text-secondary); line-height:var(--leading-normal); }
+.admin-dash .stats-row { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:var(--space-3); margin-bottom:var(--space-8); }
+.admin-dash .stat-card { background:var(--color-surface-raised); border-radius:var(--radius-md); padding:var(--space-4); box-shadow:var(--shadow-product); text-align:center; }
+.admin-dash .stat-card .num { font-family:var(--font-heading); font-size:2rem; font-weight:var(--weight-black); line-height:1; }
+.admin-dash .stat-card .label { font-size:var(--text-caption); color:var(--color-text-secondary); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-top:var(--space-1); }
+.admin-dash .stat-card.stat--red .num { color:var(--color-accent-primary); }
+.admin-dash .stat-card.stat--yellow .num { color:var(--color-accent-secondary); }
+.admin-dash .stat-card.stat--dark .num { color:var(--color-surface-dark); }
+.admin-tabs { display:flex; gap:var(--space-1); flex-wrap:wrap; margin-bottom:var(--space-6); border-bottom:2px solid var(--color-surface-dark); padding-bottom:0; }
+.admin-tabs button { background:none; border:none; font-family:var(--font-heading); font-weight:var(--weight-bold); font-size:var(--text-caption); letter-spacing:var(--tracking-wider); text-transform:uppercase; padding:var(--space-2) var(--space-3); color:var(--color-text-secondary); border-bottom:3px solid transparent; margin-bottom:-2px; transition:0.15s; white-space:nowrap; }
+.admin-tabs button:hover { color:var(--color-text-primary); }
+.admin-tabs button.active { color:var(--color-accent-primary); border-bottom-color:var(--color-accent-primary); }
+.admin-panel { display:none; }
+.admin-panel.active { display:block; }
+.admin-team-grid { display:grid; grid-template-columns:1fr; gap:var(--space-3); }
+@media (min-width:768px) { .admin-team-grid { grid-template-columns:1fr 1fr; } }
+.admin-member { background:var(--color-surface-raised); border-radius:var(--radius-md); padding:var(--space-4); box-shadow:var(--shadow-product); display:flex; gap:var(--space-4); align-items:flex-start; }
+.admin-member .avatar { width:44px; height:44px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:var(--weight-black); font-size:1rem; color:#fff; }
+.admin-member .info { flex:1; }
+.admin-member .name { font-family:var(--font-heading); font-weight:var(--weight-bold); font-size:var(--text-body-sm); text-transform:uppercase; }
+.admin-member .role { font-size:var(--text-caption); color:var(--color-text-secondary); letter-spacing:var(--tracking-wider); text-transform:uppercase; }
+.admin-member .status { display:inline-block; font-size:9px; font-weight:600; padding:2px 8px; border-radius:10px; text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-top:var(--space-1); }
+.admin-member .status.active { background:#e8f5e9; color:#2e7d32; }
+.admin-member .status.plan { background:#fff3e0; color:#e65100; }
+.admin-member .status.blocked { background:#ffebee; color:#c62828; }
+.admin-member .status.done { background:#e8eaf6; color:#283593; }
+
+/* ── PROTO BADGE ────────────────────────────────────── */
+.proto-badge {
+  position:fixed; top:50%; right:-30px;
+  transform:translateY(-50%) rotate(90deg);
+  background: var(--color-accent-secondary); color: var(--color-text-on-yellow);
+  font-family: var(--font-mono); font-size:8px;
+  letter-spacing: var(--tracking-widest); text-transform:uppercase;
+  padding:2px 8px; z-index:999; pointer-events:none;
+}
+
+/* ── CHECKOUT ─────────────────────────────────── */
+.checkout-wrap { display:flex; flex-direction:column; gap:var(--space-6); max-width:800px; margin:0 auto; padding: var(--space-6) var(--space-4); }
+@media (min-width:768px) { .checkout-wrap { flex-direction:row; } }
+.checkout-form { flex:1.5; }
+.checkout-form h2 { font-family:var(--font-heading); font-weight:var(--weight-black); font-size:var(--text-h2); text-transform:uppercase; letter-spacing:var(--tracking-snug); margin-bottom:var(--space-6); }
+.chk-section { margin-bottom:var(--space-6); }
+.chk-section h3 { font-family:var(--font-heading); font-weight:var(--weight-bold); font-size:var(--text-h3); text-transform:uppercase; letter-spacing:var(--tracking-snug); margin-bottom:var(--space-3); padding-bottom:var(--space-2); border-bottom:2px solid var(--color-surface-dark); }
+.chk-row { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3); }
+.chk-field { display:flex; flex-direction:column; gap:var(--space-1); }
+.chk-field label { font-family:var(--font-heading); font-weight:var(--weight-semibold); font-size:var(--text-caption); text-transform:uppercase; letter-spacing:var(--tracking-wider); color:var(--color-text-secondary); }
+.chk-field input, .chk-field select { background:var(--color-surface-raised); border:2px solid var(--color-surface-dark); border-radius:var(--radius-md); padding:var(--space-3); font-family:inherit; font-size:var(--text-body-sm); }
+.chk-field input:focus { outline:none; border-color:var(--color-accent-primary); }
+.chk-payment { display:flex; flex-direction:column; gap:var(--space-2); }
+.chk-payment label { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-3); background:var(--color-surface-raised); border:2px solid var(--color-surface-dark); border-radius:var(--radius-md); cursor:pointer; transition:0.15s; }
+.chk-payment label:hover { border-color:var(--color-accent-primary); }
+.chk-payment input[type="radio"] { accent-color:var(--color-accent-primary); width:16px; height:16px; }
+.chk-payment .pay-info { font-size:var(--text-caption); color:var(--color-text-secondary); }
+.chk-summary { flex:1; background:var(--color-surface-raised); border-radius:var(--radius-md); padding:var(--space-5); box-shadow:var(--shadow-product); height:fit-content; position:sticky; top:var(--space-6); }
+.chk-summary h3 { font-family:var(--font-heading); font-weight:var(--weight-black); font-size:var(--text-h3); text-transform:uppercase; letter-spacing:var(--tracking-snug); margin-bottom:var(--space-4); }
+.chk-summary .line { display:flex; justify-content:space-between; font-size:var(--text-body-sm); padding:var(--space-2) 0; }
+.chk-summary .line.total { font-family:var(--font-heading); font-weight:var(--weight-bold); font-size:var(--text-h3); border-top:2px solid var(--color-surface-dark); padding-top:var(--space-3); margin-top:var(--space-2); }
+
+/* ── CONFIRMATION ────────────────────────────── */
+.conf-page { max-width:600px; margin:0 auto; padding: var(--space-10) var(--space-4); text-align:center; }
+.conf-page .conf-icon { font-size:4rem; margin-bottom:var(--space-4); }
+.conf-page h2 { font-family:var(--font-heading); font-weight:var(--weight-black); font-size:var(--text-h1); text-transform:uppercase; letter-spacing:var(--tracking-snug); margin-bottom:var(--space-3); }
+.conf-page .conf-number { background:var(--color-surface-raised); display:inline-block; padding:var(--space-2) var(--space-5); border-radius:var(--radius-md); font-family:var(--font-mono); font-weight:var(--weight-bold); font-size:var(--text-h3); margin:var(--space-4) 0 var(--space-2); }
+.conf-page .conf-detail { font-size:var(--text-body-sm); color:var(--color-text-secondary); line-height:var(--leading-normal); margin-bottom:var(--space-2); }
+.conf-page .conf-actions { display:flex; flex-direction:column; gap:var(--space-3); align-items:center; margin-top:var(--space-8); }
+
+/* ── ACCOUNT ──────────────────────────────────── */
+.acct-wrap { max-width:900px; margin:0 auto; padding: var(--space-6) var(--space-4); }
+.acct-header { display:flex; align-items:center; gap:var(--space-4); margin-bottom:var(--space-8); flex-wrap:wrap; }
+.acct-avatar { width:64px; height:64px; border-radius:50%; background:var(--color-accent-primary); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:var(--weight-black); font-size:1.5rem; flex-shrink:0; }
+.acct-info h2 { font-family:var(--font-heading); font-weight:var(--weight-black); font-size:var(--text-h2); text-transform:uppercase; letter-spacing:var(--tracking-snug); }
+.acct-info p { font-size:var(--text-body-sm); color:var(--color-text-secondary); }
+.acct-tabs { display:flex; gap:var(--space-1); border-bottom:2px solid var(--color-surface-dark); margin-bottom:var(--space-6); }
+.acct-tabs button { background:none; border:none; font-family:var(--font-heading); font-weight:var(--weight-bold); font-size:var(--text-caption); letter-spacing:var(--tracking-wider); text-transform:uppercase; padding:var(--space-2) var(--space-3); color:var(--color-text-secondary); border-bottom:3px solid transparent; margin-bottom:-2px; transition:0.15s; }
+.acct-tabs button.active { color:var(--color-accent-primary); border-bottom-color:var(--color-accent-primary); }
+.acct-panel { display:none; }
+.acct-panel.active { display:block; }
+.acct-orders { display:flex; flex-direction:column; gap:var(--space-3); }
+.acct-order { background:var(--color-surface-raised); border-radius:var(--radius-md); padding:var(--space-4); box-shadow:var(--shadow-product); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-3); cursor:pointer; transition:0.15s; }
+.acct-order:hover { box-shadow:var(--shadow-raised); }
+.acct-order .ord-meta { display:flex; flex-direction:column; gap:2px; }
+.acct-order .ord-number { font-family:var(--font-heading); font-weight:var(--weight-bold); font-size:var(--text-body-sm); }
+.acct-order .ord-date { font-size:var(--text-caption); color:var(--color-text-secondary); }
+.acct-order .ord-status { font-size:var(--text-caption); font-weight:600; padding:2px 10px; border-radius:10px; text-transform:uppercase; letter-spacing:var(--tracking-wider); }
+.acct-order .ord-status.delivered { background:#e8f5e9; color:#2e7d32; }
+.acct-order .ord-status.processing { background:#fff3e0; color:#e65100; }
+.acct-order .ord-total { font-family:var(--font-heading); font-weight:var(--weight-bold); font-size:var(--text-body-sm); }
+.acct-wishlist { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:var(--space-3); }
+.acct-wishlist .wl-item { background:var(--color-surface-raised); border-radius:var(--radius-md); padding:var(--space-3); box-shadow:var(--shadow-product); text-align:center; }
+.acct-wishlist .wl-item .wl-price { font-family:var(--font-heading); font-weight:var(--weight-bold); color:var(--color-accent-primary); margin-top:var(--space-1); }
+.acct-wishlist .wl-item .wl-remove { font-size:10px; color:var(--color-text-secondary); cursor:pointer; margin-top:var(--space-1); display:inline-block; }
+.acct-profile { max-width:500px; }
+.acct-profile .pf-row { margin-bottom:var(--space-4); }
+.acct-profile .pf-row label { font-family:var(--font-heading); font-weight:var(--weight-semibold); font-size:var(--text-caption); text-transform:uppercase; letter-spacing:var(--tracking-wider); color:var(--color-text-secondary); display:block; margin-bottom:var(--space-1); }
+.acct-profile .pf-row input { width:100%; background:var(--color-surface-raised); border:2px solid var(--color-surface-dark); border-radius:var(--radius-md); padding:var(--space-3); font-family:inherit; font-size:var(--text-body-sm); box-sizing:border-box; }
+.acct-profile .pf-row input:focus { outline:none; border-color:var(--color-accent-primary); }
+
+/* ── COMPETITORS ─────────────────────────────── */
+.comp-page { max-width:1100px; margin:0 auto; padding: var(--space-6) var(--space-4); }
+.comp-page h2 { font-family:var(--font-heading); font-weight:var(--weight-black); font-size:var(--text-h2); text-transform:uppercase; letter-spacing:var(--tracking-snug); margin-bottom:var(--space-2); }
+.comp-page .comp-subtitle { font-size:var(--text-body-sm); color:var(--color-text-secondary); line-height:var(--leading-normal); margin-bottom:var(--space-6); }
+.comp-grid { display:grid; grid-template-columns:1fr; gap:var(--space-5); margin-bottom:var(--space-8); }
+@media (min-width:768px) { .comp-grid { grid-template-columns:1fr 1fr; } }
+.comp-card { background:var(--color-surface-raised); border-radius:var(--radius-md); padding:var(--space-5); box-shadow:var(--shadow-product); border-left:4px solid var(--color-accent-primary); }
+.comp-card.comp--indirect { border-left-color:var(--color-accent-secondary); }
+.comp-card.comp--global { border-left-color:var(--color-surface-dark); }
+.comp-card .comp-name { font-family:var(--font-heading); font-weight:var(--weight-bold); font-size:var(--text-h3); text-transform:uppercase; letter-spacing:var(--tracking-snug); margin-bottom:var(--space-1); }
+.comp-card .comp-tag { display:inline-block; font-size:9px; font-weight:600; padding:2px 8px; border-radius:10px; text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3); }
+.comp-card .comp-tag.direct { background:#ffebee; color:#c62828; }
+.comp-card .comp-tag.indirect { background:#fff3e0; color:#e65100; }
+.comp-card .comp-tag.global { background:#e8eaf6; color:#283593; }
+.comp-card .comp-url { font-size:var(--text-caption); color:var(--color-text-secondary); margin-bottom:var(--space-2); word-break:break-all; }
+.comp-card .comp-url a { color:var(--color-accent-primary); }
+.comp-card .comp-desc { font-size:var(--text-body-sm); line-height:var(--leading-normal); margin-bottom:var(--space-3); }
+.comp-card .comp-detail { font-size:var(--text-caption); color:var(--color-text-secondary); line-height:var(--leading-normal); }
+.comp-card .comp-detail strong { color:var(--color-text-primary); }
+.comp-matrix { background:var(--color-surface-raised); border-radius:var(--radius-md); padding:var(--space-5); box-shadow:var(--shadow-product); margin-bottom:var(--space-8); overflow-x:auto; }
+.comp-matrix h3 { font-family:var(--font-heading); font-weight:var(--weight-black); font-size:var(--text-h3); text-transform:uppercase; letter-spacing:var(--tracking-snug); margin-bottom:var(--space-4); }
+.comp-matrix table { width:100%; border-collapse:collapse; font-size:var(--text-caption); }
+.comp-matrix th, .comp-matrix td { text-align:left; padding:var(--space-2) var(--space-3); border-bottom:1px solid var(--color-surface-dark); }
+.comp-matrix th { font-family:var(--font-heading); font-weight:var(--weight-bold); text-transform:uppercase; letter-spacing:var(--tracking-wider); white-space:nowrap; }
+.comp-matrix td.yes { color:var(--color-accent-primary); font-weight:600; }
+.comp-matrix td.no { color:var(--color-text-secondary); }
+.comp-matrix td.partial { color:var(--color-accent-secondary); }
+.comp-gap { background:var(--color-surface-raised); border-radius:var(--radius-md); padding:var(--space-5); box-shadow:var(--shadow-product); margin-bottom:var(--space-8); }
+.comp-gap h3 { font-family:var(--font-heading); font-weight:var(--weight-black); font-size:var(--text-h3); text-transform:uppercase; letter-spacing:var(--tracking-snug); margin-bottom:var(--space-4); }
+.comp-gap .gap-list { display:flex; flex-direction:column; gap:var(--space-3); }
+.comp-gap .gap-item { display:flex; gap:var(--space-3); align-items:flex-start; padding:var(--space-3); background:var(--color-surface-base); border-radius:var(--radius-md); }
+.comp-gap .gap-item .gap-icon { width:28px; height:28px; border-radius:50%; background:var(--color-accent-primary); color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:700; font-size:14px; }
+.comp-gap .gap-item .gap-icon.opp { background:var(--color-accent-secondary); color:var(--color-text-on-yellow); }
+.comp-gap .gap-item .gap-text { flex:1; }
+.comp-gap .gap-item .gap-title { font-family:var(--font-heading); font-weight:var(--weight-bold); font-size:var(--text-body-sm); text-transform:uppercase; }
+.comp-gap .gap-item .gap-desc { font-size:var(--text-caption); color:var(--color-text-secondary); line-height:var(--leading-normal); }
+}
+</style>
+</head>
+<body>
+
+<!-- ── TPL LIVE PAGES NAV ── -->
+<style>
+.tpl-nav{background:#1A1A1A;padding:6px 16px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-family:'Inter',sans-serif;border-bottom:1px solid #333}
+.tpl-nav a{color:#999;text-decoration:none;font-size:11px;padding:3px 10px;border-radius:4px;transition:.15s;white-space:nowrap}
+.tpl-nav a:hover{color:#fff;background:rgba(255,255,255,.1)}
+.tpl-nav a.active{color:#F2D024;background:rgba(242,208,36,.12);font-weight:600}
+.tpl-nav .nav-brand{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:#fff;letter-spacing:.05em;margin-right:8px}
+.tpl-nav .nav-brand span{color:#E63B2E}
+.tpl-nav .nav-spacer{flex:1}
+</style>
+<div class="tpl-nav">
+  <span class="nav-brand">tpl<span>_</span>live</span>
+  <a href="../index.html">Hub</a>
+  <a href="tpl-site-prototype.html" class="active">Full Site</a>
+  <a href="homepage-wireframe-prototype.html">Homepage</a>
+  <a href="coming-soon-page.html">Coming Soon</a>
+  <a href="framer/index.html">Framer</a>
+  <a href="../design/reviews/walsh-gemini-review-iteration-1.html">Walsh</a>
+  <a href="../design/reviews/gemini-skill-review-iteration-1.html">Gemini</a>
+  <a href="../admin/index.html" style="color:#E63B2E;font-weight:600">Admin</a>
+  <a href="../FILE-INDEX.html">Files</a>
+</div>
+
+<div class="proto-badge">Prototype v0.3 — Light+Bold</div>
+
+<!-- ── SVG DEFS (stamps, icons, doodles — reused inline) ── -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Circular text stamp path -->
+    <path id="circle-path-90" d="M 45,5 A 40,40 0 1,1 44.999,5"/>
+    <path id="circle-path-72" d="M 36,4 A 32,32 0 1,1 35.999,4"/>
+    <path id="circle-path-110" d="M 55,5 A 50,50 0 1,1 54.999,5"/>
+  </defs>
+</svg>
+
+<!-- Announcement bar -->
+<div class="ann-bar">
+  Free shipping over <span>₹499</span> &nbsp;·&nbsp; COD available &nbsp;·&nbsp; <span>Artist-made</span> in Bengaluru
+</div>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="site-header__logo" onclick="showPage('home')" style="cursor:pointer">
+    <span class="logo-stamp">TPL</span>
+    <span>The Product Lab</span>
+  </div>
+  <nav class="site-nav">
+    <a onclick="showPage('collection')">Find</a>
+    <a onclick="showPage('collect')">Collect</a>
+    <a onclick="showPage('gift')">Gift</a>
+    <a onclick="showPage('artists')">Artists</a>
+  </nav>
+  <div class="header-actions">
+    <button class="icon-btn" aria-label="Account" onclick="showPage('account')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/>
+      </svg>
+    </button>
+    <button class="icon-btn" aria-label="Search" onclick="showPage('collection')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </button>
+    <div class="cart-wrap">
+      <button class="icon-btn" aria-label="Cart" onclick="toggleCart()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+      </button>
+      <div class="cart-dot">2</div>
+    </div>
+  </div>
+</header>
+
+
+<!-- ════════════════════════════════════════
+     PAGE: HOME
+════════════════════════════════════════ -->
+<div id="page-home" class="page active">
+
+  <!-- Opinion Wall -->
+  <section class="opinion-wall" aria-label="Brand statement">
+    <div class="ow-phrases" aria-hidden="true">
+      <span class="phrase phrase--xl" style="top:6%;left:2%;transform:rotate(-2deg)">BULLSHIT</span>
+      <span class="phrase phrase--xl phrase--accent" style="top:6%;left:43%;transform:rotate(1deg)">REMOVER</span>
+      <span class="phrase phrase--lg" style="top:28%;left:4%;transform:rotate(2deg)">SELECTIVE LISTENER</span>
+      <span class="phrase phrase--lg" style="top:46%;left:18%;transform:rotate(-1deg)">YOUR CARD HAS</span>
+      <span class="phrase phrase--lg" style="top:54%;left:10%;transform:rotate(1deg)">A PERSONALITY</span>
+      <span class="phrase phrase--md" style="top:20%;left:55%;transform:rotate(-3deg)">enjoy the SHITSHOW</span>
+      <span class="phrase phrase--md" style="top:66%;left:2%;transform:rotate(2deg)">no meetings before coffee</span>
+      <span class="phrase phrase--sm" style="top:38%;left:60%;transform:rotate(1deg)">IDIOT REPELLENT</span>
+      <span class="phrase phrase--sm phrase--accent" style="top:76%;left:42%;transform:rotate(-2deg)">straight outta f#_ks</span>
+      <span class="phrase phrase--xs" style="top:13%;left:68%;transform:rotate(3deg)">NO FILTER</span>
+      <span class="phrase phrase--xs" style="top:84%;left:5%;transform:rotate(-1deg)">CHAOS COORDINATOR</span>
+    </div>
+
+    <!-- Corner stamp mark -->
+    <div class="ow-stamp-mark">
+      <!-- Circular stamp: BENGALURU ORIGINAL -->
+      <svg width="110" height="110" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="55" cy="55" r="50" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+        <circle cx="55" cy="55" r="42" fill="none" stroke="#1A1A1A" stroke-width="1" stroke-dasharray="3 3"/>
+        <path id="cp110-outer" d="M 55,8 A 47,47 0 1,1 54.999,8" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="10" fill="#1A1A1A" letter-spacing="3" text-transform="uppercase">
+          <textPath href="#cp110-outer">BENGALURU · ORIGINAL · ARTIST-MADE · MMXXVI ·</textPath>
+        </text>
+        <text x="55" y="50" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="14" fill="#1A1A1A" letter-spacing="-1">TPL</text>
+        <text x="55" y="64" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="700" font-size="7" fill="#1A1A1A" letter-spacing="2">EST. 2026</text>
+      </svg>
+    </div>
+
+    <p class="ow-tagline">small objects. big opinions.</p>
+    <div class="ow-chevron" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Record Store Browse -->
+  <section class="record-browse" aria-label="Browse collections">
+    <p class="rs-label">
+      <!-- Doodle arrow -->
+      <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 7h16M13 1l6 6-6 6" stroke="#6B6B6B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Browse by mood
+    </p>
+    <div class="rs-track">
+      <a class="rs-card" onclick="showPage('collection')" aria-label="Browse Your Card Has a Personality">
+        <!-- Faint stamp on dark card -->
+        <div class="rs-card__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="none" stroke="#F5F0EB" stroke-width="1.5"/><text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#F5F0EB" letter-spacing="0">TPL</text></svg>
+        </div>
+        <span class="rs-card__name">Your Card Has a Personality</span>
+        <div class="rs-card__foot">
+          <span class="rs-card__count">12 designs</span>
+          <span class="rs-card__arrow">→</span>
+        </div>
+      </a>
+      <a class="rs-card rs-card--red" onclick="showPage('collection')" aria-label="Browse No Filter">
+        <span class="rs-card__name" style="color:#fff">No Filter</span>
+        <div class="rs-card__foot">
+          <span class="rs-card__count" style="color:#fff">18 designs</span>
+          <span class="rs-card__arrow" style="color:#fff">→</span>
+        </div>
+      </a>
+      <a class="rs-card" onclick="showPage('collection')" aria-label="Browse Best Sellers">
+        <span class="rs-card__name">Best Sellers</span>
+        <div class="rs-card__foot">
+          <span class="rs-card__count">8 designs</span>
+          <span class="rs-card__arrow">→</span>
+        </div>
+      </a>
+      <a class="rs-card rs-card--yellow" onclick="showPage('collection')" aria-label="Browse The Drop">
+        <span class="rs-card__name">The Drop</span>
+        <div class="rs-card__foot">
+          <span class="rs-card__count">Coming soon</span>
+          <span class="rs-card__arrow">→</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- AOV nudge -->
+  <div class="aov-bar"><strong>₹250 away from free shipping.</strong> Add one more and you're there.</div>
+
+  <!-- ── STICKER WALL ── -->
+  <section class="sticker-wall">
+    <div class="sticker-wall__headline">
+      <span>The Opinion<br><em>Wall</em></span>
+      <!-- Doodle star -->
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="margin-bottom:6px;flex-shrink:0">
+        <path d="M16 2l2.5 9.5H28l-7.5 5.5 2.5 9.5L16 21l-7 5.5 2.5-9.5L4 11.5h9.5z" fill="#E63B2E"/>
+      </svg>
+    </div>
+    <div class="sw-grid">
+      <!-- 8 sticker-wall items — real catalog -->
+      <div class="sw-item">
+        <div class="sw-card" onclick="showPage('pdp')" style="cursor:pointer">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/Coca-cola-keychains.jpg" alt="Coca Cola Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+            <span class="pc-sticker pc-sticker--red">Fan Fave</span>
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">KC-001</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Keychain</p>
+            <p class="pc-name">Coca Cola</p>
+            <div class="pc-row">
+              <span class="pc-price">₹199</span>
+              <button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card" onclick="showPage('pdp')" style="cursor:pointer">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/06/Less-Panic-More-Disco-earrings-Earings.png" alt="Less Panic More Disco Earrings" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">ER-001</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Earrings</p>
+            <p class="pc-name">Less Panic More Disco</p>
+            <div class="pc-row">
+              <span class="pc-price">₹199</span>
+              <button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card" onclick="showPage('pdp')" style="cursor:pointer">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/Cartoon-network-CARD-STICKER.jpg" alt="Cartoon Network Card Sticker" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+            <span class="pc-sticker pc-sticker--yellow">New</span>
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">CS-001</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Card sticker</p>
+            <p class="pc-name">Cartoon Network</p>
+            <div class="pc-row">
+              <span class="pc-price">₹149</span>
+              <button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card" onclick="showPage('pdp')" style="cursor:pointer">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/RICH-AF-CARD-STICKER-STICKER.jpg" alt="Rich AF Card Sticker" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">CS-002</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Card sticker</p>
+            <p class="pc-name">Rich AF</p>
+            <div class="pc-row">
+              <span class="pc-price">₹149</span>
+              <button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card" onclick="showPage('pdp')" style="cursor:pointer">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/Arsenal-magnet.jpg" alt="Arsenal Fridge Magnet" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">FM-001</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Fridge magnet</p>
+            <p class="pc-name">Arsenal</p>
+            <div class="pc-row">
+              <span class="pc-price">₹225</span>
+              <button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card" onclick="showPage('pdp')" style="cursor:pointer">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/premium-boy-tears-magnet-1.jpg" alt="Boy Tears Fridge Magnet" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+            <span class="pc-sticker pc-sticker--dark">Fan Fave</span>
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">FM-006</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Fridge magnet</p>
+            <p class="pc-name">Boy Tears</p>
+            <div class="pc-row">
+              <span class="pc-price">₹225</span>
+              <button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card" onclick="showPage('pdp')" style="cursor:pointer">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/Homer-Simpsons-duff-Keychain.jpg" alt="Homer Simpsons Beer Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">KC-010</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Keychain</p>
+            <p class="pc-name">Homer Simpsons Beer</p>
+            <div class="pc-row">
+              <span class="pc-price">₹199</span>
+              <button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sw-item">
+        <div class="sw-card" onclick="showPage('pdp')" style="cursor:pointer">
+          <div class="pc-image">
+            <img src="https://theproductlab.in/wp-content/uploads/2024/05/SHUT-UP-TAKE-MY-MONEY-card-sticker.jpg" alt="Shut Up &amp; Take My Money Card Sticker" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+            <span class="pc-sticker pc-sticker--yellow">Bestseller</span>
+          </div>
+          <div class="pc-strip"><span class="pc-strip__sku">CS-003</span><span class="pc-strip__site">theproductlab.in</span></div>
+          <div class="pc-body">
+            <p class="pc-type">Card sticker</p>
+            <p class="pc-name">Shut Up &amp; Take My Money</p>
+            <div class="pc-row">
+              <span class="pc-price">₹149</span>
+              <button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── OPINION INTERRUPT ── -->
+  <div class="opinion-interrupt">
+    <div class="oi-bg-text" aria-hidden="true">FIND</div>
+    <div class="oi-content">
+      <div class="oi-eyebrow">
+        <!-- Doodle star small -->
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="#E63B2E"><path d="M6 0l1 3.8H10L7.5 6l1 3.8L6 7.5 3.5 9.8l1-3.8L2 3.8h3z"/></svg>
+        The Purchase Mechanic
+        <div class="oi-eyebrow-line"></div>
+      </div>
+      <p class="oi-statement">Find<em>.</em> Collect<em>.</em> Gift<em>.</em></p>
+      <p class="oi-sub">Find the one that's exactly you. Build the collection that says something. Send the one that's exactly someone else.</p>
+      <a class="oi-cta" onclick="showPage('collection')">
+        Shop All Products
+        <!-- Doodle arrow right -->
+        <svg width="20" height="12" viewBox="0 0 20 12" fill="none">
+          <path d="M1 6h16M13 1l6 5-6 5" stroke="#1A1A1A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+    <!-- Stamps in corner -->
+    <div class="oi-stamps">
+      <!-- Artist Made stamp -->
+      <svg width="90" height="90" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg" style="opacity:0.65">
+        <circle cx="45" cy="45" r="42" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+        <circle cx="45" cy="45" r="34" fill="none" stroke="#1A1A1A" stroke-width="1" stroke-dasharray="2 4"/>
+        <path id="cp90" d="M 45,6 A 39,39 0 1,1 44.999,6" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9.5" fill="#1A1A1A" letter-spacing="2">
+          <textPath href="#cp90">ARTIST-MADE · BENGALURU · MMXXVI ·</textPath>
+        </text>
+        <text x="45" y="42" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="11" fill="#1A1A1A" letter-spacing="-0.5">SINCE</text>
+        <text x="45" y="57" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="13" fill="#E63B2E" letter-spacing="-1">2026</text>
+      </svg>
+      <!-- Quality stamp -->
+      <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" style="opacity:0.50;transform:rotate(-15deg)">
+        <circle cx="36" cy="36" r="33" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+        <path id="cp72" d="M 36,5 A 31,31 0 1,1 35.999,5" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#1A1A1A" letter-spacing="2">
+          <textPath href="#cp72">SMALL OBJECTS · BIG OPINIONS ·</textPath>
+        </text>
+        <text x="36" y="38" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#1A1A1A">✓ APPROVED</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Opinion Bar -->
+  <div class="opinion-bar">
+    <p>Small objects don't have to have small opinions.</p>
+  </div>
+
+  <!-- Trust Block -->
+  <section class="trust-block">
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <!-- Small hexagon stamp icon -->
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#E63B2E">ART</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">Artist-Made</p>
+          <p class="trust-copy">Every design by independent creators. Not mass-produced. Sourced from Bengaluru.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#E63B2E">7D</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">7-Day Returns</p>
+          <p class="trust-copy">Not your vibe? Full refund, no questions. Even if you just changed your mind.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#E63B2E">FAST</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">2–4 Days Delivery</p>
+          <p class="trust-copy">Shipped via Shiprocket. Track in real-time. Free shipping over ₹499.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── BRAND ELEMENTS SHOWCASE ── -->
+  <!-- This section shows Dan the graphic language available — stamps, badges, labels, doodles -->
+  <section class="brand-elements">
+    <p class="be-label">Brand graphic elements — stamps · badges · labels · marks</p>
+
+    <div class="be-row-label">Circular Stamps</div>
+    <div class="be-row">
+      <!-- Full stamp: Bengaluru Original -->
+      <svg width="110" height="110" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="55" cy="55" r="50" fill="none" stroke="#F5F0EB" stroke-width="2"/>
+        <circle cx="55" cy="55" r="42" fill="none" stroke="#F5F0EB" stroke-width="1" stroke-dasharray="3 3"/>
+        <path id="cp110a" d="M 55,8 A 47,47 0 1,1 54.999,8" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="10" fill="#F5F0EB" letter-spacing="3">
+          <textPath href="#cp110a">BENGALURU · ORIGINAL · ARTIST-MADE · MMXXVI ·</textPath>
+        </text>
+        <text x="55" y="51" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="14" fill="#F5F0EB" letter-spacing="-1">TPL</text>
+        <text x="55" y="65" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="700" font-size="7" fill="#F5F0EB" letter-spacing="2">EST. 2026</text>
+      </svg>
+      <!-- Red stamp -->
+      <svg width="90" height="90" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="45" cy="45" r="42" fill="#E63B2E"/>
+        <circle cx="45" cy="45" r="35" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="2 4"/>
+        <path id="cp90r" d="M 45,6 A 39,39 0 1,1 44.999,6" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#fff" letter-spacing="2.5">
+          <textPath href="#cp90r">SMALL OBJECTS · BIG OPINIONS · THE PRODUCT LAB ·</textPath>
+        </text>
+        <text x="45" y="50" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="11" fill="#fff">ONLY</text>
+        <text x="45" y="60" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#fff" letter-spacing="1">AT TPL</text>
+      </svg>
+      <!-- Yellow stamp -->
+      <svg width="90" height="90" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="45" cy="45" r="42" fill="#F2D024"/>
+        <circle cx="45" cy="45" r="35" fill="none" stroke="#1A1A1A" stroke-width="1.5" stroke-dasharray="2 4"/>
+        <path id="cp90y" d="M 45,6 A 39,39 0 1,1 44.999,6" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#1A1A1A" letter-spacing="2.5">
+          <textPath href="#cp90y">NEW DROP · NEW DROP · NEW DROP · NEW DROP ·</textPath>
+        </text>
+        <text x="45" y="47" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="20" fill="#1A1A1A">↓</text>
+        <text x="45" y="62" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#1A1A1A" letter-spacing="1">THE DROP</text>
+      </svg>
+    </div>
+
+    <div class="be-row-label">Sticker Badges (on cards)</div>
+    <div class="be-row">
+      <span class="sticker-badge sticker-badge--red" style="transform:rotate(-3deg)">Only at TPL</span>
+      <span class="sticker-badge sticker-badge--yellow" style="transform:rotate(2deg)">New Drop</span>
+      <span class="sticker-badge sticker-badge--dark" style="transform:rotate(-1deg)">Bundle</span>
+      <span class="sticker-badge sticker-badge--white" style="transform:rotate(1.5deg)">Artist Pick</span>
+      <span class="sticker-badge sticker-badge--red" style="transform:rotate(3deg)">Limited</span>
+    </div>
+
+    <div class="be-row-label">Vintage Label Tags</div>
+    <div class="be-row">
+      <span class="label-tag" style="color:#F5F0EB;background:#1A1A1A;border-color:#F5F0EB">CS-001 / ₹199</span>
+      <span class="label-tag" style="color:#F5F0EB;background:#E63B2E;border-color:#E63B2E">CARD STICKER</span>
+      <span class="label-tag" style="color:#1A1A1A;background:#F2D024;border-color:#1A1A1A">NEW ↓</span>
+      <span class="label-tag" style="color:#F5F0EB;background:#1A1A1A;border-color:#F5F0EB">THEPRODUCTLAB.IN</span>
+    </div>
+
+    <div class="be-row-label">Doodle Marks (underlines, arrows, stars)</div>
+    <div class="be-row" style="align-items:flex-start">
+      <!-- Squiggle underline -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.25rem;color:#F5F0EB;text-transform:uppercase">Opinion</span>
+        <svg width="80" height="10" viewBox="0 0 80 10">
+          <path d="M2 5 Q10 1 18 5 Q26 9 34 5 Q42 1 50 5 Q58 9 66 5 Q74 1 78 5" stroke="#E63B2E" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <!-- Arrow right doodle -->
+      <svg width="48" height="32" viewBox="0 0 48 32" fill="none">
+        <path d="M4 16 Q16 8 28 16 Q36 22 42 14" stroke="#F5F0EB" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <path d="M38 10 L44 14 L40 20" stroke="#F5F0EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <!-- 4-point star -->
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="#E63B2E">
+        <path d="M16 2l2 12 12 2-12 2-2 12-2-12L2 16l12-2z"/>
+      </svg>
+      <!-- 6-point star (asterisk style) -->
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#F2D024" stroke-width="2" stroke-linecap="round">
+        <line x1="16" y1="4" x2="16" y2="28"/>
+        <line x1="4" y1="16" x2="28" y2="16"/>
+        <line x1="7" y1="7" x2="25" y2="25"/>
+        <line x1="25" y1="7" x2="7" y2="25"/>
+      </svg>
+      <!-- Underline bracket mark -->
+      <svg width="60" height="20" viewBox="0 0 60 20" fill="none">
+        <path d="M5 5 L5 15 L55 15 L55 5" stroke="#F5F0EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <!-- Circle emphasis -->
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <ellipse cx="20" cy="20" rx="17" ry="14" stroke="#E63B2E" stroke-width="2" stroke-dasharray="1 3"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-logo">
+      <span class="logo-stamp" style="border-color:#F5F0EB">TPL</span>
+      The Product Lab
+    </div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('collection')">Shop</a>
+      <a onclick="showPage('about')">About</a>
+      <a onclick="showPage('artists')">Artists</a>
+      <a onclick="showPage('gift')">Gifting</a>
+      <a onclick="showPage('account')">Account</a>
+      <a onclick="showPage('checkout')">Checkout</a>
+      <a onclick="showPage('suggestions')">Suggest</a><a onclick="showPage('competitors')">Competitors</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+
+</div><!-- /page-home -->
+
+
+<!-- ════════════════════════════════════════
+     PAGE: COLLECTION
+════════════════════════════════════════ -->
+<div id="page-collection" class="page">
+
+  <div class="coll-hero">
+    <div class="coll-hero__bg" aria-hidden="true">PERSONALITY</div>
+    <p class="coll-eyebrow">Card Stickers · 12 designs</p>
+    <h1 class="coll-title">Your Card Has a <span>Personality</span></h1>
+    <p class="coll-desc">Your card is out there doing the talking. Might as well give it something worth saying.</p>
+    <div class="coll-meta">
+      <span class="sticker-badge sticker-badge--dark" style="transform:rotate(-1deg)">12 Designs</span>
+      <span class="sticker-badge sticker-badge--red" style="transform:rotate(2deg)">Only at TPL</span>
+      <span class="label-tag">From ₹199</span>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="chip active">All</button>
+    <button class="chip">Card Stickers</button>
+    <button class="chip">Keychains</button>
+    <button class="chip">Enamel Pins</button>
+    <button class="chip">Bundles</button>
+    <button class="chip">Under ₹249</button>
+  </div>
+
+  <div class="coll-grid">
+    <div class="product-grid">
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/Always-tired-key-chain-keychains-1.jpg" alt="Always Tired Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+          <span class="pc-sticker pc-sticker--red">Fan Fave</span>
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">KC-003</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Keychain</p>
+          <p class="pc-name">Always Tired</p>
+          <div class="pc-row"><span class="pc-price">₹199</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/HIMYM-keychains.jpg" alt="HIMYM Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">KC-005</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Keychain</p>
+          <p class="pc-name">HIMYM</p>
+          <div class="pc-row"><span class="pc-price">₹199</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/Ice-Cream-Love-bites-earrings-scaled.jpg" alt="Ice Cream Love Bites Earrings" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">ER-002</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Earrings</p>
+          <p class="pc-name">Ice Cream Love Bites</p>
+          <div class="pc-row"><span class="pc-price">₹199</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/nike-keychain-6.jpg" alt="Nike Air Red Offwhite Lapel Pin" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">LP-001</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Lapel pin</p>
+          <p class="pc-name">Nike Air Red Offwhite</p>
+          <div class="pc-row"><span class="pc-price">₹149</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2025/02/FM-Secret.png" alt="Serotonin Spray Fridge Magnet" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">FM-003</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Fridge magnet</p>
+          <p class="pc-name">Serotonin Spray</p>
+          <div class="pc-row"><span class="pc-price">₹225</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/Suck-it-keychains.jpg" alt="Suck It Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">KC-002</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Keychain</p>
+          <p class="pc-name">Suck It</p>
+          <div class="pc-row"><span class="pc-price">₹199</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="opinion-bar" style="margin-top:32px">
+    <p>"If someone else likes it, that's a bonus."</p>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a onclick="showPage('about')">About</a><a onclick="showPage('artists')">Artists</a><a onclick="showPage('gift')">Gifting</a><a onclick="showPage('account')">Account</a><a onclick="showPage('checkout')">Checkout</a><a onclick="showPage('suggestions')">Suggest</a><a onclick="showPage('competitors')">Competitors</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+
+</div><!-- /page-collection -->
+
+
+
+
+<!-- ════════════════════════════════════════
+     PAGE: COLLECT (Sets Hub)
+════════════════════════════════════════ -->
+<div id="page-collect" class="page">
+
+  <div class="coll-hero" style="background:var(--color-surface-dark)">
+    <div class="coll-hero__bg" aria-hidden="true" style="color:rgba(245,240,235,0.06)">COLLECT</div>
+    <p class="coll-eyebrow" style="color:var(--color-accent-secondary)">Build your opinion wall</p>
+    <h1 class="coll-title" style="color:var(--color-text-on-dark)">Find Your <span style="color:var(--color-accent-secondary)">Set</span></h1>
+    <p class="coll-desc" style="color:var(--color-text-on-dark)">Five stickers. One frame. An opinion wall that actually says something.</p>
+    <div class="coll-meta">
+      <span class="sticker-badge sticker-badge--yellow">Build Your Set — ₹499</span>
+      <span class="sticker-badge sticker-badge--red">Curated Bundles</span>
+    </div>
+  </div>
+
+  <section class="product-section">
+    <div class="sec-header">
+      <div class="sec-header__title">Curated Sets<span class="sec-header__title-underline"></span></div>
+      <a class="sec-header__link" onclick="showPage('collection')">View All →</a>
+    </div>
+    <div class="product-grid">
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image" style="background:var(--color-accent-secondary)">
+          <div class="pc-placeholder">No<br>Notes</div>
+          <span class="pc-sticker pc-sticker--dark">Gift Set</span>
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">SET-001</span><span class="pc-strip__site">5 stickers</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Gift Set</p>
+          <p class="pc-name">No Notes</p>
+          <div class="pc-row"><span class="pc-price">₹499</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">Add</button></div>
+        </div>
+      </div>
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image" style="background:var(--color-surface-loud)">
+          <div class="pc-placeholder" style="color:#fff">Sent<br>On Read</div>
+          <span class="pc-sticker pc-sticker--yellow">New</span>
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">SET-002</span><span class="pc-strip__site">5 stickers</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Gift Set</p>
+          <p class="pc-name">Sent On Read</p>
+          <div class="pc-row"><span class="pc-price">₹499</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">Add</button></div>
+        </div>
+      </div>
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image" style="background:var(--color-surface-dark)">
+          <div class="pc-placeholder" style="color:var(--color-text-on-dark)">Pick<br>Any 5</div>
+          <span class="pc-sticker pc-sticker--red">Build It</span>
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">SET-000</span><span class="pc-strip__site">Mix &amp; match</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Build Your Own</p>
+          <p class="pc-name">Custom Set</p>
+          <div class="pc-row"><span class="pc-price">₹499</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">Add</button></div>
+        </div>
+      </div>
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image" style="background:var(--color-surface-energy)">
+          <div class="pc-placeholder">Frame<br>+ 5</div>
+          <span class="pc-sticker pc-sticker--yellow">Bundle Deal</span>
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">SET-003</span><span class="pc-strip__site">+ frame</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Complete Set</p>
+          <p class="pc-name">Wall Ready Bundle</p>
+          <div class="pc-row"><span class="pc-price">₹699</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">Add</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="opinion-bar">
+    <p>One wall. Five opinions. Zero filter.</p>
+  </div>
+
+  <section class="sticker-wall">
+    <div class="sticker-wall__headline">
+      <span>How It <em>Works</em></span>
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="margin-bottom:6px;flex-shrink:0">
+        <path d="M16 2l2.5 9.5H28l-7.5 5.5 2.5 9.5L16 21l-7 5.5 2.5-9.5L4 11.5h9.5z" fill="#E63B2E"/>
+      </svg>
+    </div>
+    <div class="trust-grid" style="padding:0 var(--space-4);max-width:900px;margin:0 auto">
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#E63B2E">01</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">Choose Your Set</p>
+          <p class="trust-copy">Curated bundles for every personality. Or build your own — pick any 5 stickers.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#E63B2E">02</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">We Frame It</p>
+          <p class="trust-copy">Each set comes with a premium card frame. Ready to hang. Zero assembly.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9" fill="#E63B2E">03</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">Build Your Opinion Wall</p>
+          <p class="trust-copy">Collect sets over time. Swap stickers. Your wall is never finished — it evolves with you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a onclick="showPage('about')">About</a><a onclick="showPage('artists')">Artists</a><a onclick="showPage('gift')">Gifting</a><a onclick="showPage('account')">Account</a><a onclick="showPage('checkout')">Checkout</a><a onclick="showPage('suggestions')">Suggest</a><a onclick="showPage('competitors')">Competitors</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+
+</div><!-- /page-collect -->
+
+
+<!-- ════════════════════════════════════════
+     PAGE: GIFT
+════════════════════════════════════════ -->
+<div id="page-gift" class="page">
+
+  <div class="coll-hero">
+    <div class="coll-hero__bg" aria-hidden="true">GIFT</div>
+    <p class="coll-eyebrow">Find the perfect one</p>
+    <h1 class="coll-title">You Already Know Who <span>Needs This</span></h1>
+    <p class="coll-desc">Four personalities. One perfect sticker. Zero guesswork.</p>
+    <div class="coll-meta">
+      <span class="sticker-badge sticker-badge--red">Gift-packaged free</span>
+      <span class="sticker-badge sticker-badge--dark">Add a note at checkout</span>
+    </div>
+  </div>
+
+  <section class="product-section">
+    <div class="sec-header">
+      <div class="sec-header__title">Gift By Persona<span class="sec-header__title-underline"></span></div>
+    </div>
+    <div class="product-grid">
+      <div class="product-card" onclick="showPage('collection')">
+        <div class="pc-image" style="background:var(--color-surface-energy)">
+          <div class="pc-placeholder">Sarcastic<br>One</div>
+          <span class="pc-sticker pc-sticker--dark">For The</span>
+        </div>
+        <div class="pc-body">
+          <p class="pc-type">Gift Recomendation</p>
+          <p class="pc-name">The Sarcastic One</p>
+          <div class="pc-row"><span class="pc-price" style="color:var(--color-text-primary);font-weight:600;font-size:0.8125rem">They've got a comment for everything</span></div>
+        </div>
+      </div>
+      <div class="product-card" onclick="showPage('collection')">
+        <div class="pc-image" style="background:var(--color-surface-base)">
+          <div class="pc-placeholder">Over-<br>thinker</div>
+        </div>
+        <div class="pc-body">
+          <p class="pc-type">Gift Recomendation</p>
+          <p class="pc-name">The Over-thinker</p>
+          <div class="pc-row"><span class="pc-price" style="color:var(--color-text-primary);font-weight:600;font-size:0.8125rem">For the friend who needs a reminder</span></div>
+        </div>
+      </div>
+      <div class="product-card" onclick="showPage('collection')">
+        <div class="pc-image" style="background:var(--color-surface-dark)">
+          <div class="pc-placeholder" style="color:var(--color-text-on-dark)">Main<br>Character</div>
+          <span class="pc-sticker pc-sticker--yellow">Best For</span>
+        </div>
+        <div class="pc-body">
+          <p class="pc-type">Gift Recomendation</p>
+          <p class="pc-name">The Main Character</p>
+          <div class="pc-row"><span class="pc-price" style="color:var(--color-text-primary);font-weight:600;font-size:0.8125rem">They already know. The sticker confirms it.</span></div>
+        </div>
+      </div>
+      <div class="product-card" onclick="showPage('collection')">
+        <div class="pc-image" style="background:var(--color-surface-loud)">
+          <div class="pc-placeholder" style="color:#fff">Group<br>Chat</div>
+          <span class="pc-sticker pc-sticker--dark">For The</span>
+        </div>
+        <div class="pc-body">
+          <p class="pc-type">Gift Recomendation</p>
+          <p class="pc-name">The Group Chat</p>
+          <div class="pc-row"><span class="pc-price" style="color:var(--color-text-primary);font-weight:600;font-size:0.8125rem">The friend who sends the screenshot</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="opinion-interrupt">
+    <div class="oi-bg-text" aria-hidden="true">GIFT</div>
+    <div class="oi-content">
+      <div class="oi-eyebrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="#E63B2E"><path d="M6 0l1 3.8H10L7.5 6l1 3.8L6 7.5 3.5 9.8l1-3.8L2 3.8h3z"/></svg>
+        Free Gift Packaging
+        <div class="oi-eyebrow-line"></div>
+      </div>
+      <p class="oi-statement">Thoughtful <em>Gifts,</em> Minimal <em>Effort</em></p>
+      <p class="oi-sub">Every order ships gift-ready. Add a note at checkout. We'll write it, wrap it, and send it — no extra charge.</p>
+      <a class="oi-cta" onclick="showPage('collection')">
+        Browse Gifts
+        <svg width="20" height="12" viewBox="0 0 20 12" fill="none">
+          <path d="M1 6h16M13 1l6 5-6 5" stroke="#1A1A1A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+    <div class="oi-stamps">
+      <svg width="90" height="90" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg" style="opacity:0.65">
+        <circle cx="45" cy="45" r="42" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+        <circle cx="45" cy="45" r="34" fill="none" stroke="#1A1A1A" stroke-width="1" stroke-dasharray="2 4"/>
+        <path id="cp90g" d="M 45,6 A 39,39 0 1,1 44.999,6" fill="none"/>
+        <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="9.5" fill="#1A1A1A" letter-spacing="2"><textPath href="#cp90g">GIFT-READY · WRAPPED FREE · NOTE INCLUDED ·</textPath></text>
+        <text x="45" y="42" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="11" fill="#1A1A1A" letter-spacing="-0.5">FREE</text>
+        <text x="45" y="57" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="13" fill="#E63B2E" letter-spacing="-1">WRAP</text>
+      </svg>
+    </div>
+  </div>
+
+  <section class="trust-block">
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#E63B2E">GIFT</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">Free Gift Packaging</p>
+          <p class="trust-copy">Every order ships gift-wrapped at no extra cost. Just tell us who it's for.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#E63B2E">NOTE</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">Handwritten Notes</p>
+          <p class="trust-copy">Add a message at checkout. We'll handwrite it on a TPL card and include it in the package.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#E63B2E">BULK</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">Bulk Orders</p>
+          <p class="trust-copy">Corporate gifting? Wedding favours? Drop us a line. We do custom runs at scale.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a onclick="showPage('about')">About</a><a onclick="showPage('artists')">Artists</a><a onclick="showPage('collection')">Shop</a><a onclick="showPage('account')">Account</a><a onclick="showPage('checkout')">Checkout</a><a onclick="showPage('suggestions')">Suggest</a><a onclick="showPage('competitors')">Competitors</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+
+</div><!-- /page-gift -->
+
+
+<!-- ════════════════════════════════════════
+     PAGE: ARTISTS
+════════════════════════════════════════ -->
+<div id="page-artists" class="page">
+
+  <div class="coll-hero" style="background:var(--color-surface-dark)">
+    <div class="coll-hero__bg" aria-hidden="true" style="color:rgba(245,240,235,0.06)">ARTISTS</div>
+    <p class="coll-eyebrow" style="color:var(--color-accent-secondary)">Artist-made · Bengaluru</p>
+    <h1 class="coll-title" style="color:var(--color-text-on-dark)">The People Behind <span style="color:var(--color-accent-secondary)">the Opinions</span></h1>
+    <p class="coll-desc" style="color:var(--color-text-on-dark)">Every sticker starts with an artist. We find them, commission them, and put their work on your card.</p>
+  </div>
+
+  <section class="product-section">
+    <div class="sec-header">
+      <div class="sec-header__title">Meet the Artists<span class="sec-header__title-underline"></span></div>
+    </div>
+    <div class="artist-grid">
+      <div class="artist-card">
+        <div class="artist-avatar">?</div>
+        <p class="artist-name">Artist Name</p>
+        <p class="artist-location">Bengaluru</p>
+        <p class="artist-bio">Artist bio and story goes here. Dan is working on getting bios and portraits from each artist.</p>
+        <div class="artist-cta" onclick="showPage('collection')" style="cursor:pointer">View Work →</div>
+      </div>
+      <div class="artist-card">
+        <div class="artist-avatar">?</div>
+        <p class="artist-name">Artist Name</p>
+        <p class="artist-location">Bengaluru</p>
+        <p class="artist-bio">Artist bio and story goes here. Dan is working on getting bios and portraits from each artist.</p>
+        <div class="artist-cta" onclick="showPage('collection')" style="cursor:pointer">View Work →</div>
+      </div>
+      <div class="artist-card">
+        <div class="artist-avatar">?</div>
+        <p class="artist-name">Artist Name</p>
+        <p class="artist-location">Bengaluru</p>
+        <p class="artist-bio">Artist bio and story goes here. Dan is working on getting bios and portraits from each artist.</p>
+        <div class="artist-cta" onclick="showPage('collection')" style="cursor:pointer">View Work →</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="opinion-bar" style="background:var(--color-surface-dark)">
+    <p style="color:var(--color-text-on-dark)">Every sticker has a signature. Meet the artist behind it.</p>
+  </div>
+
+  <section class="trust-block">
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#E63B2E">ART</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">Artist-Made</p>
+          <p class="trust-copy">Every design is an original commission. Artists keep 60-70% margin. We handle the rest.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#E63B2E">CARD</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">Artist Attribution</p>
+          <p class="trust-copy">Every order ships with a collectible artist card. Name, story, Instagram — full credit, always.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#E63B2E">SELL</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title" onclick="alert('Interested? Email us at artists@theproductlab.in with 3-5 samples of your work. We review submissions every Friday.')" style="cursor:pointer">Sell Your Art →</p>
+          <p class="trust-copy">We're always looking for new voices. Bengaluru artists — apply to get your work on a card.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a onclick="showPage('about')">About</a><a onclick="showPage('gift')">Gifting</a><a onclick="showPage('collection')">Shop</a><a onclick="showPage('account')">Account</a><a onclick="showPage('checkout')">Checkout</a><a onclick="showPage('suggestions')">Suggest</a><a onclick="showPage('competitors')">Competitors</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+
+</div><!-- /page-artists -->
+
+
+<!-- ════════════════════════════════════════
+     PAGE: ABOUT
+════════════════════════════════════════ -->
+<div id="page-about" class="page">
+
+  <div class="coll-hero">
+    <div class="coll-hero__bg" aria-hidden="true">ABOUT</div>
+    <p class="coll-eyebrow">Made in Bengaluru</p>
+    <h1 class="coll-title">Small Objects. <span>Big Opinions.</span></h1>
+    <p class="coll-desc">The Product Lab is an artist-first lifestyle brand. We turn everyday objects into opinion-delivery systems.</p>
+    <div class="coll-meta">
+      <span class="sticker-badge sticker-badge--red">Artist-made</span>
+      <span class="sticker-badge sticker-badge--dark">Bengaluru origin</span>
+    </div>
+  </div>
+
+  <div class="opinion-bar">
+    <p>We believe the objects you carry should say something about what you carry in your head.</p>
+  </div>
+
+  <section class="trust-block">
+    <div class="sec-header">
+      <div class="sec-header__title">How It Works<span class="sec-header__title-underline"></span></div>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#E63B2E">DISCOVER</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">Discover</p>
+          <p class="trust-copy">Browse our collection of artist-designed stickers, keychains, and accessories. Each piece is a conversation starter.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#E63B2E">PARTNER</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">Partner</p>
+          <p class="trust-copy">We commission emerging Bengaluru artists to create original work. Artists keep 60-70% — we handle production, logistics, and sales.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-item__stamp">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#E63B2E" stroke-width="2"/>
+            <text x="20" y="22" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#E63B2E">CELEBRATE</text>
+          </svg>
+        </div>
+        <div class="trust-item__body">
+          <p class="trust-title">Celebrate</p>
+          <p class="trust-copy">Every order ships with a collectible artist card — name, story, Instagram. We build community, not just commerce.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a onclick="showPage('collection')">Shop</a>
+      <a onclick="showPage('artists')">Artists</a><a onclick="showPage('gift')">Gifting</a>
+      <a onclick="showPage('account')">Account</a><a onclick="showPage('checkout')">Checkout</a>
+      <a onclick="showPage('suggestions')">Suggest</a><a onclick="showPage('competitors')">Competitors</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     PAGE: PDP
+════════════════════════════════════════ -->
+<div id="page-pdp" class="page">
+
+  <div class="pdp">
+    <div class="pdp-image" style="background:#f0e8ff">
+      <div class="pdp-img-placeholder">BULLSHIT<br>REMOVER</div>
+      <!-- Rotated stamp on image -->
+      <div class="pdp-image__stamp">
+        <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" style="opacity:0.55">
+          <circle cx="36" cy="36" r="33" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+          <circle cx="36" cy="36" r="26" fill="none" stroke="#1A1A1A" stroke-width="1" stroke-dasharray="2 3"/>
+          <path id="cp72b" d="M 36,5 A 31,31 0 1,1 35.999,5" fill="none"/>
+          <text font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="8" fill="#1A1A1A" letter-spacing="2">
+            <textPath href="#cp72b">ONLY AT TPL · ARTIST-MADE ·</textPath>
+          </text>
+          <text x="36" y="40" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="10" fill="#E63B2E">✓ ORIGINAL</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="pdp-body">
+      <div class="pdp-eyebrow">
+        Card Sticker
+        <!-- Doodle dot separator -->
+        <svg width="4" height="4" viewBox="0 0 4 4"><circle cx="2" cy="2" r="2" fill="#E63B2E"/></svg>
+        Your Card Has a Personality
+      </div>
+      <h1 class="pdp-name">Bullshit Remover</h1>
+      <div class="pdp-price-row">
+        <span class="pdp-price">₹199</span>
+        <span class="pdp-sku">SKU: CS-001</span>
+      </div>
+      <div class="pdp-badges">
+        <span class="sticker-badge sticker-badge--red" style="transform:rotate(-2deg)">Only at TPL</span>
+        <span class="sticker-badge sticker-badge--white">In Stock</span>
+        <span class="label-tag">COD available</span>
+      </div>
+      <p class="pdp-desc">
+        For the one who's tired of nodding along. Stick it where it belongs — your card, your laptop,
+        your cubicle partition. The card does the talking so you don't have to.
+      </p>
+      <div class="pdp-ctas">
+        <button class="btn-primary" onclick="addAndOpenCart()">
+          Ship My Opinions
+          <!-- Arrow icon -->
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><path d="M1 6h14M10 1l6 5-6 5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-secondary" onclick="showPage('gift')">Send as a Gift</button>
+      </div>
+      <div class="pdp-meta">
+        <div class="pdp-meta-row">
+          <span class="pdp-meta-icon">⚡</span>
+          <span>Delivery in 2–4 days · Free shipping over ₹499</span>
+        </div>
+        <div class="pdp-meta-row">
+          <span class="pdp-meta-icon">↩</span>
+          <span>7-day returns, no questions</span>
+        </div>
+        <div class="pdp-meta-row">
+          <span class="pdp-meta-icon">🎨</span>
+          <span>Artist-made · Bengaluru</span>
+        </div>
+        <div class="pdp-meta-row">
+          <span class="pdp-meta-icon">💳</span>
+          <span>COD available · Prepaid saves ₹30</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile sticky CTA -->
+  <div class="pdp-sticky">
+    <button class="btn-secondary" style="flex:1" onclick="showPage('gift')">Gift</button>
+    <button class="btn-primary" style="flex:2" onclick="addAndOpenCart()">Ship My Opinions</button>
+  </div>
+
+  <!-- You might also like -->
+  <section class="product-section" style="margin-top:32px">
+    <div class="sec-header">
+      <h2 class="sec-header__title" onclick="showPage('collect')" style="cursor:pointer">
+        Build Your Opinion Wall
+        <span class="sec-header__title-underline"></span>
+      </h2>
+    </div>
+    <div class="product-grid">
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/Girl-Power-keychains.jpg" alt="Girl Power Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">KC-004</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Keychain</p>
+          <p class="pc-name">Girl Power</p>
+          <div class="pc-row"><span class="pc-price">₹199</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+      <div class="product-card" onclick="showPage('pdp')">
+        <div class="pc-image">
+          <img src="https://theproductlab.in/wp-content/uploads/2024/05/Rolling-stones-keychains.jpg" alt="Rolling Stones Keychain" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        </div>
+        <div class="pc-strip"><span class="pc-strip__sku">KC-008</span><span class="pc-strip__site">theproductlab.in</span></div>
+        <div class="pc-body">
+          <p class="pc-type">Keychain</p>
+          <p class="pc-name">Rolling Stones</p>
+          <div class="pc-row"><span class="pc-price">₹199</span><button class="pc-add" onclick="event.stopPropagation();addAndOpenCart()">ADD</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a onclick="showPage('collection')">Shop</a>
+      <a onclick="showPage('artists')">Artists</a><a onclick="showPage('gift')">Gifting</a>
+      <a onclick="showPage('account')">Account</a><a onclick="showPage('checkout')">Checkout</a><a onclick="showPage('suggestions')">Suggest</a><a onclick="showPage('competitors')">Competitors</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+
+</div><!-- /page-pdp -->
+
+
+<!-- ════════════════════════════════════════
+     PAGE: ADMIN
+════════════════════════════════════════ -->
+<div id="page-admin" class="page">
+
+  <div class="coll-hero" style="padding-bottom:var(--space-6)">
+    <div class="coll-hero__bg" aria-hidden="true">ADMIN</div>
+    <p class="coll-eyebrow">Internal · The Product Lab</p>
+    <h1 class="coll-title" style="font-size:clamp(2rem,7vw,4rem)">Program <span>Dashboard</span></h1>
+    <p class="coll-desc">9 pods · 25 agents · 6 phases · sole operator (Dan)</p>
+  </div>
+
+  <div class="admin-dash">
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card stat--red"><div class="num">9</div><div class="label">Pods</div></div>
+      <div class="stat-card stat--red"><div class="num">25</div><div class="label">Agents</div></div>
+      <div class="stat-card stat--yellow"><div class="num">6</div><div class="label">Phases</div></div>
+      <div class="stat-card stat--dark"><div class="num">4</div><div class="label">Active</div></div>
+      <div class="stat-card stat--red"><div class="num">1</div><div class="label">Blocker</div></div>
+      <div class="stat-card stat--dark"><div class="num">48</div><div class="label">Products</div></div>
+    </div>
+
+    <!-- Sub-tabs -->
+    <div class="admin-tabs">
+      <button class="active" onclick="showAdminTab('overview',this)">Overview</button>
+      <button onclick="showAdminTab('command',this)">Command</button>
+      <button onclick="showAdminTab('strategy',this)">Strategy</button>
+      <button onclick="showAdminTab('product',this)">Product</button>
+      <button onclick="showAdminTab('creative',this)">Creative</button>
+      <button onclick="showAdminTab('build',this)">Build</button>
+      <button onclick="showAdminTab('growth',this)">Growth</button>
+      <button onclick="showAdminTab('marketing',this)">Marketing</button>
+      <button onclick="showAdminTab('content',this)">Content</button>
+      <button onclick="showAdminTab('ops',this)">Ops</button>
+    </div>
+
+    <!-- ═══ OVERVIEW ═══ -->
+    <div class="admin-panel active" id="apanel-overview">
+      <h2>Current State</h2>
+      <p style="margin-bottom:var(--space-4)">Phase 4 — Build | Last updated 2026-05-30 | Platform: Fynd (Commerce.com)</p>
+
+      <div style="background:var(--color-surface-raised);border-radius:var(--radius-md);padding:var(--space-5);box-shadow:var(--shadow-product);margin-bottom:var(--space-6)">
+        <h3>Phase Progress</h3>
+        <div style="display:flex;gap:var(--space-2);margin-top:var(--space-3);flex-wrap:wrap">
+          <span class="sticker-badge sticker-badge--dark" style="background:#e8eaf6;color:#283593">1 — Audit ✓</span>
+          <span class="sticker-badge sticker-badge--dark" style="background:#e8eaf6;color:#283593">2 — Strategy ✓</span>
+          <span class="sticker-badge sticker-badge--dark" style="background:#e8eaf6;color:#283593">3 — Creative ✓</span>
+          <span class="sticker-badge sticker-badge--red">4 — Build ◉</span>
+          <span class="sticker-badge sticker-badge--white" style="border-color:#ccc">5 — Launch ○</span>
+          <span class="sticker-badge sticker-badge--white" style="border-color:#ccc">6 — Optimize ○</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-6)">
+        <div style="background:#fff3e0;border-radius:var(--radius-md);padding:var(--space-5);border-left:4px solid #e65100">
+          <h3 style="color:#e65100">⚠ #1 Blocker</h3>
+          <p style="margin-top:var(--space-2)"><strong>Tobi</strong> needs Fynd (Commerce.com) store credentials from Dan. Without admin access, theme development and catalog integration cannot proceed.</p>
+        </div>
+        <div style="background:#e8f5e9;border-radius:var(--radius-md);padding:var(--space-5);border-left:4px solid #2e7d32">
+          <h3 style="color:#2e7d32">✓ Latest Decision</h3>
+          <p style="margin-top:var(--space-2)"><strong>D-022</strong> (2026-05-30): Fynd for launch. Medusa deferred to Day 30 post-launch re-evaluation.</p>
+        </div>
+      </div>
+
+      <h3>Prototype Pages</h3>
+      <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap">
+        <span class="sticker-badge sticker-badge--dark" onclick="showPage('home')" style="cursor:pointer">Home</span>
+        <span class="sticker-badge sticker-badge--dark" onclick="showPage('collection')" style="cursor:pointer">Collection</span>
+        <span class="sticker-badge sticker-badge--dark" onclick="showPage('pdp')" style="cursor:pointer">PDP</span>
+        <span class="sticker-badge sticker-badge--dark" onclick="showPage('collect')" style="cursor:pointer">Collect</span>
+        <span class="sticker-badge sticker-badge--dark" onclick="showPage('gift')" style="cursor:pointer">Gift</span>
+        <span class="sticker-badge sticker-badge--dark" onclick="showPage('artists')" style="cursor:pointer">Artists</span>
+        <span class="sticker-badge sticker-badge--dark" onclick="showPage('about')" style="cursor:pointer">About</span>
+        <span class="sticker-badge sticker-badge--dark" onclick="showPage('checkout')" style="cursor:pointer">Checkout</span>
+        <span class="sticker-badge sticker-badge--dark" onclick="showPage('confirmation')" style="cursor:pointer">Confirmation</span>
+        <span class="sticker-badge sticker-badge--dark" onclick="showPage('account')" style="cursor:pointer">Account</span>
+        <span class="sticker-badge sticker-badge--dark" onclick="showPage('suggestions')" style="cursor:pointer">Suggest</span>
+        <span class="sticker-badge sticker-badge--red" onclick="showPage('competitors')" style="cursor:pointer">Competitors</span>
+      </div>
+
+      <h3 style="margin-top:var(--space-5)">Escalation Rules (Only These → Dan)</h3>
+      <p>Launch date · Budget >₹5K/mo · Drop 2 timing · Paid ads · Hiring · Pricing changes</p>
+    </div>
+
+    <!-- ═══ COMMAND ═══ -->
+    <div class="admin-panel" id="apanel-command">
+      <h2>Pod A — Command</h2>
+      <p style="margin-bottom:var(--space-4)">Program direction, coordination, research, state management. Always active.</p>
+      <div class="admin-team-grid">
+        <div class="admin-member">
+          <div class="avatar" style="background:#1A1A1A">H</div>
+          <div class="info">
+            <div class="name">Harley</div>
+            <div class="role">Program Director</div>
+            <div class="status active">Active</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Main session agent. Talks to Dan, spawns all sub-agents. Never does specialist work.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#E63B2E">C</div>
+          <div class="info">
+            <div class="name">Claire</div>
+            <div class="role">Operations &amp; Dependency Tracker</div>
+            <div class="status active">Active</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Tracks blockers, dependencies, and sprints. Keeps the program calendar.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#6B6B6B">M</div>
+          <div class="info">
+            <div class="name">Maria</div>
+            <div class="role">Research Librarian</div>
+            <div class="status active">Active</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Maintains knowledge base, artifacts, reference docs. Available all phases.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STRATEGY ═══ -->
+    <div class="admin-panel" id="apanel-strategy">
+      <h2>Pod B — Strategy</h2>
+      <p style="margin-bottom:var(--space-4)">Customer insight, brand positioning, product architecture. Phase 1-2 (complete).</p>
+      <div class="admin-team-grid">
+        <div class="admin-member">
+          <div class="avatar" style="background:#F2D024;color:#1A1A1A">W</div>
+          <div class="info">
+            <div class="name">Weiss</div>
+            <div class="role">Customer Insight &amp; Brand Strategist</div>
+            <div class="status done">Complete</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Zero-party research, ICP definition, audience segments, decision framework.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#F2D024;color:#1A1A1A">H</div>
+          <div class="info">
+            <div class="name">Heyward</div>
+            <div class="role">Brand Positioning Strategist</div>
+            <div class="status done">Complete</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Brand territory, positioning &amp; messaging, brand model &amp; flywheels, verbal identity, creative strategy.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#F2D024;color:#1A1A1A">J</div>
+          <div class="info">
+            <div class="name">Jenna</div>
+            <div class="role">Product Hierarchy &amp; Catalog Architect</div>
+            <div class="status done">Complete</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Catalog architecture, product hierarchy, pricing strategy, SKU system.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PRODUCT ═══ -->
+    <div class="admin-panel" id="apanel-product">
+      <h2>Pod C — Product</h2>
+      <p style="margin-bottom:var(--space-4)">PMF, catalog ops, merchandising. Phase 2-3 complete; Phase 4 blocked on platform.</p>
+      <div class="admin-team-grid">
+        <div class="admin-member">
+          <div class="avatar" style="background:#3ECF4C">S</div>
+          <div class="info">
+            <div class="name">Shreyas</div>
+            <div class="role">PMF &amp; Growth Product Manager</div>
+            <div class="status done">Complete</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">PMF framework, growth loops, measurement plan. Available again Phase 6.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#3ECF4C">A</div>
+          <div class="info">
+            <div class="name">Andy</div>
+            <div class="role">Merchandising &amp; Catalog Operations</div>
+            <div class="status blocked">Blocked</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Catalog enrichment, collection structuring, pricing ops. Needs Fynd admin access.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CREATIVE ═══ -->
+    <div class="admin-panel" id="apanel-creative">
+      <h2>Pod D — Creative</h2>
+      <p style="margin-bottom:var(--space-4)">Visual identity, copy, UX, UI. Phase 3 (complete — all approved).</p>
+      <div class="admin-team-grid">
+        <div class="admin-member">
+          <div class="avatar" style="background:#E63B2E">S</div>
+          <div class="info">
+            <div class="name">Sean</div>
+            <div class="role">Brand Identity &amp; Creative Director</div>
+            <div class="status done">Complete</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Visual identity system, logo, typography, colour, graphic language, brand reviews.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#E63B2E">J</div>
+          <div class="info">
+            <div class="name">Joanna</div>
+            <div class="role">Copy Strategist &amp; Voice Architect</div>
+            <div class="status done">Complete</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Verbal identity, tone of voice, copy guidelines, brand vocabulary.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#E63B2E">K</div>
+          <div class="info">
+            <div class="name">Kurt</div>
+            <div class="role">UX &amp; Information Architect</div>
+            <div class="status done">Complete</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Site IA, user flows, wireframes, experience design for Find/Collect/Gift mechanic.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#E63B2E">J</div>
+          <div class="info">
+            <div class="name">Julie</div>
+            <div class="role">UI Designer &amp; Frontend Spec Lead</div>
+            <div class="status done">Complete</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">UI component system, design tokens, responsive grid, design handoff specs.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ BUILD ═══ -->
+    <div class="admin-panel" id="apanel-build">
+      <h2>Pod E — Build / QA</h2>
+      <p style="margin-bottom:var(--space-4)">Storefront, integrations, quality assurance. Phase 4 (active — BLOCKED on Fynd credentials).</p>
+      <div class="admin-team-grid">
+        <div class="admin-member">
+          <div class="avatar" style="background:#1A1A1A">T</div>
+          <div class="info">
+            <div class="name">Tobi</div>
+            <div class="role">Lead Engineer &amp; Platform Builder</div>
+            <div class="status blocked">Blocked</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Fynd store setup, theme dev, product catalog, payment/shipping integration, SEO.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#1A1A1A">J</div>
+          <div class="info">
+            <div class="name">James</div>
+            <div class="role">QA Lead &amp; Launch Gatekeeper</div>
+            <div class="status active">Active</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">QA framework, test plans, launch checklist. No one overrules James on QA. Veto power.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ GROWTH ═══ -->
+    <div class="admin-panel" id="apanel-growth">
+      <h2>Pod F — Growth</h2>
+      <p style="margin-bottom:var(--space-4)">Campaigns, analytics, retention/lifecycle. Phase 5-6 (planned, artifacts written).</p>
+      <div class="admin-team-grid">
+        <div class="admin-member">
+          <div class="avatar" style="background:#F2D024;color:#1A1A1A">N</div>
+          <div class="info">
+            <div class="name">Nik</div>
+            <div class="role">Growth Lead &amp; Campaign Strategist</div>
+            <div class="status plan">Planned</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Growth loops, campaign architecture, funnel design, launch strategy.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#F2D024;color:#1A1A1A">A</div>
+          <div class="info">
+            <div class="name">Avinash</div>
+            <div class="role">Analytics &amp; Performance Lead</div>
+            <div class="status plan">Planned</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">GA4 setup, dashboard, funnel analysis, conversion tracking.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#F2D024;color:#1A1A1A">E</div>
+          <div class="info">
+            <div class="name">Eli</div>
+            <div class="role">Retention &amp; Lifecycle Marketing Lead</div>
+            <div class="status plan">Planned</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Email/SMS flows (Klaviyo), WhatsApp, post-purchase, win-back.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MARKETING ═══ -->
+    <div class="admin-panel" id="apanel-marketing">
+      <h2>Pod G — Marketing</h2>
+      <p style="margin-bottom:var(--space-4)">Launch ops, content strategy, seeding/community. Phase 5 (planned, artifacts written).</p>
+      <div class="admin-team-grid">
+        <div class="admin-member">
+          <div class="avatar" style="background:#E63B2E">A</div>
+          <div class="info">
+            <div class="name">Andrew</div>
+            <div class="role">Launch Campaign Manager</div>
+            <div class="status plan">Planned</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Launch calendar, campaign execution, channel coordination.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#E63B2E">C</div>
+          <div class="info">
+            <div class="name">Chase</div>
+            <div class="role">Content Strategist</div>
+            <div class="status plan">Planned</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Editorial calendar, channel-specific content, SEO strategy.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#E63B2E">R</div>
+          <div class="info">
+            <div class="name">Rachel</div>
+            <div class="role">Seeding &amp; Community Lead</div>
+            <div class="status plan">Planned</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Influencer seeding, community building, UGC strategy.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CONTENT ═══ -->
+    <div class="admin-panel" id="apanel-content">
+      <h2>Pod H — Content</h2>
+      <p style="margin-bottom:var(--space-4)">Content production, asset creation. Phase 3-5 (Phase 3 complete, Phase 5 ready).</p>
+      <div class="admin-team-grid">
+        <div class="admin-member">
+          <div class="avatar" style="background:#6B6B6B">C</div>
+          <div class="info">
+            <div class="name">Casey</div>
+            <div class="role">Content Producer</div>
+            <div class="status active">Active</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Product photography copy, social assets, email templates, blog content, launch copy.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ OPS ═══ -->
+    <div class="admin-panel" id="apanel-ops">
+      <h2>Pod I — Ops / Finance</h2>
+      <p style="margin-bottom:var(--space-4)">Finance, logistics, SOPs, data. Phase 1-2 complete; Phase 4-5 operational setup; Phase 6 primary.</p>
+      <div class="admin-team-grid">
+        <div class="admin-member">
+          <div class="avatar" style="background:#1A1A1A">P</div>
+          <div class="info">
+            <div class="name">Patrick</div>
+            <div class="role">Finance &amp; Unit Economics Lead</div>
+            <div class="status done">Complete</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Unit economics, pricing validation, COGS analysis, margin model.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#1A1A1A">R</div>
+          <div class="info">
+            <div class="name">Raj</div>
+            <div class="role">Logistics &amp; Fulfillment Lead</div>
+            <div class="status active">Active</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Shiprocket integration, COD setup, shipping zones, return flow.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#1A1A1A">T</div>
+          <div class="info">
+            <div class="name">Tony</div>
+            <div class="role">Operations &amp; SOPs Lead</div>
+            <div class="status plan">Planned</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Operations manuals, SOPs, fulfillment workflows, escalation procedures.</p>
+          </div>
+        </div>
+        <div class="admin-member">
+          <div class="avatar" style="background:#1A1A1A">L</div>
+          <div class="info">
+            <div class="name">Lenny</div>
+            <div class="role">Data &amp; Reporting Lead</div>
+            <div class="status plan">Planned</div>
+            <p style="margin-top:var(--space-2);font-size:var(--text-caption)">Reporting infrastructure, dashboards, data pipeline. Not yet active.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a onclick="showPage('collection')">Shop</a>
+      <a onclick="showPage('artists')">Artists</a><a onclick="showPage('about')">About</a>
+      <a onclick="showPage('account')">Account</a><a onclick="showPage('checkout')">Checkout</a><a onclick="showPage('suggestions')">Suggest</a><a onclick="showPage('competitors')">Competitors</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+
+</div><!-- /page-admin -->
+
+<!-- ════════════════════════════════════════
+     PAGE: CHECKOUT
+════════════════════════════════════════ -->
+<div id="page-checkout" class="page">
+  <div class="checkout-wrap">
+    <div class="checkout-form">
+      <h2>Checkout</h2>
+
+      <div class="chk-section">
+        <h3>Contact</h3>
+        <div class="chk-row" style="grid-template-columns:1fr">
+          <div class="chk-field">
+            <label>Email</label>
+            <input type="email" placeholder="you@email.com" value="dan@theproductlab.in">
+          </div>
+        </div>
+        <div class="chk-row">
+          <div class="chk-field">
+            <label>Phone</label>
+            <input type="tel" placeholder="+91 98765 43210" value="+91 98765 43210">
+          </div>
+          <div class="chk-field"></div>
+        </div>
+      </div>
+
+      <div class="chk-section">
+        <h3>Shipping</h3>
+        <div class="chk-row" style="grid-template-columns:1fr">
+          <div class="chk-field">
+            <label>Full Name</label>
+            <input type="text" placeholder="Dan Raj" value="Dan Raj">
+          </div>
+        </div>
+        <div class="chk-row" style="grid-template-columns:1fr">
+          <div class="chk-field">
+            <label>Address</label>
+            <input type="text" placeholder="Street, building, area" value="12, MG Road, Indiranagar">
+          </div>
+        </div>
+        <div class="chk-row">
+          <div class="chk-field">
+            <label>City</label>
+            <input type="text" placeholder="Bengaluru" value="Bengaluru">
+          </div>
+          <div class="chk-field">
+            <label>Pincode</label>
+            <input type="text" placeholder="560038" value="560038">
+          </div>
+        </div>
+        <div class="chk-row">
+          <div class="chk-field">
+            <label>State</label>
+            <input type="text" value="Karnataka">
+          </div>
+          <div class="chk-field"></div>
+        </div>
+      </div>
+
+      <div class="chk-section">
+        <h3>Payment</h3>
+        <div class="chk-payment">
+          <label>
+            <input type="radio" name="payment" checked>
+            <div>
+              <strong>COD — Cash on Delivery</strong>
+              <div class="pay-info">Pay when your order arrives</div>
+            </div>
+          </label>
+          <label>
+            <input type="radio" name="payment">
+            <div>
+              <strong>UPI — Google Pay / PhonePe</strong>
+              <div class="pay-info">Instant payment via any UPI app</div>
+            </div>
+          </label>
+          <label>
+            <input type="radio" name="payment">
+            <div>
+              <strong>Credit / Debit Card</strong>
+              <div class="pay-info">Visa, Mastercard, RuPay</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="showPage('confirmation')" style="width:100%;margin-top:var(--space-4)">
+        Place Order — ₹1,297
+      </button>
+    </div>
+
+    <div class="chk-summary">
+      <h3>Order Summary</h3>
+      <div class="line"><span>Card Sticker × 2</span><span>₹398</span></div>
+      <div class="line"><span>Opinion Keychain × 1</span><span>₹225</span></div>
+      <div class="line"><span>Bundles × 1</span><span>₹499</span></div>
+      <div class="line" style="font-size:var(--text-caption);color:var(--color-text-secondary)"><span>Shipping</span><span>₹175</span></div>
+      <div class="line total"><span>Total</span><span>₹1,297</span></div>
+      <p style="font-size:10px;color:var(--color-text-secondary);margin-top:var(--space-3);text-align:center">
+        Free shipping above ₹499 · COD available
+      </p>
+    </div>
+  </div>
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a onclick="showPage('collection')">Shop</a>
+      <a onclick="showPage('account')">Account</a><a onclick="showPage('artists')">Artists</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: ORDER CONFIRMATION
+════════════════════════════════════════ -->
+<div id="page-confirmation" class="page">
+  <div class="conf-page">
+    <div class="conf-icon">✅</div>
+    <h2>Order Confirmed!</h2>
+    <p class="conf-detail">Your stickers and opinions are being packed in Bengaluru.</p>
+    <div class="conf-number">#TPL-2026-0402</div>
+    <p class="conf-detail">Estimated delivery: <strong>5–8 business days</strong></p>
+    <p class="conf-detail">We'll send tracking to dan@theproductlab.in once shipped.</p>
+    <div class="conf-actions">
+      <button class="btn-primary" onclick="showPage('home')" style="width:100%;max-width:320px">Continue Shopping</button>
+      <button class="btn-secondary" onclick="showPage('account')" style="width:100%;max-width:320px">View Order History</button>
+    </div>
+  </div>
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a onclick="showPage('collection')">Shop</a>
+      <a onclick="showPage('account')">Account</a><a onclick="showPage('artists')">Artists</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: ACCOUNT / PROFILE
+════════════════════════════════════════ -->
+<div id="page-account" class="page">
+  <div class="acct-wrap">
+    <div class="acct-header">
+      <div class="acct-avatar">D</div>
+      <div class="acct-info">
+        <h2>Dan Raj</h2>
+        <p>dan@theproductlab.in · +91 98765 43210</p>
+      </div>
+    </div>
+
+    <div class="acct-tabs">
+      <button class="active" onclick="showAcctTab('orders',this)">Orders</button>
+      <button onclick="showAcctTab('wishlist',this)">Wishlist</button>
+      <button onclick="showAcctTab('profile',this)">Profile</button>
+    </div>
+
+    <div class="acct-panel active" id="apanel-orders">
+      <div class="acct-orders">
+        <div class="acct-order" onclick="showPage('collection')">
+          <div class="ord-meta">
+            <span class="ord-number">#TPL-2026-0402</span>
+            <span class="ord-date">April 2, 2026 · 3 items</span>
+          </div>
+          <span class="ord-status processing">Processing</span>
+          <span class="ord-total">₹1,297</span>
+        </div>
+        <div class="acct-order" onclick="showPage('collection')">
+          <div class="ord-meta">
+            <span class="ord-number">#TPL-2026-0315</span>
+            <span class="ord-date">March 15, 2026 · 1 item</span>
+          </div>
+          <span class="ord-status delivered">Delivered</span>
+          <span class="ord-total">₹199</span>
+        </div>
+        <div class="acct-order" onclick="showPage('collection')">
+          <div class="ord-meta">
+            <span class="ord-number">#TPL-2026-0228</span>
+            <span class="ord-date">Feb 28, 2026 · 2 items</span>
+          </div>
+          <span class="ord-status delivered">Delivered</span>
+          <span class="ord-total">₹424</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="acct-panel" id="apanel-wishlist">
+      <div class="acct-wishlist">
+        <div class="wl-item" onclick="showPage('pdp')" style="cursor:pointer">
+          <div class="prod-image" style="height:100px;background:var(--color-surface-dark);margin-bottom:var(--space-2)"></div>
+          <div style="font-size:var(--text-caption);font-weight:600">No Filter Sticker</div>
+          <div class="wl-price">₹199</div>
+          <span class="wl-remove" onclick="event.stopPropagation();this.parentElement.style.display='none'">Remove</span>
+        </div>
+        <div class="wl-item" onclick="showPage('pdp')" style="cursor:pointer">
+          <div class="prod-image" style="height:100px;background:var(--color-surface-dark);margin-bottom:var(--space-2)"></div>
+          <div style="font-size:var(--text-caption);font-weight:600">Opinion Keychain</div>
+          <div class="wl-price">₹225</div>
+          <span class="wl-remove" onclick="event.stopPropagation();this.parentElement.style.display='none'">Remove</span>
+        </div>
+        <div class="wl-item" onclick="showPage('pdp')" style="cursor:pointer">
+          <div class="prod-image" style="height:100px;background:var(--color-surface-dark);margin-bottom:var(--space-2)"></div>
+          <div style="font-size:var(--text-caption);font-weight:600">Bullshit Bundle</div>
+          <div class="wl-price">₹499</div>
+          <span class="wl-remove" onclick="event.stopPropagation();this.parentElement.style.display='none'">Remove</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="acct-panel" id="apanel-profile">
+      <div class="acct-profile">
+        <div class="pf-row">
+          <label>Full Name</label>
+          <input type="text" value="Dan Raj">
+        </div>
+        <div class="pf-row">
+          <label>Email</label>
+          <input type="email" value="dan@theproductlab.in">
+        </div>
+        <div class="pf-row">
+          <label>Phone</label>
+          <input type="tel" value="+91 98765 43210">
+        </div>
+        <div class="pf-row" style="display:flex;gap:var(--space-3)">
+          <button class="btn-primary" onclick="alert('Profile saved!')">Save Changes</button>
+          <button class="btn-secondary" onclick="alert('Logged out!')" style="color:var(--color-accent-primary)">Log Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a onclick="showPage('collection')">Shop</a>
+      <a onclick="showPage('checkout')">Checkout</a><a onclick="showPage('artists')">Artists</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: COMPETITORS
+════════════════════════════════════════ -->
+<div id="page-competitors" class="page">
+  <div class="comp-page">
+    <h2>Competitor Landscape</h2>
+    <p class="comp-subtitle">How The Product Lab stacks up against sticker &amp; stationery brands in India. All price ranges are approximate (INR).</p>
+
+    <div class="comp-grid">
+      <div class="comp-card comp--direct">
+        <div class="comp-name">Alicia Souza</div>
+        <div class="comp-tag direct">Direct</div>
+        <div class="comp-url"><a href="https://www.aliciasouza.com" target="_blank">aliciasouza.com</a></div>
+        <div class="comp-desc">India's most established illustrated stationery brand. Planners, stickers, tees, totes, desk accessories. Character-driven with strong recognisable IP.</div>
+        <div class="comp-detail"><strong>Price:</strong> ₹199–₹3,399<br><strong>Products:</strong> 400+ SKUs across stationery, apparel, home<br><strong>Established:</strong> 2012</div>
+      </div>
+
+      <div class="comp-card comp--indirect">
+        <div class="comp-name">Odd Giraffe</div>
+        <div class="comp-tag indirect">Indirect</div>
+        <div class="comp-url"><a href="https://www.oddgiraffe.com" target="_blank">oddgiraffe.com</a></div>
+        <div class="comp-desc">Premium photobooks, planners, journals. Focused on memory-keeping and custom-printed books rather than expressive sticker art.</div>
+        <div class="comp-detail"><strong>Price:</strong> ₹799–₹2,299<br><strong>Products:</strong> Photobooks, planners, notebooks, desk calendars<br><strong>Niche:</strong> Custom photobooks</div>
+      </div>
+
+      <div class="comp-card comp--direct">
+        <div class="comp-name">Living Waters</div>
+        <div class="comp-tag direct">Direct</div>
+        <div class="comp-url"><a href="https://www.livingwaters.co.in" target="_blank">livingwaters.co.in</a></div>
+        <div class="comp-desc">Diaries, bookmarks, mini gifts, totes, wall frames, bags. Traditional stationery with faith-inspired themes.</div>
+        <div class="comp-detail"><strong>Price:</strong> ₹99–₹999<br><strong>Products:</strong> Diaries, bookmarks, totes, wall frames, bags<br><strong>Niche:</strong> Faith-themed stationery</div>
+      </div>
+
+      <div class="comp-card comp--indirect">
+        <div class="comp-name">WrapCart</div>
+        <div class="comp-tag indirect">Indirect</div>
+        <div class="comp-url"><a href="https://www.wrapcart.com" target="_blank">wrapcart.com</a></div>
+        <div class="comp-desc">Device skins and tech accessories (phone, laptop, iPad, camera, car). Custom-printed wraps — overlaps TPL on self-expression but is tech-accessory focused.</div>
+        <div class="comp-detail"><strong>Price:</strong> ₹299–₹1,999<br><strong>Products:</strong> Device skins, laptop wraps, car decals<br><strong>Formats:</strong> Custom-print-on-demand</div>
+      </div>
+
+      <div class="comp-card comp--direct">
+        <div class="comp-name">Stick It Up</div>
+        <div class="comp-tag direct">Direct</div>
+        <div class="comp-url"><a href="https://www.stickitup.xyz" target="_blank">stickitup.xyz</a></div>
+        <div class="comp-desc">Vinyl stickers, t-shirts, hoodies, mystery boxes. Edgy, pop-culture driven designs. Currently the closest direct competitor in the sticker-first space.</div>
+        <div class="comp-detail"><strong>Price:</strong> ₹15–₹1,299<br><strong>Products:</strong> Vinyl stickers, shirts, hoodies, mystery boxes<br><strong>Niche:</strong> Pop-culture sticker brand</div>
+      </div>
+
+      <div class="comp-card comp--direct">
+        <div class="comp-name">The Gareeb Store</div>
+        <div class="comp-tag direct">Direct</div>
+        <div class="comp-url"><a href="https://www.thegareebstore.in" target="_blank">thegareebstore.in</a></div>
+        <div class="comp-desc">Quirky stickers, bookmarks, and stationery aimed at Gen Z with sarcastic / inside-joke humour. D2C-first sticker brand with strong social presence.</div>
+        <div class="comp-detail"><strong>Price:</strong> ₹29–₹599<br><strong>Products:</strong> Stickers, bookmarks, pins, stationery<br><strong>Vibe:</strong> Sarcastic / meme humour</div>
+      </div>
+
+      <div class="comp-card comp--direct">
+        <div class="comp-name">Stickerogy</div>
+        <div class="comp-tag direct">Direct</div>
+        <div class="comp-url"><a href="https://www.stickerogy.in" target="_blank">stickerogy.in</a></div>
+        <div class="comp-desc">1,600+ sticker designs. Holographic, car decals, laptop skins, home decor, food labels. Massive catalogue with variety across categories.</div>
+        <div class="comp-detail"><strong>Price:</strong> ₹49–₹799<br><strong>Products:</strong> Vinyl, holographic, car decals, laptop skins, labels<br><strong>Scale:</strong> 1,600+ designs</div>
+      </div>
+
+      <div class="comp-card comp--direct">
+        <div class="comp-name">Stick Store</div>
+        <div class="comp-tag direct">Direct</div>
+        <div class="comp-url"><a href="https://www.stickstore.in" target="_blank">stickstore.in</a></div>
+        <div class="comp-desc">Custom stickers, posters, t-shirts, merch. Print-on-demand model with both pre-made designs and custom order capability.</div>
+        <div class="comp-detail"><strong>Price:</strong> ₹35–₹999<br><strong>Products:</strong> Custom stickers, posters, apparel, merch<br><strong>Model:</strong> Print-on-demand + catalogue</div>
+      </div>
+
+      <div class="comp-card comp--direct">
+        <div class="comp-name">KALP</div>
+        <div class="comp-tag direct">Direct</div>
+        <div class="comp-url"><a href="https://www.kalp.store" target="_blank">kalp.store</a></div>
+        <div class="comp-desc">Quirky stationery, journals, planners, sticker sheets. Known for high-quality print and Indian-themed illustrations.</div>
+        <div class="comp-detail"><strong>Price:</strong> ₹99–₹1,299<br><strong>Products:</strong> Sticker sheets, journals, planners, washi tapes<br><strong>Vibe:</strong> Indian quirky</div>
+      </div>
+
+      <div class="comp-card comp--direct">
+        <div class="comp-name">The Riyal Store</div>
+        <div class="comp-tag direct">Direct</div>
+        <div class="comp-url"><a href="https://www.theriyalstore.com" target="_blank">theriyalstore.com</a></div>
+        <div class="comp-desc">"India's first meme sticker brand." Pop-culture, internet-meme, and desi-humour vinyl stickers. Strong Instagram-first distribution.</div>
+        <div class="comp-detail"><strong>Price:</strong> ₹99–₹399<br><strong>Products:</strong> Meme stickers, phone grips, pin badges<br><strong>Niche:</strong> Internet meme stickers</div>
+      </div>
+
+      <div class="comp-card comp--indirect">
+        <div class="comp-name">Peeekaboo</div>
+        <div class="comp-tag indirect">Indirect</div>
+        <div class="comp-url"><a href="https://www.stickera.in" target="_blank">stickera.in (Peeekaboo)</a></div>
+        <div class="comp-desc">Premium vinyl stickers and laptop skins. Focused on aesthetics and curated design collections rather than opinion-led or text-driven products.</div>
+        <div class="comp-detail"><strong>Price:</strong> ₹99–₹699<br><strong>Products:</strong> Vinyl stickers, laptop skins<br><strong>Niche:</strong>Aesthetic / decorative</div>
+      </div>
+
+      <div class="comp-card comp--indirect">
+        <div class="comp-name">Paper Scissors Co</div>
+        <div class="comp-tag indirect">Indirect</div>
+        <div class="comp-url"><a href="https://www.paperscissorsco.in" target="_blank">paperscissorsco.in</a></div>
+        <div class="comp-desc">Minimalist / sarcastic stickers, coasters, stationery. Small catalogue but strong design sensibility with muted colour palette.</div>
+        <div class="comp-detail"><strong>Price:</strong> ₹99–₹499<br><strong>Products:</strong> Stickers, coasters, notepads, prints<br><strong>Vibe:</strong> Minimal sarcastic</div>
+      </div>
+    </div>
+
+    <!-- Feature Matrix -->
+    <div class="comp-matrix">
+      <h3>Feature Comparison</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>TPL</th>
+            <th>Alicia S.</th>
+            <th>Odd Giraffe</th>
+            <th>Stick It Up</th>
+            <th>Gareeb Store</th>
+            <th>Stickerogy</th>
+            <th>KALP</th>
+            <th>Riyal St.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td width="160">Stickers (vinyl)</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Sticker Sheets</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>
+          <tr><td>Keychains / Hard Goods</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="partial">≈ pins</td><td class="no">—</td><td class="no">—</td><td class="partial">≈ grips</td></tr>
+          <tr><td>Apparel</td><td class="partial">Planned</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>Planners / Journals</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td></tr>
+          <tr><td>Device Skins / Wraps</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>Home / Wall Decor</td><td class="partial">Prints</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="partial">Stickers</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>Mystery Box / Sub.</td><td class="partial">Planned</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>Artist Collab Platform</td><td class="yes">Core</td><td class="partial">In-house</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="partial">In-house</td><td class="no">—</td></tr>
+          <tr><td>"Opinion" / Product Voice</td><td class="yes">Core DNA</td><td class="partial">Character</td><td class="no">—</td><td class="partial">Meme</td><td class="yes">Sarcasm</td><td class="no">—</td><td class="partial">Quirky</td><td class="yes">Meme</td></tr>
+          <tr><td>Collect Sets (Series)</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>Gift Persona Shopping</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>UPI / COD / Cards</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Gap / Opportunity Analysis -->
+    <div class="comp-gap">
+      <h3>Opportunity Map</h3>
+      <div class="gap-list">
+        <div class="gap-item">
+          <div class="gap-icon">1</div>
+          <div class="gap-text">
+            <div class="gap-title">Opinion-as-Product DNA</div>
+            <div class="gap-desc">No competitor owns the "small objects, big opinions" territory. Stick It Up and Riyal Store do meme stickers, but TPL's positioning is more intentional — product as statement, not just joke.</div>
+          </div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-icon opp">2</div>
+          <div class="gap-text">
+            <div class="gap-title">Collect Sets (Series Mechanics)</div>
+            <div class="gap-desc">No Indian sticker brand does collectible series drops. TPL's "Drop 1 / Drop 2" and set completion is a first — creates FOMO, repeat purchases, and a collecting culture.</div>
+          </div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-icon">3</div>
+          <div class="gap-text">
+            <div class="gap-title">Artist Collaboration Marketplace</div>
+            <div class="gap-desc">Alicia Souza and KALP use in-house illustrators. TPL's open artist-collab model (anyone can submit, get credited, get paid) is unique in this space — similar to Redbubble but curated and India-first.</div>
+          </div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-icon opp">4</div>
+          <div class="gap-text">
+            <div class="gap-title">Gift Persona Shopping</div>
+            <div class="gap-desc">No competitor lets you shop by giftee personality ("For the Opinionated Friend"). TPL's gift persona mechanic reduces choice paralysis and adds a social-sharing hook.</div>
+          </div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-icon">5</div>
+          <div class="gap-text">
+            <div class="gap-title">Sub-₹249 Entry Price Point</div>
+            <div class="gap-desc">While Alicia Souza averages ₹500+, Stick It Up starts at ₹15 (single sticker), and The Riyal Store at ₹99. TPL's ₹249 keychain entry is above the impulse threshold — consider a ₹99 sticker-single SKU for entry.</div>
+          </div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-icon opp">6</div>
+          <div class="gap-text">
+            <div class="gap-title">Opinion Wall (Digital Collecting)</div>
+            <div class="gap-desc">No competitor offers a digital "pin your collection" wall. This is TPL's biggest differentiator — turns stickers from disposable goods into a digital identity layer.</div>
+          </div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-icon">7</div>
+          <div class="gap-text">
+            <div class="gap-title">Brand Voice Consistency</div>
+            <div class="gap-desc">TPL has a defined 3-register verbal identity (Headline, Aside, Conversation) across all touchpoints. Most competitors use generic "fun" copy. This is a brand-strength moat if executed consistently.</div>
+          </div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-icon opp">8</div>
+          <div class="gap-text">
+            <div class="gap-title">Subscription / Drop Model</div>
+            <div class="gap-desc">No competitor runs limited drops on a calendar. Stick It Up does mystery boxes but not scheduled series drops. TPL's Drop-1/Drop-2 cadence builds anticipation and urgency.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Threat Assessment: Deep Dives -->
+    <div class="comp-threats" style="margin-top:var(--space-8)">
+      <h3>Threat Assessment: Deep Dives</h3>
+      <p style="font-size:var(--text-body-sm);color:var(--color-text-secondary);margin-bottom:var(--space-5)">The three most dangerous competitors — brands that overlap TPL's product space, audience, or price range. Each deep dive covers positioning, attack vectors, and defensive recommendations.</p>
+
+      <!-- Threat 1: Stick It Up -->
+      <div class="threat-card" style="background:var(--color-surface-raised);border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-5);border-left:4px solid var(--color-accent-red)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-3)">
+          <div>
+            <div style="font-family:var(--font-heading);font-weight:var(--weight-black);font-size:var(--text-h4);text-transform:uppercase">Stick It Up</div>
+            <div style="font-size:var(--text-caption);color:var(--color-text-secondary)">stickitup.xyz · <span style="color:var(--color-accent-red)">HIGH THREAT — Direct, sticker-first, same audience</span></div>
+          </div>
+          <div style="background:var(--color-accent-red);color:#1A1A1A;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;font-family:var(--font-heading)">DIRECT</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-3)">
+          <div>
+            <div style="font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1)">Positioning &amp; Product</div>
+            <ul style="font-size:var(--text-body-sm);line-height:var(--leading-relaxed);padding-left:var(--space-4);margin:0">
+              <li>Vinyl stickers (₹15–₹199 singles), tees, hoodies, mystery boxes</li>
+              <li>Edgy pop-culture + internet-humour designs; strong Gen Z aesthetic</li>
+              <li>Mystery box model creates surprise/repeat purchase loop TPL lacks</li>
+              <li>Apparel gives them higher AOV potential (₹799–₹1,299 tees)</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1)">Attack Vectors on TPL</div>
+            <ul style="font-size:var(--text-body-sm);line-height:var(--leading-relaxed);padding-left:var(--space-4);margin:0">
+              <li>Same sticker-first identity — TPL's card sticker is the only differentiator</li>
+              <li>Mystery box = higher engagement loop than TPL's Drop model (gamble vs. planned)</li>
+              <li>Lower entry price (₹15 sticker vs. TPL's ₹149 card sticker) captures impulse buys</li>
+              <li>Active social-first content engine; TPL's organic presence needs building</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)">
+          <div>
+            <div style="font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1)">TPL's Advantage</div>
+            <ul style="font-size:var(--text-body-sm);line-height:var(--leading-relaxed);padding-left:var(--space-4);margin:0">
+              <li>Card stickers are unique — Stick It Up doesn't make them</li>
+              <li>Artist-collab platform vs. in-house designs — TPL gets variety + community ownership</li>
+              <li>TPL's product voice is opinion-led, not just meme-humour — deeper identity connection</li>
+              <li>Keychains/hard goods = Stick It Up doesn't compete in accessories</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1)">Defensive Priority</div>
+            <div style="font-size:var(--text-body-sm);line-height:var(--leading-relaxed);padding:var(--space-2);background:rgba(230,59,46,0.1);border-radius:var(--radius-sm)">
+              <strong>HIGH.</strong> Stick It Up is the closest sticker-first competitor. TPL must own card stickers as a defensible category and use artist-collab to out-content them. Mystery box competitor loop is a gap — consider a TPL mystery box for Phase 6.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Threat 2: Dot Badges -->
+      <div class="threat-card" style="background:var(--color-surface-raised);border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-5);border-left:4px solid var(--color-accent-yellow)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-3)">
+          <div>
+            <div style="font-family:var(--font-heading);font-weight:var(--weight-black);font-size:var(--text-h4);text-transform:uppercase">Dot Badges</div>
+            <div style="font-size:var(--text-caption);color:var(--color-text-secondary)">dotbadges.com · <span style="color:var(--color-accent-yellow)">MEDIUM-HIGH THREAT — Volume/price leader in enamel pins (268+ SKUs)</span></div>
+          </div>
+          <div style="background:var(--color-accent-yellow);color:#1A1A1A;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;font-family:var(--font-heading)">PRICE THREAT</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-3)">
+          <div>
+            <div style="font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1)">Positioning &amp; Product</div>
+            <ul style="font-size:var(--text-body-sm);line-height:var(--leading-relaxed);padding-left:var(--space-4);margin:0">
+              <li>268+ enamel pin SKUs at ₹69–₹349 — lowest price in India's pin category</li>
+              <li>Also sells button badges, magnets, laptop stickers, notebooks, patches, tees</li>
+              <li>1 lakh+ customers claimed; strong Amazon + Flipkart marketplace presence</li>
+              <li>Thematic breadth: K-pop, travel, gaming, mental health, pop culture, anime</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1)">Attack Vectors on TPL</div>
+            <ul style="font-size:var(--text-body-sm);line-height:var(--leading-relaxed);padding-left:var(--space-4);margin:0">
+              <li>Direct price comparison: TPL pins at ₹249–₹299 vs. Dot Badges at ₹69–₹349</li>
+              <li>268+ designs = far deeper catalog than TPL's initial 20–30 SKU launch range</li>
+              <li>Marketplace-native = discoverable on Amazon/Flipkart where TPL has no presence</li>
+              <li>"Pocket-friendly merchandise" positioning captures budget-conscious Gen Z buyers</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)">
+          <div>
+            <div style="font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1)">TPL's Advantage</div>
+            <ul style="font-size:var(--text-body-sm);line-height:var(--leading-relaxed);padding-left:var(--space-4);margin:0">
+              <li>Artist-led model = perceived uniqueness Dot Badges can't claim (mass-manufactured)</li>
+              <li>No brand story = Dot Badges wins on price, loses on identity — TPL should never compete on price</li>
+              <li>TPL's card stickers, keychains and collect sets add categories Dot Badges can't match</li>
+              <li>Gift persona shopping = Dot Badges has no equivalent mechanic</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1)">Defensive Priority</div>
+            <div style="font-size:var(--text-body-sm);line-height:var(--leading-relaxed);padding:var(--space-2);background:rgba(242,208,36,0.15);border-radius:var(--radius-sm)">
+              <strong>MEDIUM-HIGH.</strong> Do not compete on pin price — Dot Badges wins that game. Compete on pin story: limited drops, artist names, collectibility. TPL's ₹249 pin must feel worth more than Dot Badges' ₹99 pin. Artist card + exclusive series + limited run = justifies premium.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Threat 3: The Riyal Store -->
+      <div class="threat-card" style="background:var(--color-surface-raised);border-radius:var(--radius-lg);padding:var(--space-5);border-left:4px solid var(--color-accent-yellow)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-3)">
+          <div>
+            <div style="font-family:var(--font-heading);font-weight:var(--weight-black);font-size:var(--text-h4);text-transform:uppercase">The Riyal Store</div>
+            <div style="font-size:var(--text-caption);color:var(--color-text-secondary)">theriyalstore.com · <span style="color:var(--color-accent-yellow)">MEDIUM THREAT — "India's first meme sticker brand," same Gen Z audience</span></div>
+          </div>
+          <div style="background:var(--color-accent-yellow);color:#1A1A1A;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;font-family:var(--font-heading)">AUDIENCE OVERLAP</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-3)">
+          <div>
+            <div style="font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1)">Positioning &amp; Product</div>
+            <ul style="font-size:var(--text-body-sm);line-height:var(--leading-relaxed);padding-left:var(--space-4);margin:0">
+              <li>India's first meme-specific sticker brand — internet culture, desi humour, pop references</li>
+              <li>Price: ₹99–₹399 — aggressive entry price for vinyl stickers + phone grips + badges</li>
+              <li>Strong Instagram-first distribution: Reels, memes, UGC-driven content strategy</li>
+              <li>Phone grips (pop sockets) are a unique accessory TPL doesn't currently offer</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1)">Attack Vectors on TPL</div>
+            <ul style="font-size:var(--text-body-sm);line-height:var(--leading-relaxed);padding-left:var(--space-4);margin:0">
+              <li>Same "opinion product" territory — meme stickers are a form of opinion expression</li>
+              <li>Lower price floor (₹99 vs. TPL's ₹149 entry) captures more impulse traffic</li>
+              <li>Instagram-native = organic reach advantage TPL hasn't built yet</li>
+              <li>Desi/internet-humour positioning overlaps TPL's Gen Z target directly</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)">
+          <div>
+            <div style="font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1)">TPL's Advantage</div>
+            <ul style="font-size:var(--text-body-sm);line-height:var(--leading-relaxed);padding-left:var(--space-4);margin:0">
+              <li>TPL's product voice is identity-led ("For the person who..."), not just meme-repeat — deeper brand connection</li>
+              <li>Riyal Store is sticker-only; TPL offers hard goods (keychains, pins, magnets, card stickers)</li>
+              <li>Artist platform = original, exclusive designs; Riyal Store uses internet memes available everywhere</li>
+              <li>Collect sets + drops create repeat purchase loop Riyal Store can't replicate with single-sticker model</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:var(--text-caption);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1)">Defensive Priority</div>
+            <div style="font-size:var(--text-body-sm);line-height:var(--leading-relaxed);padding:var(--space-2);background:rgba(242,208,36,0.15);border-radius:var(--radius-sm)">
+              <strong>MEDIUM.</strong> Riyal Store wins on meme-speed and price. TPL wins on depth and identity. TPL's best defense is to never chase meme-velocity — instead, build products that feel permanent and collectible. Riyal Store stickers are disposable; TPL's opinion pieces are keepsakes. Lean into that gap.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: SUGGESTIONS
+════════════════════════════════════════ -->
+<div id="page-suggestions" class="page">
+  <div style="max-width:600px;margin:0 auto;padding:var(--space-6) var(--space-4)">
+    <h2 style="font-family:var(--font-heading);font-weight:var(--weight-black);font-size:var(--text-h2);text-transform:uppercase;letter-spacing:var(--tracking-snug);margin-bottom:var(--space-6)">Suggest a Design</h2>
+    <p style="font-size:var(--text-body-sm);color:var(--color-text-secondary);line-height:var(--leading-normal);margin-bottom:var(--space-6)">
+      Got an idea for a sticker, keychain, or opinion worth printing? We're all ears. The best suggestions get made and credited to you.
+    </p>
+    <div class="chk-section">
+      <h3>Your Idea</h3>
+      <div class="chk-row" style="grid-template-columns:1fr">
+        <div class="chk-field">
+          <label>What's the design or phrase?</label>
+          <input type="text" placeholder='e.g. "Selective Listener"'>
+        </div>
+      </div>
+      <div class="chk-row" style="grid-template-columns:1fr">
+        <div class="chk-field">
+          <label>Product Type</label>
+          <select><option>Sticker</option><option>Keychain</option><option>Enamel Pin</option><option>Bundle</option><option>Other</option></select>
+        </div>
+      </div>
+      <div class="chk-row" style="grid-template-columns:1fr">
+        <div class="chk-field">
+          <label>Why would this make a great product?</label>
+          <input type="text" placeholder="Tell us the story behind it...">
+        </div>
+      </div>
+      <div class="chk-row" style="grid-template-columns:1fr">
+        <div class="chk-field">
+          <label>Your Name (for credit)</label>
+          <input type="text" placeholder="Your name or @handle">
+        </div>
+      </div>
+      <div class="chk-row" style="grid-template-columns:1fr">
+        <button class="btn-primary" onclick="alert('Thanks for the suggestion! We review ideas every week. If yours gets made, we\'ll credit you on the product page.')" style="width:100%">Submit Idea</button>
+      </div>
+    </div>
+    <div class="chk-section">
+      <h3>Recent Suggestions</h3>
+      <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+        <div style="background:var(--color-surface-raised);border-radius:var(--radius-md);padding:var(--space-3);box-shadow:var(--shadow-product)">
+          <div style="font-family:var(--font-heading);font-weight:var(--weight-bold);font-size:var(--text-caption);text-transform:uppercase">"CHAOS COORDINATOR"</div>
+          <div style="font-size:var(--text-caption);color:var(--color-text-secondary)">Suggested by @bengaluru_boy · Sticker</div>
+        </div>
+        <div style="background:var(--color-surface-raised);border-radius:var(--radius-md);padding:var(--space-3);box-shadow:var(--shadow-product)">
+          <div style="font-family:var(--font-heading);font-weight:var(--weight-bold);font-size:var(--text-caption);text-transform:uppercase">"PROFESSIONAL OVERTHINKER"</div>
+          <div style="font-size:var(--text-caption);color:var(--color-text-secondary)">Suggested by @sarcasmqueen · Keychain</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="site-footer">
+    <div class="footer-logo"><span class="logo-stamp" style="border-color:#F5F0EB">TPL</span> The Product Lab</div>
+    <p class="footer-tagline">small objects. big opinions.</p>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Home</a><a onclick="showPage('collection')">Shop</a>
+      <a onclick="showPage('account')">Account</a><a onclick="showPage('artists')">Artists</a>
+    </div>
+    <p class="footer-copy">© 2026 The Product Lab · Bengaluru, India</p>
+  </footer>
+</div>
+
+
+<!-- Mobile Bottom Bar -->
+<nav class="bottom-bar" aria-label="Main navigation">
+  <button class="bb-item active" id="bb-find" onclick="showPage('home');setTab('bb-find')">
+    <div class="bb-dot"></div>Find
+  </button>
+  <button class="bb-item" id="bb-collect" onclick="showPage('collection');setTab('bb-collect')">
+    <div class="bb-dot"></div>Collect
+  </button>
+  <button class="bb-item" id="bb-gift" onclick="showPage('gift');setTab('bb-gift')">
+    <div class="bb-dot"></div>Gift
+  </button>
+  <button class="bb-item" id="bb-cart" onclick="toggleCart()">
+    <div class="bb-dot"></div>Cart
+  </button>
+</nav>
+
+<!-- Cart Drawer -->
+<div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cart-drawer">
+  <div class="cart-head">
+    <span class="cart-head__title">Your Opinions (2)</span>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-body">
+    <div class="cart-item">
+      <div class="cart-item__thumb" style="background:#f0e8ff">BULLSHIT REMOVER</div>
+      <div>
+        <p class="cart-item__name">Bullshit Remover</p>
+        <p class="cart-item__type">Card sticker</p>
+        <p class="cart-item__price">₹199</p>
+      </div>
+    </div>
+    <div class="cart-item">
+      <div class="cart-item__thumb" style="background:#ffe8e8">SELECTIVE LISTENER</div>
+      <div>
+        <p class="cart-item__name">Selective Listener</p>
+        <p class="cart-item__type">Card sticker</p>
+        <p class="cart-item__price">₹199</p>
+      </div>
+    </div>
+  </div>
+  <div class="cart-foot">
+    <div class="cart-subtotal">
+      <span class="cart-subtotal__label">Subtotal</span>
+      <span class="cart-subtotal__val">₹398</span>
+    </div>
+    <p class="cart-ship-note">Add ₹101 more for free shipping ↑</p>
+    <button class="btn-primary" style="margin-bottom:12px" onclick="toggleCart();showPage('checkout')">Checkout</button>
+    <button class="btn-secondary" onclick="toggleCart()">Continue Shopping</button>
+  </div>
+</div>
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function showAdminTab(id, btn) {
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-tabs button').forEach(b => b.classList.remove('active'));
+  document.getElementById('apanel-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+function showAcctTab(id, btn) {
+  document.querySelectorAll('.acct-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.acct-tabs button').forEach(b => b.classList.remove('active'));
+  document.getElementById('apanel-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+function setTab(id) {
+  document.querySelectorAll('.bb-item').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function toggleCart() {
+  document.getElementById('cart-overlay').classList.toggle('open');
+  document.getElementById('cart-drawer').classList.toggle('open');
+}
+function addAndOpenCart() {
+  document.getElementById('cart-overlay').classList.add('open');
+  document.getElementById('cart-drawer').classList.add('open');
+}
+// Hash routing for cross-page nav (e.g. Admin from other pages)
+if (window.location.hash) {
+  var hashPage = window.location.hash.replace(/^#\/?/, '');
+  if (document.getElementById('page-' + hashPage)) showPage(hashPage);
+}
+window.addEventListener('hashchange', function() {
+  var hashPage = window.location.hash.replace(/^#\/?/, '');
+  if (document.getElementById('page-' + hashPage)) showPage(hashPage);
+});
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    chip.closest('.filter-bar').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

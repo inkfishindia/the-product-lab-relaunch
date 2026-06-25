@@ -1,0 +1,21 @@
+# Product Photography
+
+This folder will hold all product photography for TPL.
+
+## Status: EMPTY — Photography not yet shot.
+
+Dan's action: Shoot hero product shots per brief in:
+  artifacts/phase-3/asset-list.md
+
+## Required Before Launch
+
+- Hero shot: Card stickers (3 angles)
+- Hero shot: Lapel pins (close-up + display)
+- Hero shot: No Filter collection (full set)
+- Lifestyle: Products in use (bag, jacket lapel, desk)
+
+## Naming Convention
+
+product-[sku-slug]-[angle]-[size].[ext]
+
+Example: product-cardsticker-bataangle-hero-1080.jpg

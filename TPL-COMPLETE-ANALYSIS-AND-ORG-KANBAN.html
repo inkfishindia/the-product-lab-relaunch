@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Product Lab — Complete Analysis & Org Kanban</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0d14;
+    --bg2: #0f131c;
+    --bg3: #161b28;
+    --bg4: #1e2536;
+    --text: #e8e6e3;
+    --text2: rgba(255,255,255,0.7);
+    --text3: rgba(255,255,255,0.5);
+    --tpl-red: #E63B2E;
+    --tpl-yellow: #F2D024;
+    --tpl-cream: #F5F0EB;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --pink: #ec4899;
+    --teal: #14b8a6;
+  }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 20px;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  h1 { font-size: 2.8rem; color: var(--tpl-cream); margin-bottom: 4px; }
+  h2 { font-size: 1.8rem; color: var(--tpl-yellow); margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--tpl-red); }
+  h3 { font-size: 1.3rem; color: var(--tpl-cream); margin: 20px 0 10px; }
+  h4 { font-size: 1rem; color: var(--text2); margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+  p, li { color: var(--text2); font-size: 0.9rem; line-height: 1.7; }
+  .subtitle { color: var(--text3); font-size: 0.95rem; margin-bottom: 32px; }
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    flex-wrap: wrap; gap: 16px; margin-bottom: 24px;
+  }
+  .header-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    display: inline-block; padding: 4px 14px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .badge-red { background: var(--tpl-red); color: #fff; }
+  .badge-yellow { background: var(--tpl-yellow); color: #000; }
+  .badge-green { background: var(--green); color: #fff; }
+  .badge-blue { background: var(--blue); color: #fff; }
+  .badge-purple { background: var(--purple); color: #fff; }
+  .badge-teal { background: var(--teal); color: #fff; }
+
+  /* ===== TABS ===== */
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 24px; }
+  .tab-btn {
+    padding: 10px 20px; background: var(--bg2); border: 1px solid var(--bg4);
+    color: var(--text2); border-radius: 8px 8px 0 0; cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 1rem;
+    font-weight: 600; transition: all 0.2s;
+  }
+  .tab-btn:hover { background: var(--bg3); }
+  .tab-btn.active { background: var(--bg3); color: var(--tpl-yellow); border-color: var(--tpl-yellow); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ===== KANBAN ===== */
+  .kanban-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .kanban-col {
+    background: var(--bg2); border-radius: 12px; border: 1px solid var(--bg4);
+    padding: 16px; min-height: 200px;
+  }
+  .kanban-col h4 { margin-top: 0; padding-bottom: 8px; border-bottom: 2px solid; }
+  .kanban-col.hiring h4 { border-color: var(--green); }
+  .kanban-col.core h4 { border-color: var(--blue); }
+  .kanban-col.build h4 { border-color: var(--tpl-yellow); }
+  .kanban-col.growth h4 { border-color: var(--tpl-red); }
+  .kanban-col.ops h4 { border-color: var(--purple); }
+  .kanban-col.future h4 { border-color: var(--teal); }
+  .kanban-col.scale h4 { border-color: var(--pink); }
+
+  .card {
+    background: var(--bg3); border-radius: 8px; padding: 12px; margin-top: 10px;
+    border: 1px solid var(--bg4); transition: all 0.2s;
+  }
+  .card:hover { border-color: var(--tpl-yellow); transform: translateX(2px); }
+  .card .title { font-weight: 600; color: var(--text); font-size: 0.85rem; margin-bottom: 4px; }
+  .card .meta { font-size: 0.72rem; color: var(--text3); display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+  .card .desc { font-size: 0.78rem; color: var(--text2); line-height: 1.5; }
+  .card .skills { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+  .skill-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.65rem; font-weight: 500; background: var(--bg4); color: var(--text3);
+  }
+  .skill-tag.primary { background: rgba(59,130,246,0.2); color: var(--blue); }
+  .skill-tag.technical { background: rgba(16,185,166,0.2); color: var(--teal); }
+  .skill-tag.creative { background: rgba(236,72,153,0.2); color: var(--pink); }
+  .skill-tag.business { background: rgba(245,158,11,0.2); color: var(--amber); }
+
+  /* ===== COMPETITOR TABLE ===== */
+  .comp-table {
+    width: 100%; border-collapse: collapse; font-size: 0.8rem;
+    margin: 16px 0;
+  }
+  .comp-table th {
+    background: var(--bg3); color: var(--tpl-yellow); padding: 10px 8px;
+    text-align: left; font-weight: 600; border-bottom: 2px solid var(--bg4);
+    position: sticky; top: 0;
+  }
+  .comp-table td {
+    padding: 8px; border-bottom: 1px solid var(--bg4); color: var(--text2);
+  }
+  .comp-table tr:hover td { background: var(--bg3); }
+  .comp-table .tpl-row { background: rgba(230,59,46,0.08); }
+  .comp-table .tpl-row td { color: var(--tpl-cream); font-weight: 500; }
+  .win { color: var(--green); }
+  .lose { color: var(--tpl-red); }
+  .tie { color: var(--tpl-yellow); }
+
+  /* ===== CARDS ===== */
+  .metric-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px; margin: 16px 0;
+  }
+  .metric-card {
+    background: var(--bg3); border-radius: 8px; padding: 16px;
+    border: 1px solid var(--bg4); text-align: center;
+  }
+  .metric-card .value { font-size: 1.6rem; font-weight: 700; color: var(--tpl-yellow); font-family: 'Barlow Condensed', sans-serif; }
+  .metric-card .label { font-size: 0.72rem; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .insight-box {
+    background: var(--bg3); border-left: 3px solid var(--tpl-red);
+    padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0;
+  }
+  .insight-box.blue { border-left-color: var(--blue); }
+  .insight-box.green { border-left-color: var(--green); }
+  .insight-box.amber { border-left-color: var(--amber); }
+
+  .tag-list { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .pill {
+    display: inline-block; padding: 4px 12px; border-radius: 16px;
+    font-size: 0.72rem; font-weight: 500;
+  }
+  .pill.direct { background: rgba(230,59,46,0.2); color: var(--tpl-red); }
+  .pill.indirect { background: rgba(139,92,246,0.2); color: var(--purple); }
+  .pill.new { background: rgba(16,185,166,0.2); color: var(--teal); }
+  .pill.legacy { background: rgba(245,158,11,0.2); color: var(--amber); }
+
+  .section-divider { margin: 40px 0 20px; border: none; border-top: 1px solid var(--bg4); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+  .timeline { position: relative; padding-left: 24px; margin: 16px 0; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--bg4); }
+  .timeline-item { position: relative; margin-bottom: 20px; }
+  .timeline-item::before {
+    content: ''; position: absolute; left: -20px; top: 6px; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--tpl-red);
+  }
+  .timeline-item .phase { font-weight: 700; color: var(--tpl-yellow); font-size: 0.9rem; }
+  .timeline-item .date { font-size: 0.75rem; color: var(--text3); }
+  .timeline-item p { margin-top: 4px; }
+
+  .expandable { cursor: pointer; }
+  .expandable:hover { opacity: 0.8; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>THE PRODUCT LAB</h1>
+    <div class="subtitle">Complete Analysis · Market Research · Competitive Landscape · Org Kanban · Scale Roadmap</div>
+  </div>
+  <div class="header-badges">
+    <span class="badge badge-red">Phase 4 Active</span>
+    <span class="badge badge-yellow">₹48L Revenue</span>
+    <span class="badge badge-green">73% Gross Margin</span>
+    <span class="badge badge-blue">D2C Launch</span>
+    <span class="badge badge-purple">2026-06-06</span>
+  </div>
+</div>
+
+<!-- ===== TABS ===== -->
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="market">Market Research</button>
+  <button class="tab-btn" data-tab="competitors">Competitor Analysis</button>
+  <button class="tab-btn" data-tab="company">Company Analysis</button>
+  <button class="tab-btn" data-tab="org">Org Kanban</button>
+  <button class="tab-btn" data-tab="roadmap">Scale Roadmap</button>
+  <button class="tab-btn" data-tab="data">Data Sources</button>
+</nav>
+
+<!-- ================================================================== -->
+<!-- TAB 1: MARKET RESEARCH -->
+<!-- ================================================================== -->
+<section id="market" class="tab-content active">
+
+<h2>Market Research — Indian D2C & Accessories Landscape</h2>
+
+<div class="metric-grid">
+  <div class="metric-card"><div class="value">$87.5B</div><div class="label">India D2C Market 2025</div></div>
+  <div class="metric-card"><div class="value">24.3%</div><div class="label">D2C CAGR (2026-31)</div></div>
+  <div class="metric-card"><div class="value">$17.7B</div><div class="label">Personal Accessories 2024</div></div>
+  <div class="metric-card"><div class="value">9.4%</div><div class="label">Accessories CAGR (2025-34)</div></div>
+  <div class="metric-card"><div class="value">₹7.3T</div><div class="label">Accessories Retail Value 2025</div></div>
+  <div class="metric-card"><div class="value">371M</div><div class="label">Gen Z / Young Consumers</div></div>
+  <div class="metric-card"><div class="value">12-15%</div><div class="label">Stationery & Stickers CAGR</div></div>
+  <div class="metric-card"><div class="value">$310B</div><div class="label">D2C GMV by 2031 (est.)</div></div>
+</div>
+
+<h3>Market Structure & Key Trends</h3>
+<div class="two-col">
+  <div>
+    <h4>Macro Tailwinds</h4>
+    <ul>
+      <li><strong>India D2C 3.0</strong> — shift from growth-at-all-costs to retention, repeat purchases, operational efficiency, and quick commerce readiness</li>
+      <li><strong>Trust Flip</strong> — prepaid orders overtaking COD in Tier 2 hubs (Jaipur, Lucknow, Bhubaneswar) — first time in history</li>
+      <li><strong>Bharat Rising</strong> — Tier 2/3 cities now account for 60%+ of e-commerce volumes; Indore, Coimbatore, Surat emerging as brand hubs</li>
+      <li><strong>Premiumisation</strong> — consumers seeking high-quality branded products as status symbols; affordable luxury is the sweet spot</li>
+      <li><strong>Culture-Led Branding</strong> — Indian cultural storytelling (indigenous art, craft traditions, everyday Indian experiences) becoming core brand identity</li>
+    </ul>
+  </div>
+  <div>
+    <h4>D2C 3.0 Winning Models</h4>
+    <ul>
+      <li><strong>High-frequency categories</strong> — products that drive recurring purchases vs one-time discretionary</li>
+      <li><strong>Community-led engagement</strong> — repeat purchase rates >35-40% as sustainability threshold</li>
+      <li><strong>Quick commerce ready</strong> — 10-min delivery becoming baseline expectation</li>
+      <li><strong>Omnichannel</strong> — online + offline + quick commerce as growth trifecta</li>
+      <li><strong>Niche psychographic targeting</strong> — highly specific consumer behaviours vs broad demographic categories</li>
+    </ul>
+  </div>
+</div>
+
+<div class="insight-box">
+  <strong>TPL's Opportunity Window:</strong> The Indian sticker/stationery/accessories market is growing at 12-15% CAGR with low organized penetration. No brand currently owns the "opinion-led collectible sticker" space. TPL's Find.Collect.Gift mechanic, artist platform, and opinion wall are unique differentiators that map directly to D2C 3.0's community + psychographic targeting + high-frequency models.
+</div>
+
+<h3>Market Segmentation</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table">
+  <thead><tr>
+    <th>Segment</th><th>Market Size (2025)</th><th>Growth Rate</th><th>Key Players</th><th>TPL Relevance</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>Fashion Accessories</td><td>$17.7B (India)</td><td>9.4% CAGR</td><td>Titan, Fastrack, Lenskart, Baggit, Lavie</td><td>Direct — TPL's card stickers, pins, accessories</td></tr>
+    <tr><td>D2C Lifestyle</td><td>$87.5B</td><td>24.3% CAGR</td><td>Mamaearth, boAt, Sugar, Mokobara</td><td>Distribution channel — TPL goes D2C first</td></tr>
+    <tr><td>Stationery & Stickers</td><td>~$3B by 2027</td><td>12-15% CAGR</td><td>Odd Giraffe, Sticker Saga, KALP, Cupik Design</td><td>Core category — sticker collectibles</td></tr>
+    <tr><td>Pop-Culture Merch</td><td>~$500M+</td><td>18-22% CAGR</td><td>The Souled Store, Bewakoof, Redwolf</td><td>Adjacent — TPL avoids licensed IP (D-020)</td></tr>
+    <tr><td>Gifts & Souvenirs</td><td>~$15B by 2027</td><td>14-18% CAGR</td><td>Chumbak, Happily Unmarried, Nestasia</td><td>Direct — TPL's gifting hub + bundles</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Consumer Behaviour Shifts (2025-26)</h3>
+<div class="two-col">
+  <div>
+    <div class="insight-box blue">
+      <strong>Gen Z = Primary Engine</strong><br>
+      371M young consumers (15-29) in India. They use accessories for identity, social media styling, self-expression. Discovery via Instagram Reels, YouTube Shorts, creator commerce. Purchase behaviour: impulse gifting, frequent wardrobe refresh, visual expression.
+    </div>
+  </div>
+  <div>
+    <div class="insight-box green">
+      <strong>Pricing Sweet Spots</strong><br>
+      Entry: ₹149-199 | Core: ₹249 | Premium: ₹299-349 | Bundles: ₹399-999<br>
+      TPL's pricing (D-006) maps perfectly to the "Affordable Luxury" tier for Gen Z in Tier 1-3 cities. Nothing below ₹149 protects brand equity.
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+<h2>Market Opportunity: Key Numbers for TPL</h2>
+<div class="metric-grid">
+  <div class="metric-card"><div class="value">₹48L</div><div class="label">Current Revenue (TPL)</div></div>
+  <div class="metric-card"><div class="value">80%</div><div class="label">B2B Share Today</div></div>
+  <div class="metric-card"><div class="value">20%</div><div class="label">D2C Share Today</div></div>
+  <div class="metric-card"><div class="value">₹350+</div><div class="label">Target AOV</div></div>
+  <div class="metric-card"><div class="value">1.5-2.5%</div><div class="label">Target Conversion Rate</div></div>
+  <div class="metric-card"><div class="value">73%</div><div class="label">Gross Margin</div></div>
+  <div class="metric-card"><div class="value">34%</div><div class="label">Net Margin</div></div>
+  <div class="metric-card"><div class="value">₹1L/mo</div><div class="label">Store Rent (Cunningham Rd)</div></div>
+</div>
+
+</section>
+
+<!-- ================================================================== -->
+<!-- TAB 2: COMPETITOR ANALYSIS -->
+<!-- ================================================================== -->
+<section id="competitors" class="tab-content">
+
+<h2>Competitor Analysis — Indian Sticker, Stationery & Accessories Market</h2>
+<p class="subtitle">26 brands analysed across direct, indirect, and emerging competitors. TPL's unique differentiators highlighted.</p>
+
+<div class="tag-list">
+  <span class="pill direct">Direct Competitor</span>
+  <span class="pill indirect">Indirect / Lifestyle Competitor</span>
+  <span class="pill new">Emerging / Niche</span>
+  <span class="pill legacy">Mass Market / Legacy</span>
+</div>
+
+<h3>Competitive Landscape — Feature Comparison Matrix</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table">
+  <thead><tr>
+    <th>Brand</th><th>Type</th><th>Revenue Est.</th><th>Price Range</th><th>Hero Category</th><th>Artist Collab</th><th>Collect Sets</th><th>Gift Persona</th><th>Opinion Wall</th><th>D2C Maturity</th>
+  </tr></thead>
+  <tbody>
+    <tr class="tpl-row"><td><strong>TPL</strong></td><td>Direct</td><td>₹48L</td><td>₹149-999</td><td>Opinion Stickers</td><td><span class="win">✓ Planned</span></td><td><span class="win">✓ Core</span></td><td><span class="win">✓ Core</span></td><td><span class="win">✓ Unique</span></td><td>Pre-launch</td></tr>
+    <tr><td><strong>Sticker Saga</strong></td><td><span class="pill new">New</span></td><td>Undisclosed</td><td>₹29-499</td><td>Expressive Stickers</td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Early</td></tr>
+    <tr><td><strong>Peel Off</strong></td><td><span class="pill new">New</span></td><td>Undisclosed</td><td>₹19-299</td><td>Trendy Stickers</td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Early</td></tr>
+    <tr><td><strong>Bas Aise Hi</strong></td><td><span class="pill new">New</span></td><td>Undisclosed</td><td>₹99-799</td><td>Joyful Stationery</td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Early</td></tr>
+    <tr><td><strong>KALP</strong></td><td><span class="pill new">New</span></td><td>Undisclosed</td><td>₹99-599</td><td>Quirky Stationery</td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Early</td></tr>
+    <tr><td><strong>Odd Giraffe</strong></td><td><span class="pill direct">Direct</span></td><td>₹4.1Cr</td><td>₹800-1,500</td><td>Premium Journals</td><td><span class="tie">✓ Limited</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Early</td></tr>
+    <tr><td><strong>Cupik Design</strong></td><td><span class="pill direct">Direct</span></td><td>Undisclosed</td><td>₹199-999</td><td>Personalised Stationery</td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="tie">✓ Personalised</span></td><td><span class="lose">✗</span></td><td>Mid</td></tr>
+    <tr><td><strong>Young Onion</strong></td><td><span class="pill new">New</span></td><td>Undisclosed</td><td>₹49-599</td><td>Kawaii Stationery</td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Early</td></tr>
+    <tr><td><strong>Living Waters</strong></td><td><span class="pill indirect">Indirect</span></td><td>Undisclosed</td><td>₹49-399</td><td>Religious Stickers</td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Early</td></tr>
+    <tr><td><strong>WrapCart</strong></td><td><span class="pill indirect">Indirect</span></td><td>Undisclosed</td><td>₹99-499</td><td>Gift Wrapping</td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Mid</td></tr>
+    <tr><td><strong>Delight2Create</strong></td><td><span class="pill indirect">Indirect</span></td><td>Undisclosed</td><td>₹99-599</td><td>Custom Stickers</td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Early</td></tr>
+    <tr><td><strong>Chumbak</strong></td><td><span class="pill indirect">Indirect</span></td><td>₹1,020Cr</td><td>₹199-2,999</td><td>Quirky Lifestyle</td><td><span class="tie">✓ Occasional</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Mature</td></tr>
+    <tr><td><strong>The Souled Store</strong></td><td><span class="pill indirect">Indirect</span></td><td>₹492Cr</td><td>₹799-2,499</td><td>Pop-Culture Apparel</td><td><span class="tie">✓ Licensed IP</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Mature</td></tr>
+    <tr><td><strong>Bewakoof</strong></td><td><span class="pill indirect">Indirect</span></td><td>₹173Cr</td><td>₹249-999</td><td>Graphic Apparel</td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Mature</td></tr>
+    <tr><td><strong>Hobigo</strong></td><td><span class="pill new">New</span></td><td>Undisclosed</td><td>₹99-799</td><td>3D Printed Quirky</td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td>Early</td></tr>
+    <tr><td><strong>Nestasia</strong></td><td><span class="pill indirect">Indirect</span></td><td>Undisclosed</td><td>₹199-1,999</td><td>Home Decor</td><td><span class="lose">✗</span></td><td><span class="lose">✗</span></td><td><span class="tie">✓ Gifting</span></td><td><span class="lose">✗</span></td><td>Mid</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="insight-box">
+  <strong>Key Insight:</strong> <strong>No competitor</strong> owns TPL's full stack: (1) Collectible sets that reward repeat purchase, (2) Gift personas as organic growth engine, (3) Artist collaboration platform, (4) Opinion Wall as UGC + community + retention mechanic. These 4 differentiators create a moat that no sticker brand currently has.
+</div>
+
+<h3>Competitor Deep-Dives</h3>
+
+<div class="two-col">
+  <div>
+    <h4>🟠 Sticker Saga</h4>
+    <p>College startup, student-run. ₹29 entry price. Waterproof stickers. Strong on Instagram. No collect sets, no gifting mechanic, no artist platform. TPL advantage: brand depth, gift mechanic, opinion territory, premium pricing.</p>
+  </div>
+  <div>
+    <h4>🟣 Chumbak</h4>
+    <p>₹1,020Cr revenue. 120+ stores. Acquired by G.O.A.T Brand Labs. Quirky lifestyle brand. Strong omnichannel. But broad lifestyle play — no focused sticker/opinion territory. TPL advantage: focused niche, opinion-led, artist-first, better margins (73% vs Chumbak ~38%).</p>
+  </div>
+  <div>
+    <h4>🔵 Odd Giraffe</h4>
+    <p>₹4.1Cr revenue. Premium journals (₹800-1,500). 80% women buyers. Made-to-order model. Small team of 4. Limited sticker offering. TPL advantage: accessible pricing, broader audience, collect mechanics, physical store.</p>
+  </div>
+  <div>
+    <h4>🟡 Bas Aise Hi</h4>
+    <p>Lucknow-based. Handpainted designs. Solo founder + small team. Joyful stationery. Beautiful aesthetic but no scale, no collect mechanics, no artist platform. TPL advantage: opinion territory, artist platform, Find.Collect.Gift mechanic.</p>
+  </div>
+  <div>
+    <h4>🔴 The Souled Store</h4>
+    <p>₹492Cr revenue. Licensed IP (Marvel, DC, Disney). Pop-culture apparel leader. Premium pricing. Official licensing moat. BUT TPL D-020 explicitly avoids licensed IP — original opinion-driven designs instead. TPL advantage: no licensing costs, original artist IP, ownable opinion territory.</p>
+  </div>
+  <div>
+    <h4>🟢 Bewakoof</h4>
+    <p>₹173Cr revenue, ₹73Cr loss. Mass-market graphic tees. Backed by Aditya Birla's TMRW. Poor customer service (1.3/5 Trustpilot). Price wars. Thin margins. TPL advantage: high margin (73%), focused SKUs, premium positioning, no price war.</p>
+  </div>
+</div>
+
+<h3>Opportunity Map — 8 Gaps TPL Can Own</h3>
+<div class="kanban-row">
+  <div class="kanban-col build"><h4>1. Collectible Sets</h4><div class="card"><div class="desc">No sticker brand offers curated collectible sets (like trading cards). TPL's "Buy the set, complete the wall" mechanic is unique. Drives repeat purchase — D2C 3.0's #1 requirement.</div></div></div>
+  <div class="kanban-col build"><h4>2. Gift Personas</h4><div class="card"><div class="desc">"Send a sticker to the poet friend, the sarcastic coworker, the coffee addict." No competitor segments gifting by personality. Organic virality — every gift drops a new customer.</div></div></div>
+  <div class="kanban-col build"><h4>3. Opinion Territory</h4><div class="card"><div class="desc">"Small objects. Big opinions." No one owns opinion-led sticker consumption. Chumbak is quirky, Souled Store is fandom, TPL is opinion. Distinct, ownable, defensible.</div></div></div>
+  <div class="kanban-col build"><h4>4. Artist Platform</h4><div class="card"><div class="desc">TPL has existing artist network (Boltminor + 3 others). Tiered revenue share model. Drop-based artist collabs. No competitor has a structured artist platform.</div></div></div>
+  <div class="kanban-col build"><h4>5. Opinion Wall</h4><div class="card"><div class="desc">UGC wall where customers display their collections. Social proof + community + retention. No sticker brand has this. Drives Instagram UGC organically.</div></div></div>
+  <div class="kanban-col build"><h4>6. Physical Store</h4><div class="card"><div class="desc">TPL has Cunningham Road store (₹1L/month rent). All competitors are D2C-only. Phygital advantage — experiential retail, direct customer connection, local community hub.</div></div></div>
+  <div class="kanban-col build"><h4>7. In-House Production</h4><div class="card"><div class="desc">Screen printing (12-color), UV, digital, DTG, embroidery — all owned. Competitors outsource. TPL can iterate faster, test small batches, maintain 73% margin.</div></div></div>
+  <div class="kanban-col build"><h4>8. B2B Bridge</h4><div class="card"><div class="desc">80% of current revenue is B2B (Meta, Diageo, Coca-Cola, Amazon). No competitor has enterprise B2B relationships. Corporate gifting = natural D2C → B2B bridge.</div></div></div>
+</div>
+
+</section>
+
+<!-- ================================================================== -->
+<!-- TAB 3: COMPANY ANALYSIS -->
+<!-- ================================================================== -->
+<section id="company" class="tab-content">
+
+<h2>The Product Lab — Complete Company Analysis</h2>
+
+<div class="metric-grid">
+  <div class="metric-card"><div class="value">2021</div><div class="label">Founded</div></div>
+  <div class="metric-card"><div class="value">₹48L</div><div class="label">Annual Revenue</div></div>
+  <div class="metric-card"><div class="value">73%</div><div class="label">Gross Margin</div></div>
+  <div class="metric-card"><div class="value">34%</div><div class="label">Net Margin</div></div>
+  <div class="metric-card"><div class="value">1</div><div class="label">Team Size (Dan)</div></div>
+  <div class="metric-card"><div class="value">80%</div><div class="label">B2B Revenue Share</div></div>
+  <div class="metric-card"><div class="value">Ink Fish</div><div class="label">Parent Entity (est. 2013)</div></div>
+  <div class="metric-card"><div class="value">4</div><div class="label">Enterprise Clients</div></div>
+</div>
+
+<h3>SWOT Analysis</h3>
+<div class="kanban-row">
+  <div class="kanban-col core">
+    <h4>Strengths (Internal)</h4>
+    <div class="card"><div class="title">🔧 In-House Production</div><div class="desc">Screen printing (12-color), UV, digital, DTG, sublimation, embroidery, vinyl, DTF. JIT model. 45-day max stock. 73% gross margin. Competitors outsource — TPL owns the factory.</div></div>
+    <div class="card"><div class="title">🏪 Physical Store</div><div class="desc">Cunningham Road, Bangalore. ₹1L/month rent. Phygital advantage none of the D2C-only competitors have. Walk-in traffic, local community, experiential retail.</div></div>
+    <div class="card"><div class="title">🏢 Enterprise B2B Base</div><div class="desc">Meta, Diageo, Coca-Cola, Amazon as clients. 80% of ₹48L revenue. Corporate gifting pipeline for D2C launch seeding. No sticker competitor has this.</div></div>
+    <div class="card"><div class="title">🎨 Artist Network</div><div class="desc">Boltminor collab done. 4 artists in pipeline. Tiered revenue share model. Drop-based collaboration framework ready.</div></div>
+  </div>
+  <div class="kanban-col hiring">
+    <h4>Weaknesses (Internal)</h4>
+    <div class="card"><div class="title">👤 Solo Founder</div><div class="desc">Dan is the entire team. All roles unfilled. Bottleneck on all decisions. Cannot scale without hiring. D-012: Dan + AI agents until Phase 5-6.</div></div>
+    <div class="card"><div class="title">🌐 D2C Immaturity</div><div class="desc">20% of revenue from D2C. No analytics infrastructure. No email/SMS flows. No retention system. Starting from near-zero D2C capability.</div></div>
+    <div class="card"><div class="title">📦 B2B Dependency</div><div class="desc">80% revenue from 4 enterprise clients. Concentration risk. Any client loss = 20%+ revenue drop. D2C diversification is existential.</div></div>
+    <div class="card"><div class="title">💰 No Funding</div><div class="desc">Bootstrapped. Budget constraint: no tool >₹5K/month. Cannot outspend competitors on ads, talent, or tech. Must be capital-efficient.</div></div>
+  </div>
+  <div class="kanban-col build">
+    <h4>Opportunities (External)</h4>
+    <div class="card"><div class="title">📈 D2C 3.0 Wave</div><div class="desc">India D2C market growing at 24.3% CAGR. Shift to retention + community + culture-led branding. TPL's opinion+artist+collect model maps perfectly.</div></div>
+    <div class="card"><div class="title">🌏 Bharat Expansion</div><div class="desc">60%+ e-commerce volume from Tier 2/3 cities. Gen Z in these cities hungry for branded self-expression. TPL's ₹149-999 price point is accessible.</div></div>
+    <div class="card"><div class="title">🎁 Gifting Economy</div><div class="desc">Indian gifting market projected ~$15B by 2027. TPL's gift persona mechanic is organic growth engine. Every gift = new customer acquisition at zero CAC.</div></div>
+    <div class="card"><div class="title">🤖 AI-Powered Efficiency</div><div class="desc">AI agents for strategy, creative, analytics, operations. Dan + AI = team of 25 at fraction of hiring cost. CLAUDE.md already has 25 agent definitions.</div></div>
+  </div>
+  <div class="kanban-col growth">
+    <h4>Threats (External)</h4>
+    <div class="card"><div class="title">⚔️ Low Entry Barriers</div><div class="desc">120+ microbrands offering Chumbak-style products at 50% lower prices. Sticker printing is commoditised. TPL's moat must be brand+community, not product.</div></div>
+    <div class="card"><div class="title">📉 CAC Inflation</div><div class="desc">Digital ad CPC rising 25% YoY. Meta/Google ad costs squeezing D2C margins. Bewakoof spends 30-40% of revenue on ads. TPL cannot afford this — must rely on organic + gift.</div></div>
+    <div class="card"><div class="title">🏢 Platform Dependency</div><div class="desc">Fynd for launch, but quick-commerce (Zepto, Blinkit) becoming primary discovery layer. Brands risk losing direct customer relationships.</div></div>
+    <div class="card"><div class="title">💰 Capital Disadvantage</div><div class="desc">Competitors backed by PE/FMCG (Chumbak/GOAT, Bewakoof/TMRW, Souled Store/PE). Deep pockets for ad spend, talent, offline expansion. TPL bootstrapped.</div></div>
+  </div>
+</div>
+
+<h3>Strategic Imperatives (from SWOT)</h3>
+<div class="kanban-row">
+  <div class="kanban-col core"><h4>Attack — Leverage Strengths × Opportunities</h4>
+    <div class="card"><div class="title">Owned Production → Fast Drops</div><div class="desc">Use in-house production for rapid artist collab drops (monthly). No competitor can match speed-to-market with owned factory.</div></div>
+    <div class="card"><div class="title">B2B Clients → Corporate Gifting D2C</div><div class="desc">Pitch Meta/Diageo/Coca-Cola as first corporate gifting customers on TPL's gift platform. Proof of concept for D2C gifting feature.</div></div>
+    <div class="card"><div class="title">Physical Store → Experience Hub</div><div class="desc">Cunningham Road as opinion wall gallery + artist workshop space + pickup point. Drives Instagram content + local community.</div></div>
+  </div>
+  <div class="kanban-col hiring"><h4>Defend — Fix Weaknesses × Threats</h4>
+    <div class="card"><div class="title">Solo Founder → AI + First Hires</div><div class="desc">Phase 5-6: hire store ops + packaging person. AI agents handle strategy/creative/analytics. Systems documented before hiring (D-014).</div></div>
+    <div class="card"><div class="title">No D2C → Zero-to-One System</div><div class="desc">GA4 + Klaviyo/Mailchimp + WhatsApp flows all in Phase 4-5 build. Analytics-first approach from Day 1 of D2C launch.</div></div>
+    <div class="card"><div class="title">B2B Concentration → D2C Diversify</div><div class="desc">D2C launch is existential hedge against B2B concentration risk. Target: 50/50 B2B/D2C split by Year 2.</div></div>
+  </div>
+</div>
+
+<h3>Financial Health Assessment</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table">
+  <thead><tr><th>Metric</th><th>TPL Current</th><th>Industry Benchmark</th><th>Health</th></tr></thead>
+  <tbody>
+    <tr><td>Gross Margin</td><td>73%</td><td>40-55% (D2C apparel/accessories)</td><td><span class="win">✓ Excellent (top quartile)</span></td></tr>
+    <tr><td>Net Margin</td><td>34%</td><td>5-15% (profitable D2C brands)</td><td><span class="win">✓ Exceptional</span></td></tr>
+    <tr><td>Revenue</td><td>₹48L</td><td>₹10Cr+ (scaled D2C)</td><td><span class="tie">○ Early stage; room to 20x</span></td></tr>
+    <tr><td>D2C Share</td><td>20%</td><td>70-100% (D2C brands)</td><td><span class="lose">✗ Must grow to 50%+</span></td></tr>
+    <tr><td>Team Size</td><td>1</td><td>10-50 (at ₹48L D2C revenue)</td><td><span class="lose">✗ Critical gap</span></td></tr>
+    <tr><td>Monthly Burn (ex-rent)</td><td>Undisclosed</td><td>15-25% of revenue</td><td><span class="tie">○ Monitor post-launch</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="insight-box green">
+  <strong>Financial Verdict:</strong> TPL's 73% gross margin and 34% net margin are exceptional — better than The Souled Store, Chumbak, and most scaled D2C brands. The unit economics work. The challenge is not profitability but <em>scale</em>. The existing business is profitable but small. D2C launch is a growth investment from a healthy base.
+</div>
+
+</section>
+
+<!-- ================================================================== -->
+<!-- TAB 4: ORG KANBAN — ROLES, TEAM, SKILLS -->
+<!-- ================================================================== -->
+<section id="org" class="tab-content">
+
+<h2>Org Kanban — Full-Stack Team, Roles & Responsibilities</h2>
+<p class="subtitle">From solo founder to scaled org. Roles organised by domain, with current status, skills, and hiring priority.</p>
+
+<h3>🔴 NOW — Phase 4/5: Launch Team (Dan + AI Agents)</h3>
+<div class="kanban-row">
+  <div class="kanban-col core">
+    <h4>Program Direction</h4>
+    <div class="card"><div class="title">Harley — Program Director</div><div class="meta">Role: AI Agent | Status: 🟢 Active</div><div class="desc">Owns total outcome, timeline, sequencing, quality bar, final decisions. Decides tradeoffs between speed, scope, commercial impact. Breaks deadlocks.</div><div class="skills"><span class="skill-tag business">Strategy</span><span class="skill-tag business">Leadership</span><span class="skill-tag primary">Decision-Making</span></div></div>
+  </div>
+  <div class="kanban-col build">
+    <h4>Build & Engineering</h4>
+    <div class="card"><div class="title">Tobi — Build Lead (AI Agent)</div><div class="meta">Role: AI Agent | Status: 🟢 Active (blocked: Fynd access)</div><div class="desc">Technical architecture, Fynd storefront implementation, integrations (Razorpay, Shiprocket, GA4, Clarity), CSS/Darkroom theme, performance. 45hr build estimate.</div><div class="skills"><span class="skill-tag technical">Fynd/Commerce.com</span><span class="skill-tag technical">CSS/HTML</span><span class="skill-tag technical">GA4</span><span class="skill-tag technical">Integrations</span></div></div>
+    <div class="card"><div class="title">James — QA Lead (AI Agent)</div><div class="meta">Role: AI Agent | Status: 🟢 Active</div><div class="desc">QA checklist, P0/P1/P2 launch gate criteria, test scripts, performance validation (<3s LCP on 4G). Controls launch sign-off. No one overrules James on QA.</div><div class="skills"><span class="skill-tag technical">QA Testing</span><span class="skill-tag technical">Performance</span><span class="skill-tag technical">Launch Gate</span></div></div>
+  </div>
+  <div class="kanban-col growth">
+    <h4>Product & Creative</h4>
+    <div class="card"><div class="title">Andy — Product (AI Agent)</div><div class="meta">Role: AI Agent | Status: 🟢 Ready</div><div class="desc">Product catalog, collections, bundles. Review opportunity map. Validate TPL's product differentiation against 8 identified gaps.</div><div class="skills"><span class="skill-tag business">Product Strategy</span><span class="skill-tag business">Catalog</span></div></div>
+    <div class="card"><div class="title">Kurt — UX Lead (AI Agent)</div><div class="meta">Role: AI Agent | Status: ✅ Complete</div><div class="desc">Information architecture, merchandising flows, page logic, interaction priorities. Sitemap (20+ URLs), IA, nav, wireframes, customer journey.</div><div class="skills"><span class="skill-tag creative">UX Design</span><span class="skill-tag creative">Information Architecture</span></div></div>
+    <div class="card"><div class="title">Julie — UI Designer (AI Agent)</div><div class="meta">Role: AI Agent | Status: ✅ Complete</div><div class="desc">CSS tokens, every component, Fynd constraints. Hi-fi page designs for 8 pages. Darkroom + Light+Bold visual system.</div><div class="skills"><span class="skill-tag creative">UI Design</span><span class="skill-tag creative">Design Systems</span></div></div>
+  </div>
+  <div class="kanban-col ops">
+    <h4>Marketing & Launch</h4>
+    <div class="card"><div class="title">Nik — Growth Launch Lead (AI Agent)</div><div class="meta">Role: AI Agent | Status: 🟡 Planned</div><div class="desc">Launch strategy, channel plan, creator seeding, retention setup, post-launch experimentation. Launch narrative, pre-launch sequence, launch week.</div><div class="skills"><span class="skill-tag business">Growth Strategy</span><span class="skill-tag business">Go-to-Market</span></div></div>
+    <div class="card"><div class="title">Chase — Marketing Lead (AI Agent)</div><div class="meta">Role: AI Agent | Status: 🟡 Planned</div><div class="desc">Social content calendar, pre-launch posts (10 with full copy), messaging differentiation. Content strategy aligned with 4 unique differentiators.</div><div class="skills"><span class="skill-tag creative">Content Strategy</span><span class="skill-tag creative">Copywriting</span></div></div>
+    <div class="card"><div class="title">Eli — Retention/Growth (AI Agent)</div><div class="meta">Role: AI Agent | Status: 🟡 Planned</div><div class="desc">Email/WhatsApp flows, Klaviyo/Mailchimp setup, MSG91/Gupshup. Welcome, abandoned cart, post-purchase, drop announcement flows.</div><div class="skills"><span class="skill-tag technical">Email Automation</span><span class="skill-tag business">Retention</span></div></div>
+    <div class="card"><div class="title">Rachel — Seeding (AI Agent)</div><div class="meta">Role: AI Agent | Status: 🟡 Planned</div><div class="desc">Gift seeding (30 gifts), Design Yatra activation, 500-subscriber strategy, gift recipient identification.</div><div class="skills"><span class="skill-tag business">Influencer/Seeding</span></div></div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<h3>🟡 PHASE 5/6 — Full Human + AI Team (Planned Hires)</h3>
+<p>D-012: Dan + AI agents for Phase 4-5. First human hires at Phase 5-6 (D-014). All systems documented and transferable before hiring.</p>
+
+<div class="kanban-row">
+  <div class="kanban-col core">
+    <h4>Leadership</h4>
+    <div class="card"><div class="title">Dan — CEO / Founder</div><div class="meta">Role: Human | Status: 🟢 Solo Operator</div><div class="desc">Vision, brand strategy, artist relationships, enterprise client management, final decisions. Owns the brand. Escalation point for all decisions beyond ₹5K/month.</div><div class="skills"><span class="skill-tag business">Leadership</span><span class="skill-tag business">Brand Vision</span><span class="skill-tag creative">Creative Direction</span></div></div>
+    <div class="card"><div class="title">Program Director</div><div class="meta">Role: AI Agent (Harley) | Priority: P0</div><div class="desc">Total outcome, timeline, sequencing, quality bar. Currently AI. Could become human COO at scale (₹2Cr+ revenue).</div><div class="skills"><span class="skill-tag business">Program Management</span><span class="skill-tag business">Operations</span></div></div>
+  </div>
+  <div class="kanban-col ops">
+    <h4>Operations (First Hire)</h4>
+    <div class="card"><div class="title">Store + Packaging Associate</div><div class="meta">Role: Human | Priority: P1 — First hire</div><div class="desc">D-014: First human hire. Store operations, packaging, fulfillment, customer walk-ins. SOPs documented before hire by AI agents. Part-time or full-time based on volume.</div><div class="skills"><span class="skill-tag business">Retail Ops</span><span class="skill-tag business">Packaging</span><span class="skill-tag technical">Inventory</span><span class="skill-tag primary">₹15-25K/mo</span></div></div>
+    <div class="card"><div class="title">Fulfillment Coordinator</div><div class="meta">Role: Human | Priority: P2</div><div class="desc">Order processing, Shiprocket management, COD verification, returns handling. Scales from the packaging hire. Required when orders exceed 50/day.</div><div class="skills"><span class="skill-tag business">Logistics</span><span class="skill-tag technical">Shiprocket</span><span class="skill-tag primary">₹20-30K/mo</span></div></div>
+  </div>
+  <div class="kanban-col build">
+    <h4>Engineering & Product</h4>
+    <div class="card"><div class="title">Full-Stack Developer</div><div class="meta">Role: Human or Agency | Priority: P2</div><div class="desc">Storefront (Fynd → potential Medusa migration at Day 30), integrations, custom features, performance optimisation. Phase 4 done by Tobi (AI). Human needed for ongoing dev post-launch.</div><div class="skills"><span class="skill-tag technical">Next.js/React</span><span class="skill-tag technical">Node.js</span><span class="skill-tag technical">SQL</span><span class="skill-tag technical">Medusa</span><span class="skill-tag primary">₹50-80K/mo</span></div></div>
+    <div class="card"><div class="title">Product Manager</div><div class="meta">Role: AI Agent (Andy) → Human P3</div><div class="desc">Product roadmap, catalog expansion, artist collab pipeline, Drop 2-3 planning. AI handles Phase 4-5. Human needed for sustained product velocity at ₹1Cr+ revenue.</div><div class="skills"><span class="skill-tag business">Product Roadmap</span><span class="skill-tag business">Agile</span><span class="skill-tag primary">₹40-60K/mo</span></div></div>
+  </div>
+  <div class="kanban-col growth">
+    <h4>Growth & Marketing</h4>
+    <div class="card"><div class="title">Growth Marketing Manager</div><div class="meta">Role: Human | Priority: P2</div><div class="desc">Owns CAC, LTV, channel mix, paid ads (Phase 6+), influencer partnerships. Nik (AI) handles launch strategy. Human needed for sustained growth and paid media at Phase 6 go/no-go.</div><div class="skills"><span class="skill-tag business">Performance Marketing</span><span class="skill-tag business">Analytics</span><span class="skill-tag technical">Meta/Google Ads</span><span class="skill-tag primary">₹40-60K/mo</span></div></div>
+    <div class="card"><div class="title">Social Media & Content Creator</div><div class="meta">Role: Human | Priority: P2</div><div class="desc">Instagram-first content production, Reels, stories, UGC curation, community management. Casey (AI) does strategy and content calendar. Human needed for daily production and engagement.</div><div class="skills"><span class="skill-tag creative">Content Production</span><span class="skill-tag creative">Video/Reels</span><span class="skill-tag creative">Community Mgmt</span><span class="skill-tag primary">₹25-40K/mo</span></div></div>
+    <div class="card"><div class="title">Artist Relations Manager</div><div class="meta">Role: Human | Priority: P3</div><div class="desc">Artist onboarding, collab management, revenue share tracking, drop calendar. Becomes critical as artist platform scales (3+ artists active).</div><div class="skills"><span class="skill-tag business">Partnerships</span><span class="skill-tag creative">Creative Direction</span><span class="skill-tag primary">₹25-35K/mo</span></div></div>
+  </div>
+  <div class="kanban-col ops">
+    <h4>Creative & Design</h4>
+    <div class="card"><div class="title">Graphic / Product Designer</div><div class="meta">Role: Human or Freelancer | Priority: P2</div><div class="desc">Product design (stickers, pins), packaging design, collection visuals, artist collab production. Phase 3-4 design done by AI agents (Sean, Joanna, Julie). Human needed for ongoing production.</div><div class="skills"><span class="skill-tag creative">Graphic Design</span><span class="skill-tag creative">Illustration</span><span class="skill-tag creative">Packaging</span><span class="skill-tag primary">₹30-50K/mo</span></div></div>
+    <div class="card"><div class="title">Copywriter / Brand Writer</div><div class="meta">Role: AI Agent (Joanna) → Human P3</div><div class="desc">Product copy, collection narratives, voice consistency, WhatsApp/email copy. AI handles Phase 3-5. Human needed for volume at scale.</div><div class="skills"><span class="skill-tag creative">Copywriting</span><span class="skill-tag creative">Brand Voice</span><span class="skill-tag primary">₹20-35K/mo</span></div></div>
+  </div>
+  <div class="kanban-col future">
+    <h4>Analytics & Data</h4>
+    <div class="card"><div class="title">Analytics / Data Lead</div><div class="meta">Role: AI Agent → Freelance P3</div><div class="desc">GA4 setup, dashboard, event tracking, customer segmentation, cohort analysis, A/B testing. Tobi (AI) sets up analytics schema. Human needed for insights at scale.</div><div class="skills"><span class="skill-tag technical">GA4/BigQuery</span><span class="skill-tag technical">SQL</span><span class="skill-tag business">Analytics</span><span class="skill-tag primary">₹30-50K/mo</span></div></div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<h3>🔵 FULL-STACK TEAM — All Skills & Domains (By Function)</h3>
+<div class="kanban-row">
+  <div class="kanban-col core"><h4>🧠 Strategy & Leadership</h4>
+    <div class="card"><div class="title">CEO / Brand Owner</div><div class="desc">Dan. Brand vision, final decisions, artist/enterprise relationships, culture.</div><div class="skills"><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">Program Director</div><div class="desc">Harley (AI). Timeline, quality bar, sequencing, deadlock resolution.</div><div class="skills"><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">Brand Strategist</div><div class="desc">Heyward (AI). Positioning, narrative, audience, messaging hierarchy.</div><div class="skills"><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">Customer Insight Lead</div><div class="desc">Weiss (AI). Interviews, review mining, audience signal synthesis.</div><div class="skills"><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">Product Strategist</div><div class="desc">Shreyas (AI) → Human P3. PMF, roadmap, catalog strategy.</div><div class="skills"><span class="skill-tag primary">P0</span></div></div>
+  </div>
+  <div class="kanban-col build"><h4>⚙️ Engineering & Tech</h4>
+    <div class="card"><div class="title">Build Lead (Platform)</div><div class="desc">Tobi (AI). Fynd, integrations, CSS, performance. 45hr build.</div><div class="skills"><span class="skill-tag technical">Fynd</span><span class="skill-tag technical">CSS/HTML</span><span class="skill-tag technical">GA4</span><span class="skill-tag technical">Integrations</span><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">Full-Stack Developer</div><div class="desc">Human P2. Next.js, Node, Medusa, SQL, custom features.</div><div class="skills"><span class="skill-tag technical">Next.js</span><span class="skill-tag technical">Node.js</span><span class="skill-tag technical">SQL</span><span class="skill-tag technical">REST APIs</span></div></div>
+    <div class="card"><div class="title">QA Lead</div><div class="desc">James (AI). Test scripts, launch gate, performance audits.</div><div class="skills"><span class="skill-tag technical">QA</span><span class="skill-tag technical">Testing</span><span class="skill-tag technical">Performance</span><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">Data / Analytics Lead</div><div class="desc">AI → Freelance P3. GA4, SQL, BigQuery, dashboards, A/B testing.</div><div class="skills"><span class="skill-tag technical">SQL</span><span class="skill-tag technical">Analytics</span><span class="skill-tag technical">Dashboards</span></div></div>
+  </div>
+  <div class="kanban-col growth"><h4>🎨 Creative & Design</h4>
+    <div class="card"><div class="title">Creative Director</div><div class="desc">Sean (AI). Visual world, identity system, campaign expression, art direction.</div><div class="skills"><span class="skill-tag creative">Visual Identity</span><span class="skill-tag creative">Art Direction</span><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">UX / Conversion Lead</div><div class="desc">Kurt (AI). IA, page logic, interaction priorities, conversion optimization.</div><div class="skills"><span class="skill-tag creative">UX Design</span><span class="skill-tag creative">Conversion</span><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">UI Designer</div><div class="desc">Julie (AI). Design system, components, hi-fi pages, tokens.</div><div class="skills"><span class="skill-tag creative">UI Design</span><span class="skill-tag creative">Design Systems</span><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">Content & Copy Lead</div><div class="desc">Joanna (AI). Voice, site copy, product narratives, collection messaging.</div><div class="skills"><span class="skill-tag creative">Copywriting</span><span class="skill-tag creative">Brand Voice</span><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">Graphic / Product Designer</div><div class="desc">Human P2. Product design, packaging, collection visuals.</div><div class="skills"><span class="skill-tag creative">Graphic Design</span><span class="skill-tag creative">Illustration</span><span class="skill-tag creative">Packaging</span></div></div>
+    <div class="card"><div class="title">Content Creator (Reels/Social)</div><div class="desc">Human P2. Instagram Reels, stories, UGC curation, daily content.</div><div class="skills"><span class="skill-tag creative">Video Production</span><span class="skill-tag creative">Social Media</span></div></div>
+  </div>
+  <div class="kanban-col ops"><h4>📦 Operations & Logistics</h4>
+    <div class="card"><div class="title">Store + Packaging Associate</div><div class="desc">Human P1 — First hire. Store ops, packaging, fulfillment, walk-ins.</div><div class="skills"><span class="skill-tag business">Retail</span><span class="skill-tag business">Packaging</span><span class="skill-tag business">Customer Service</span></div></div>
+    <div class="card"><div class="title">Fulfillment Coordinator</div><div class="desc">Human P2. Shiprocket, COD, returns, inventory tracking.</div><div class="skills"><span class="skill-tag business">Logistics</span><span class="skill-tag technical">Shiprocket</span></div></div>
+    <div class="card"><div class="title">Operations Lead</div><div class="desc">Tony (AI) → Human P3. Systems, SOPs, vendor management, compliance.</div><div class="skills"><span class="skill-tag business">Operations</span><span class="skill-tag business">SOPs</span></div></div>
+    <div class="card"><div class="title">Production Manager</div><div class="desc">Ink Fish handles. Screen printing, UV, digital, inventory planning, quality control.</div><div class="skills"><span class="skill-tag technical">Production</span><span class="skill-tag business">Supply Chain</span></div></div>
+  </div>
+  <div class="kanban-col growth"><h4>📈 Growth & Marketing</h4>
+    <div class="card"><div class="title">Growth Launch Lead</div><div class="desc">Nik (AI). Launch strategy, channel plan, creator seeding, post-launch.</div><div class="skills"><span class="skill-tag business">Growth Strategy</span><span class="skill-tag business">GTM</span><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">Marketing Lead</div><div class="desc">Chase (AI). Content calendar, messaging, brand campaigns.</div><div class="skills"><span class="skill-tag creative">Content Strategy</span><span class="skill-tag business">Campaigns</span></div></div>
+    <div class="card"><div class="title">Retention/Growth Marketer</div><div class="desc">Eli (AI) → Human P2. Email, WhatsApp, flows, retention analytics.</div><div class="skills"><span class="skill-tag technical">Email Marketing</span><span class="skill-tag business">Retention</span></div></div>
+    <div class="card"><div class="title">Seeding / PR Lead</div><div class="desc">Rachel (AI). Influencer seeding, gifting strategy, community.</div><div class="skills"><span class="skill-tag business">Influencer</span><span class="skill-tag business">PR</span></div></div>
+    <div class="card"><div class="title">Growth Marketing Manager</div><div class="desc">Human P2. Performance marketing, paid ads, channel mix, CAC/LTV.</div><div class="skills"><span class="skill-tag business">Paid Ads</span><span class="skill-tag business">Analytics</span></div></div>
+    <div class="card"><div class="title">Artist Relations Manager</div><div class="desc">Human P3. Artist onboarding, collabs, revenue share, drop calendar.</div><div class="skills"><span class="skill-tag business">Partnerships</span><span class="skill-tag creative">Creative Direction</span></div></div>
+  </div>
+  <div class="kanban-col hiring"><h4>💰 Finance & Strategy</h4>
+    <div class="card"><div class="title">Finance Lead</div><div class="desc">Patrick (AI). Pricing, budgeting, financial modelling, unit economics.</div><div class="skills"><span class="skill-tag business">Finance</span><span class="skill-tag business">Modelling</span><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">Merchandising Strategist</div><div class="desc">Jenna (AI). Product hierarchy, collection structure, MVL, hero SKUs.</div><div class="skills"><span class="skill-tag business">Merchandising</span><span class="skill-tag business">Catalog</span><span class="skill-tag primary">P0</span></div></div>
+    <div class="card"><div class="title">Part-Time Bookkeeper</div><div class="desc">Human P3. Books, GST, invoicing, reconciliation, payroll.</div><div class="skills"><span class="skill-tag business">Accounting</span><span class="skill-tag primary">₹10-15K/mo</span></div></div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<h3>Decision Rights Matrix</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table">
+  <thead><tr><th>Decision Type</th><th>Primary Owner</th><th>Required Consults</th><th>Final Override</th></tr></thead>
+  <tbody>
+    <tr><td>Brand positioning</td><td>Heyward (AI)</td><td>Weiss, Harley</td><td>Dan</td></tr>
+    <tr><td>Visual identity</td><td>Sean (AI)</td><td>Heyward, Kurt</td><td>Dan</td></tr>
+    <tr><td>Sitemap & IA</td><td>Kurt (AI)</td><td>Heyward, Tobi</td><td>Harley</td></tr>
+    <tr><td>Product hierarchy</td><td>Jenna (AI)</td><td>Shreyas, Nik</td><td>Harley</td></tr>
+    <tr><td>Technical architecture</td><td>Tobi (AI)</td><td>Kurt, Harley</td><td>Harley</td></tr>
+    <tr><td>Launch narrative</td><td>Nik (AI)</td><td>Heyward, Sean, Joanna</td><td>Dan</td></tr>
+    <tr><td>Go-live readiness</td><td>James (AI)</td><td>Tobi, QA Lead</td><td>James (no override)</td></tr>
+    <tr><td>Budget >₹5K/month</td><td>—</td><td>—</td><td>Dan (must escalate)</td></tr>
+    <tr><td>Pricing changes</td><td>—</td><td>—</td><td>Dan (D-006 locked)</td></tr>
+    <tr><td>Launch date</td><td>—</td><td>Harley, James, Nik</td><td>Dan</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="section-divider"></div>
+
+<h3>Hiring Timeline & Budget (Phases 5-6)</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table">
+  <thead><tr><th>Priority</th><th>Role</th><th>Type</th><th>When</th><th>Monthly Cost (₹)</th><th>Revenue Trigger</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge badge-red">P1</span></td><td>Store + Packaging Associate</td><td>Human (Part-time/Full)</td><td>Phase 5 (Launch)</td><td>15,000 - 25,000</td><td>Immediate need (store ops)</td></tr>
+    <tr><td><span class="badge badge-yellow">P2</span></td><td>Full-Stack Developer</td><td>Human / Agency</td><td>Phase 5-6</td><td>50,000 - 80,000</td><td>₹20L D2C revenue</td></tr>
+    <tr><td><span class="badge badge-yellow">P2</span></td><td>Growth Marketing Manager</td><td>Human</td><td>Phase 6</td><td>40,000 - 60,000</td><td>₹15L D2C revenue</td></tr>
+    <tr><td><span class="badge badge-yellow">P2</span></td><td>Social Media & Content Creator</td><td>Human</td><td>Phase 5-6</td><td>25,000 - 40,000</td><td>Post-launch content volume</td></tr>
+    <tr><td><span class="badge badge-yellow">P2</span></td><td>Graphic / Product Designer</td><td>Human / Freelancer</td><td>Phase 5-6</td><td>30,000 - 50,000</td><td>Drop 2+ design volume</td></tr>
+    <tr><td><span class="badge badge-yellow">P2</span></td><td>Fulfillment Coordinator</td><td>Human</td><td>Phase 6</td><td>20,000 - 30,000</td><td>50+ orders/day</td></tr>
+    <tr><td><span class="badge badge-teal">P3</span></td><td>Artist Relations Manager</td><td>Human</td><td>Phase 6+</td><td>25,000 - 35,000</td><td>3+ active artists</td></tr>
+    <tr><td><span class="badge badge-teal">P3</span></td><td>Product Manager</td><td>Human</td><td>Phase 6+</td><td>40,000 - 60,000</td><td>₹1Cr+ revenue</td></tr>
+    <tr><td><span class="badge badge-teal">P3</span></td><td>Part-Time Bookkeeper</td><td>Human / Freelance</td><td>Phase 6</td><td>10,000 - 15,000</td><td>Transaction volume increase</td></tr>
+    <tr><td><span class="badge badge-teal">P3</span></td><td>Data / Analytics Lead</td><td>Freelancer</td><td>Phase 6+</td><td>30,000 - 50,000</td><td>₹25L+ D2C revenue</td></tr>
+  </tbody>
+</table>
+</div>
+
+</section>
+
+<!-- ================================================================== -->
+<!-- TAB 5: SCALE ROADMAP -->
+<!-- ================================================================== -->
+<section id="roadmap" class="tab-content">
+
+<h2>Scale Roadmap — From ₹48L to ₹5Cr+</h2>
+<p class="subtitle">Phased build-and-scale plan from solo founder to full-stack org. Each phase has clear triggers and success criteria.</p>
+
+<div class="timeline">
+  <div class="timeline-item">
+    <div class="phase">Phase 4 — Build & Launch Prep</div>
+    <div class="date">Now → Launch Day (Current)</div>
+    <p><strong>Team:</strong> Dan + 8 AI agents (Harley, Tobi, James, Andy, Kurt, Julie, Casey, Joanna, Sean)</p>
+    <p><strong>Blockers:</strong> Fynd access (Tobi blocked), hero photography (Dan blocked), product copy (Dan blocked)</p>
+    <p><strong>Key Deliverables:</strong> Fynd store setup, Razorpay/Shiprocket/GA4/Clarity integrations, Darkroom/Light+Bold CSS theme, Homepage + 5+ pages, QA checklist, analytics schema</p>
+    <p><strong>Gate:</strong> James signs off — no P0/P1 issues, LCP <3s on 4G, 3+ collections live, Razorpay processing live</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Phase 5 — Launch & Seeding</div>
+    <div class="date">Launch Day → Day 30</div>
+    <p><strong>Team:</strong> Dan + 12 AI agents (add Nik, Chase, Rachel, Eli, Andrew, Casey)</p>
+    <p><strong>First Human Hire:</strong> Store + Packaging Associate (P1)</p>
+    <p><strong>Key Deliverables:</strong> 10 pre-launch posts, 30 curated gift seeds, 500+ subscriber pre-launch list, Klaviyo + WhatsApp flows live, Instagram-first content cadence, launch day runbook execution</p>
+    <p><strong>Success Criteria:</strong> >1.5% conversion rate, ₹350+ AOV, 20+ organic UGC posts from gifted products, 500+ email subscribers, zero P0 outages</p>
+    <p><strong>Escalate to Dan:</strong> Paid advertising decision (Phase 5 organic-only), Drop 2 timing</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Phase 6 — Optimise & Iterate</div>
+    <div class="date">Day 30 → Day 90</div>
+    <p><strong>Team:</strong> Dan + 14 AI agents (add Eli, Tony, Lenny, Avinash)</p>
+    <p><strong>Hires:</strong> Content Creator (P2), Graphic Designer (P2 freelancer), Fulfillment Coordinator (P2)</p>
+    <p><strong>Key Deliverables:</strong> 30-day review, A/B tests (pricing, bundles, checkout), retention flow optimisation, community building (WhatsApp broadcast), Drop 2 planning + artist collab</p>
+    <p><strong>Medusa Gate:</strong> Re-evaluate Medusa + Supabase migration at Day 30 with revenue data. 3 leads (QA/Ops/Analytics) must independently recommend.</p>
+    <p><strong>Success Criteria:</strong> 2.5%+ conversion rate, 15%+ repeat purchase rate, ₹400+ AOV, positive unit economics at 2x ad spend, Instagram 5K+ followers</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Drop 2 — Artist Collab Launch</div>
+    <div class="date">Day 60-90</div>
+    <p><strong>Team:</strong> Dan + 15 AI agents + 4-5 humans</p>
+    <p><strong>Hires:</strong> Growth Marketing Manager (P2), Full-Stack Developer (P2 agency)</p>
+    <p><strong>Key Deliverables:</strong> Artist collaboration collection, illustrated character stickers (D-020), Drop 2 launch campaign, paid ad pilot (budget: ₹30-50K), gift persona expansion</p>
+    <p><strong>Artist Platform Live:</strong> Tiered revenue share model, 3+ artists active, drop-based calendar established</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Scale — ₹1Cr+ D2C Revenue</div>
+    <div class="date">Month 6-12</div>
+    <p><strong>Team:</strong> 6-8 humans + AI agents (25 agent roster fully active)</p>
+    <p><strong>Hires:</strong> Artist Relations Manager (P3), PM (P3), Bookkeeper (P3), Data Analyst (P3 freelance)</p>
+    <p><strong>Key Deliverables:</strong> Full artist platform scaled (6+ artists), opinion wall community active, corporate gifting vertical live (via existing B2B clients), 50/50 B2B/D2C revenue split, international shipping (UAE, Singapore)</p>
+    <p><strong>Infrastructure:</strong> Consider Medusa migration at ₹2Cr+ run rate, consider VC funding only if artist platform requires capital for artist advances + inventory scale</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Bharat Expansion — ₹5Cr+ Revenue</div>
+    <div class="date">Year 2-3</div>
+    <p><strong>Team:</strong> 12-15 humans + AI agents</p>
+    <p><strong>Key Deliverables:</strong> 2nd physical store (Tier 2 city — Indore/Coimbatore/Lucknow), full omnichannel (Fynd + Myntra + Amazon + quick-commerce), paid ads scaled (Meta/Google/Instagram), potential brand acquisition / roll-up strategy à la TSS + Redwolf</p>
+  </div>
+</div>
+
+<h3>Scale Decision Gates</h3>
+<div class="kanban-row">
+  <div class="kanban-col core"><h4>Gate 1: Launch (Day 0)</h4><div class="card"><div class="meta">Pass/Fail: James sign-off</div><div class="desc">Site live, products uploaded, payments working, shipping configured, GA4 tracking, LCP <3s, 3+ collections, zero P0/P1 bugs.</div></div></div>
+  <div class="kanban-col build"><h4>Gate 2: PMF Signal (Day 30)</h4><div class="card"><div class="meta">Pass: >1.5% conv, ₹350+ AOV</div><div class="desc">Go/no-go for paid ads, Medusa eval, Drop 2 investment. If below thresholds, extend Phase 5 optimisation.</div></div></div>
+  <div class="kanban-col growth"><h4>Gate 3: Repeat (Day 90)</h4><div class="card"><div class="meta">Pass: >15% repeat rate</div><div class="desc">Artist platform green light for Drop 2 investment. If below, focus on retention mechanics (opinion wall, WhatsApp, collect sets).</div></div></div>
+  <div class="kanban-col hiring"><h4>Gate 4: Scale (Month 12)</h4><div class="card"><div class="meta">Pass: ₹1Cr+ D2C run rate</div><div class="desc">Full org built (12-15 humans + AI). 50/50 B2B/D2C. Artist platform scaled. 2nd store decision.</div></div></div>
+</div>
+
+<h3>Key Operating Principles for Scale</h3>
+<div class="two-col">
+  <div>
+    <div class="insight-box blue"><strong>1. AI-First Always</strong><br>AI agents handle strategy, creative, analytics, content first. Humans only hired for physical ops (store, packaging, fulfillment) and roles where AI cannot substitute (artist relations, partnerships). Every human hire has AI counterpart that already documented the role.</div>
+    <div class="insight-box green"><strong>2. Systems Before Humans (D-014)</strong><br>Every role gets documented with SOPs, checklists, and transferable systems before anyone is hired. The AI agent defines the role → the human fills it. No tribal knowledge.</div>
+    <div class="insight-box amber"><strong>3. Margin Protection</strong><br>73% gross margin is TPL's superpower. Every expansion decision (new category, new channel, new hire) must preserve >60% gross margin. If it dilutes margin, it must prove LTV payback within 6 months.</div>
+  </div>
+  <div>
+    <div class="insight-box"><strong>4. Gift as Growth Engine</strong><br>Every gift = zero-CAC customer acquisition. Gift personas are TPL's organic moat. All marketing investment should be measured against gift mechanic ROI. If gifting drives 30%+ of new customers, double down.</div>
+    <div class="insight-box blue"><strong>5. Opinion Territory Defensibility</strong><br>TPL owns "Small objects. Big opinions." This is not a trend — it's a generational shift in how Gen Z expresses identity. Protect this territory. Don't dilute into generic "cute" or "funny" — opinion-first always (D-020).</div>
+    <div class="insight-box green"><strong>6. Capital Efficiency</strong><br>Bootstrapped constraint is actually an advantage — it forces margin discipline, organic growth, and product-market fit focus. Only raise capital (if at all) when artist platform scaling requires it for artist advances and inventory breadth.</div>
+  </div>
+</div>
+
+</section>
+
+<!-- ================================================================== -->
+<!-- TAB 6: DATA SOURCES -->
+<!-- ================================================================== -->
+<section id="data" class="tab-content">
+
+<h2>Data Sources & Research References</h2>
+<p class="subtitle">All market data, competitor intel, and research sources used in this analysis.</p>
+
+<h3>Market Research Sources</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table">
+  <thead><tr><th>Source</th><th>Data Provided</th><th>URL</th></tr></thead>
+  <tbody>
+    <tr><td>Statista — D2C Market India</td><td>D2C market size $87.5B, 800+ D2C brands, fashion & accessories largest segment</td><td>statista.com/topics/9783/d2c-market-in-india</td></tr>
+    <tr><td>Mordor Intelligence — India D2C E-commerce</td><td>$87.5B (2025) → $322.1B (2031), 24.3% CAGR</td><td>mordorintelligence.com/industry-reports/india-d2c-ecommerce-market</td></tr>
+    <tr><td>Euromonitor — Personal Accessories India</td><td>₹7,316.2B retail value 2025, 10% growth, premiumisation trend</td><td>euromonitor.com (via giiresearch.com)</td></tr>
+    <tr><td>Nexdigm — India Fashion Accessories</td><td>$17.69B personal accessories, 9.4% CAGR 2026-2035, online 12.3% CAGR</td><td>nexdigm.com/market-research/report-store/india-fashion-accessories-market</td></tr>
+    <tr><td>Research & Markets — India Personal Accessories</td><td>$16.17B (2024) → $39.71B (2034), 9.4% CAGR</td><td>researchandmarkets.com/reports/6112212</td></tr>
+    <tr><td>Inc42 — D2C 3.0 Report 2026</td><td>D2C 3.0 era, retention > growth, quick commerce readiness</td><td>inc42.com/features/d2c-3-0-the-new-rules-of-indias-d2c-economy</td></tr>
+    <tr><td>Forbes India — D2C Discipline</td><td>D2C brands shifting from GMV to profitability, $12-15B market 2025</td><td>forbesindia.com/article/enterprise/startups/indias-d2c-journey</td></tr>
+    <tr><td>Storyboard18 — SGA PR Report 2026</td><td>Tier 2/3 growth engine, retail to cross $1.5T by 2030</td><td>storyboard18.com/brand-marketing/indias-d2c-boom-is-moving-beyond-metros-report</td></tr>
+    <tr><td>Webverbal — Bharat D2C Opportunity Map 2025</td><td>60%+ e-commerce from Tier 2/3, trust flip, 100 category map</td><td>webverbal.com/bharat-d2c-opportunity-map-2025</td></tr>
+    <tr><td>Tracxn — Fashion Accessories India</td><td>3,411 companies, $1.13B funding, $808M in 10 years</td><td>tracxn.com/d/explore/fashion-accessories-startups-in-india</td></tr>
+    <tr><td>Statista — Stationery & Hobby Market</td><td>~$2,968M (2023) → $5,584M (2027), 17.12% CAGR</td><td>statista.com (via d2cinsider.com pulse article)</td></tr>
+    <tr><td>Business Research Company — D2C Brands Global</td><td>$28.06B (2025) → $55.72B (2030), 14.7% CAGR</td><td>thebusinessresearchcompany.com</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Competitor Research Sources</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table">
+  <thead><tr><th>Competitor</th><th>Research Source</th></tr></thead>
+  <tbody>
+    <tr><td>Sticker Saga</td><td>stickersaga.com, ascendants.in (founder story), Instagram@stickersagaindia</td></tr>
+    <tr><td>Peel Off</td><td>peeloff.shop, Instagram presence</td></tr>
+    <tr><td>Bas Aise Hi</td><td>basaisehi.com, founder interview, Instagram presence</td></tr>
+    <tr><td>KALP</td><td>kalp.shop, Instagram presence</td></tr>
+    <tr><td>Odd Giraffe</td><td>d2cinsider.com/pulse article, odddgiraffe.com</td></tr>
+    <tr><td>Cupik Design</td><td>cupikdesign.com, customer reviews, product range</td></tr>
+    <tr><td>Young Onion</td><td>youngonion.in, product catalog</td></tr>
+    <tr><td>Delight2Create</td><td>delight2create.com, Amazon presence</td></tr>
+    <tr><td>Chumbak</td><td>strategyboffins.com, businessmodelcanvastemplate.com, owler.com, chumbak.com</td></tr>
+    <tr><td>The Souled Store</td><td>valueforstartups.in (investor report), zoutons.com, strategyboffins.com, owler.com</td></tr>
+    <tr><td>Bewakoof</td><td>valueforstartups.in, businessmodelcanvastemplate.com, zoutons.com, imp.news</td></tr>
+    <tr><td>Hobigo</td><td>1800d2c.com, Amazon/Flipkart/Meesho presence</td></tr>
+    <tr><td>Nestasia</td><td>businessmodelcanvastemplate.com (Chumbak analysis)</td></tr>
+    <tr><td>Hindu BusinessLine — Culture Led D2C</td><td>thehindubusinessline.com (Gully Labs, Zouk case studies)</td></tr>
+    <tr><td>CPG Lab — 35 D2C Brands Study</td><td>thecpglab.substack.com (repeat rate benchmarks)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Company Sources (TPL Internal)</h3>
+<div class="comp-table-wrapper">
+<table class="comp-table">
+  <thead><tr><th>Document</th><th>Location</th></tr></thead>
+  <tbody>
+    <tr><td>Company Facts</td><td>knowledge/16-COMPANY-FACTS.md</td></tr>
+    <tr><td>Current Program State</td><td>knowledge/26-CURRENT-STATE.md</td></tr>
+    <tr><td>Agent Org Chart</td><td>01-AGENT-ORG-CHART.md</td></tr>
+    <tr><td>Decision Log</td><td>decisions/decision-log.md (D-001 to D-023)</td></tr>
+    <tr><td>Brand Positioning</td><td>artifacts/phase-2/brand-positioning.md (Heyward)</td></tr>
+    <tr><td>Pricing Framework</td><td>artifacts/phase-2/pricing-framework.md (Patrick)</td></tr>
+    <tr><td>Product Hierarchy</td><td>artifacts/phase-2/product-hierarchy.md (Jenna)</td></tr>
+    <tr><td>Visual Identity</td><td>design/visual-identity/visual-identity-rebrand.md (Sean)</td></tr>
+    <tr><td>Copy System</td><td>design/visual-identity/copy-system-rebrand.md (Joanna)</td></tr>
+    <tr><td>Weekly Status</td><td>status/weekly-status.md</td></tr>
+    <tr><td>Tech Implementation Plan</td><td>artifacts/phase-4/technical-implementation-plan.md (Tobi)</td></tr>
+    <tr><td>QA Checklist</td><td>artifacts/phase-4/qa-checklist.md (James)</td></tr>
+    <tr><td>Launch Narrative</td><td>artifacts/phase-5/launch-narrative.md (Nik)</td></tr>
+    <tr><td>Production Costs</td><td>knowledge/17-PRODUCTION-COSTS.md</td></tr>
+    <tr><td>Handoff Intake</td><td>handoffs/handoff-intake-pod-briefs.md</td></tr>
+    <tr><td>Master Brief</td><td>00-MASTER-BRIEF.md</td></tr>
+    <tr><td>Artifact Map</td><td>knowledge/artifact-map.md</td></tr>
+  </tbody>
+</table>
+</div>
+
+</section>
+
+<!-- ===== TAB SWITCHING JS ===== -->
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById(this.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
