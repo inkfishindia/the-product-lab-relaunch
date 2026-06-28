@@ -2,17 +2,7 @@
 
 How to work with the TPL agent system.
 
-For the full project map, see `../README.md`. For the current workspace index and hygiene rules, see `../docs/WORKSPACE-INDEX.md`. For the clean folder-structure recommendation, see `../docs/PROJECT-SCOPE-AND-STRUCTURE.md`.
-
-## Workspace Hygiene Check
-
-Run this from the repo root before any cleanup or migration pass:
-
-```bash
-npm run check:workspace
-```
-
-The check reports nested Git repos, local runtime files, duplicate copy artifacts, root files duplicated in `knowledge/`, active folders missing README files, large top-level folders, and target structure folders that have not been created yet.
+For the full project map, see `../README.md`. For the clean folder-structure recommendation, see `../docs/PROJECT-SCOPE-AND-STRUCTURE.md`.
 
 ## Spawn Any Agent
 

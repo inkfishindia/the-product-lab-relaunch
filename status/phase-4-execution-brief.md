@@ -1,28 +1,5 @@
-<!-- last-updated: 2026-06-11 -->
+<!-- last-updated: 2026-03-26 -->
 # Phase 4 Execution Brief — Agent Activation Sequence
-
-## 2026-06-11 Update — AEO and Agentic Commerce Added to Gate
-
-Per D-025, the active launch path is now Medusa + Next.js. Fynd/Commerce.com access notes below are legacy context unless Dan re-approves them.
-
-Per D-027, Phase 4 now includes AEO, Merchant Center feed quality, structured data, public crawler surfaces, and internal agent access boundaries.
-
-New required artifact:
-
-- `artifacts/phase-4/aeo-agent-commerce-readiness.md`
-
-New handoff:
-
-- `handoffs/2026-06-11-aeo-agent-commerce-to-build-pods.md`
-
-New gate requirements:
-
-- Tobi ships `/robots.txt`, `/sitemap.xml`, `/llms.txt`, product feed route, PDP JSON-LD, and authenticated agent/API boundary.
-- Andy enriches catalog fields before product import is launch-ready.
-- Joanna adds answerable PDP content and image alt text.
-- James validates feed/schema/page consistency, crawlability, and private path blocking.
-- Avinash monitors feed freshness, crawl errors, schema errors, bot traffic, and agent-visible catalog health.
-- Dan provides Merchant Center access and decides AI crawler training policy.
 
 All agents are prepped and ready to activate. Three critical blockers must be resolved first.
 

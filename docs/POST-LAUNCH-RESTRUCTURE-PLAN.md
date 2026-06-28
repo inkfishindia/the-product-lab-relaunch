@@ -157,4 +157,3 @@ These reduce blast radius and can happen now, mid-build, with no risk:
 - It does not delete; every "remove from root" is a move to its target or to `archive/`.
 - It does not touch `.claude/settings.json` (agents are blocked; that step is Dan's).
 - It does not resolve the Fynd-vs-Medusa platform question — `services/commerce/` is conditional on it.
-</content>

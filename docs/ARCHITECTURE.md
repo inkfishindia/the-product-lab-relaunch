@@ -328,11 +328,11 @@ Medusa's event bus drives notification delivery:
                            │            └─────────────────────┘
                            │
                            ▼
-                    ┌──────────────┐
-                    │  Railway /   │
-                    │  Fly.io      │
-                    │  (alternative)│
-                    └──────────────┘
+                     ┌──────────────┐
+                     │  Railway /   │
+                     │  Fly.io      │
+                     │  (alternative)│
+                     └──────────────┘
 ```
 
 ### Dev Environment

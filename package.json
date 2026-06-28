@@ -1,7 +1,4 @@
 {
-  "scripts": {
-    "check:workspace": "node scripts/workspace-hygiene-check.mjs"
-  },
   "devDependencies": {
     "@playwright/test": "^1.60.0"
   }

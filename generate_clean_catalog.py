@@ -1,7 +1,7 @@
-import csv, json, re, sys
+import csv, json, re
 
 csv_path = '/Users/danish/Library/CloudStorage/GoogleDrive-danish@yourdesignstore.in/My Drive/market/the-product-lab-relaunch/TPL DUMP/wc-product-export-11-6-2026-1781128734010.csv'
-output_path = '/Users/danish/Library/CloudStorage/GoogleDrive-danish@yourdesignstore.in/My Drive/market/the-product-lab-relaunch/catalogs/cleaned_catalog.json'
+output_path = '/Users/danish/Library/CloudStorage/GoogleDrive-danish@yourdesignstore.in/My Drive/market/the-product-lab-relaunch/cleaned_catalog.json'
 
 def strip_html_tags(text):
     if not text:
@@ -20,25 +20,32 @@ def process_csv():
     with open(csv_path, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
+            # Basic validation: need Name and SKU
             if not row.get('Name') or not row.get('SKU'):
                 continue
+            # Clean text fields
             short_desc = strip_html_tags(row.get('Short description', ''))
             desc = strip_html_tags(row.get('Description', ''))
-            try:
-                sale_price = row.get('Sale price')
-                regular_price = row.get('Regular price')
-                if sale_price and float(sale_price) > 0:
-                    price = float(sale_price)
-                else:
-                    price = float(regular_price) if regular_price and float(regular_price) > 0 else 0.0
-            except (ValueError, TypeError):
-                price = 0.0
+            # Extract price fields safely
+            def to_float(val):
+                try:
+                    return float(val) if val and val.replace('.','',1).replace(',','',1).isdigit() else 0.0
+                except (ValueError, TypeError):
+                    return 0.0
+            regular_price = to_float(row.get('Regular price'))
+            sale_price = to_float(row.get('Sale price'))
+            price = sale_price if sale_price > 0 else regular_price
+            # Clean image URLs
             images_str = row.get('Images', '')
             image_urls = [url.strip() for url in images_str.split(',') if url.strip()] if images_str else []
-            categories_str = row.get('Categories', '')
-            categories = clean_list(categories_str)
-            tags_str = row.get('Tags', '')
-            tags = clean_list(tags_str)
+            # Clean categories and tags
+            categories = clean_list(row.get('Categories', ''))
+            tags = clean_list(row.get('Tags', ''))
+            # Stock info
+            in_stock = row.get('In stock?') == '1'
+            stock = row.get('Stock') or '0'
+            visibility = row.get('Visibility in catalog', 'visible')
+            # Build product dict
             product = {
                 'id': row.get('ID'),
                 'sku': row.get('SKU'),
@@ -46,16 +53,17 @@ def process_csv():
                 'short_description': short_desc,
                 'description': desc,
                 'price': round(price, 2),
-                'regular_price': round(float(regular_price) if regular_price and float(regular_price) > 0 else price, 2),
-                'sale_price': round(float(sale_price) if sale_price and float(sale_price) > 0 else None, 2),
+                'regular_price': round(regular_price, 2),
+                'sale_price': round(sale_price, 2) if sale_price > 0 else None,
                 'categories': categories,
                 'tags': tags,
                 'images': image_urls,
-                'stock': row.get('Stock') or '0',
-                'in_stock': row.get('In stock?') == '1',
-                'visibility': row.get('Visibility in catalog', 'visible')
+                'stock': stock,
+                'in_stock': in_stock,
+                'visibility': visibility
             }
             products.append(product)
+    # Write output
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(products, f, indent=2, ensure_ascii=False)
     return len(products)

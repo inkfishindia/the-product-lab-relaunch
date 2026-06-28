@@ -21,25 +21,10 @@ Dan fills this out. Once provided, paste credentials into the relevant agent ses
 - **Test mode first:** Yes — get test keys first, go live only at launch
 - **Status:** [ ] Not yet provided
 
-**Expanded credential list (from india-commerce-integration-plan.md, 2026-06-11):**
-- Razorpay Test Key ID (`rzp_test_...`) — Sprint 2 start
-- Razorpay Test Key Secret — Sprint 2 start
-- Razorpay Webhook Secret (test mode) — Sprint 2, registered in Razorpay dashboard when adding webhook URL
-- Razorpay Live Key ID (`rzp_live_...`) — before go-live only
-- Razorpay Live Key Secret — before go-live only
-- Razorpay Webhook Secret (live mode) — before go-live only
-
 ### Shiprocket
 - **Who needs it:** Tobi (integration), Raj (operations)
 - **What to get:** Email + password for Shiprocket account (API tokens generated from there)
-- **Note:** Shiprocket API uses email+password to generate a 24h JWT — not a static API key
 - **Status:** [ ] Not yet provided
-
-**Expanded credential list (from india-commerce-integration-plan.md, 2026-06-11):**
-- Shiprocket account email — Sprint 4 start
-- Shiprocket account password — Sprint 4 start
-- Shiprocket pickup location ID (visible in Shiprocket dashboard after adding warehouse) — Sprint 4
-- Bengaluru warehouse full address + pincode — Sprint 4, needed for Shiprocket order creation API
 
 ### Google Analytics 4 (GA4)
 - **Who needs it:** Tobi (install), Avinash (dashboards), James (QA verification)

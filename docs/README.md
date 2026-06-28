@@ -1,6 +1,6 @@
 # Docs
 
-Architecture, governance, tooling, platform research, and operational SOP documentation live here.
+Architecture, governance, build workflow, coding standards, platform research, and operational SOP documentation live here.
 
 ## Use This For
 
@@ -16,4 +16,4 @@ Architecture, governance, tooling, platform research, and operational SOP docume
 - Phase deliverables, which belong in `artifacts/`
 - Raw source imports, which belong in archive/reference areas
 
-Start with `WORKSPACE-INDEX.md`, then `PROJECT-SCOPE-AND-STRUCTURE.md`.
+Start with `ARCHITECTURE.md`, then `GOVERNANCE.md`.

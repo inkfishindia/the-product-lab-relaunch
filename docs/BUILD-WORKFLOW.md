@@ -1215,7 +1215,7 @@ Backend REDIS_URL  ← Upstash →  Upstash Redis connection string
 | Symptom | Likely Cause | Fix |
 |---------|-------------|-----|
 | Port 5432 already in use | Local Postgres running | Stop local Postgres: `brew services stop postgresql` |
-| Port 3000 already in use | Another dev server running | Kill process: `lsof -ti:3000 \| xargs kill` |
+| Port 3000 already in use | Another dev server running | Kill process: `lsof -ti:3000 | xargs kill` |
 | Container exits immediately | Missing env vars or config | `docker compose logs medusa` to see error |
 
 ### Environment Variable Issues

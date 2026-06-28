@@ -1,4 +1,4 @@
-<!-- last-updated: 2026-06-20 (Desktop sync + middleware port — D-035) -->
+<!-- last-updated: 2026-06-28 (Residual gaps consolidated — artifacts/phase-4/residual-gaps.md) -->
 # Cross-Reference Map — The Product Lab
 
 This is the project's *nervous system*. Every agent MUST update this file when:
@@ -50,8 +50,8 @@ This is the project's *nervous system*. Every agent MUST update this file when:
 | D-026 | `storefront/src/app/mission-control/page.tsx`, `storefront/src/components/ui/chrome-wrapper.tsx` | `knowledge/26-CURRENT-STATE.md` |
 | D-027 | `artifacts/phase-4/aeo-agent-commerce-readiness.md`, `handoffs/2026-06-11-aeo-agent-commerce-to-build-pods.md`, `status/sprint-board.md`, `storefront/`, `catalogs/` | `knowledge/26-CURRENT-STATE.md`, `knowledge/11-PLATFORM-AND-TOOLING.md` |
 | D-028 | `artifacts/phase-4/drop-1-merchandising-curation.md`, `artifacts/phase-4/catalog-curation/` (drop1-plan.json, curate-drop1.py, backup), `backend/medusa/src/scripts/curate-drop1.py`, `backend/medusa/src/scripts/apply-drop1.ts` | `knowledge/26-CURRENT-STATE.md` (Catalog Status + Phase 4 gate), D-020, D-011, D-019 |
-| D-029 | `backend/medusa/src/scripts/setup-shipping-cod.ts`, `backend/medusa/src/api/store/validate-payment-method/route.ts`, `storefront/src/app/checkout/checkout-client.tsx`, `artifacts/phase-4/cto-codebase-audit-2026-06-13.md` | `knowledge/26-CURRENT-STATE.md` |
-| D-030 | `artifacts/phase-4/admin-auth-ops-audit.md`, `storefront/src/lib/medusa-admin.ts`, `storefront/src/app/api/admin/`, `backend/medusa/src/api/admin/operator-password/route.ts` | D-012, D-029 |
+| D-029 | `backend/medusa/src/scripts/setup-shipping-cod.ts`, `backend/medusa/src/api/store/validate-payment-method/route.ts`, `storefront/src/app/checkout/checkout-client.tsx`, `artifacts/phase-4/cto-codebase-audit-2026-06-13.md`, `artifacts/phase-4/residual-gaps.md` | `knowledge/26-CURRENT-STATE.md` |
+| D-030 | `artifacts/phase-4/admin-auth-ops-audit.md`, `artifacts/phase-4/residual-gaps.md`, `storefront/src/lib/medusa-admin.ts`, `storefront/src/app/api/admin/`, `backend/medusa/src/api/admin/operator-password/route.ts` | D-012, D-029 |
 | D-031 | `artifacts/phase-4/customer-auth-account-audit.md`, `storefront/src/lib/medusa-customer.ts`, `storefront/src/lib/medusa-auth.ts`, `storefront/src/app/account/`, `storefront/src/app/api/account/`, `storefront/src/app/{login,register,forgot-password,reset-password,track}/`, `backend/medusa/src/api/store/{track-order,claim-order,customer-password}/route.ts` | D-030, D-029, D-006, D-012 |
 | D-032 | `backend/medusa/src/modules/smtp-notification/`, `backend/medusa/src/api/store/{reset-password,verify-reset-token,update-password,order-transfer-request,accept-order-transfer}/route.ts`, `storefront/src/lib/medusa-customer.ts`, `storefront/src/app/{forgot-password,reset-password,orders/accept-transfer}/`, `.env.template` | D-031 |
 | D-033 | `backend/medusa/src/modules/whatsapp-notification/`, `backend/medusa/src/subscribers/{order-confirmation,fulfillment-notification,order-delivery}.ts`, `backend/medusa/medusa-config.ts`, `backend/medusa/.env.template`, `storefront/src/app/checkout/checkout-client.tsx`, `docs/ops-sop/customer-comms-templates.md` | `knowledge/26-CURRENT-STATE.md` |
@@ -142,8 +142,7 @@ This is the project's *nervous system*. Every agent MUST update this file when:
 | `artifacts/phase-4/aeo-agent-commerce-readiness.md` | Harley + Maria | D-025, D-027 | `storefront/`, `catalogs/`, Merchant Center, QA gate |
 | `artifacts/phase-4/deploy-checklist.md` | Tobi | D-025 | Infrastructure setup guide |
 | `artifacts/phase-4/supabase-migration-guide.md` | Tobi | D-025 | Production DB migration + re-seed |
-| `artifacts/phase-4/deploy-checklist.md` | Tobi | D-025 | Infrastructure setup guide |
-| `artifacts/phase-4/supabase-migration-guide.md` | Tobi | D-025 | Production DB migration + re-seed |
+| `artifacts/phase-4/residual-gaps.md` | Harley | D-030, D-029, D-031, D-033, D-025, D-028, D-006 | Consolidated honest gap register — 34 gaps across 10 categories |
 
 ### Phase 5 — Launch (Planned)
 

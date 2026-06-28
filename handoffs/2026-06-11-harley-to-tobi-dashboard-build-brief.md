@@ -5,10 +5,7 @@
 **to:** Tobi (Frontend Build Lead)
 **Date:** 2026-06-11
 **Phase:** 4 — Build
-**Status:** ⛔ SHELVED 2026-06-11 — do NOT build. Superseded by the decision to trial the
-real Mission Control tool (builderz-labs/mission-control) read-only as the live cockpit instead
-of a static HTML board. See `mission-control-eval/EVALUATION-FOR-TPL.md`. This static spec is
-retained only as a fallback if the live tool is rejected at the Day-30 review.
+**Status:** Pending review (Tobi to build)
 **Reviewer:** Harley
 
 ---

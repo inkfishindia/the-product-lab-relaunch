@@ -12,8 +12,8 @@ This workspace is the operating system and build environment for relaunching `th
 | Execution artifacts | Phase-by-phase strategy, creative, build, launch, and optimization outputs | [`artifacts/`](artifacts/) |
 | Agent system | 25 operator-style agents across 9 pods | [`agents/README.md`](agents/README.md), [`pods/`](pods/) |
 | Project status | Sprint board, weekly status, phase tracker | [`status/sprint-board.md`](status/sprint-board.md) |
-| Recommended structure | Cleanup plan for turning this workspace into a cleaner repo | [`docs/PROJECT-SCOPE-AND-STRUCTURE.md`](docs/PROJECT-SCOPE-AND-STRUCTURE.md) |
-| Workspace hygiene | Current folder map, source-of-truth rules, and cleanup checks | [`docs/WORKSPACE-INDEX.md`](docs/WORKSPACE-INDEX.md) |
+| Recommended structure | Cleanup plan for turning this workspace into a cleaner repo | [`docs/POST-LAUNCH-RESTRUCTURE-PLAN.md`](docs/POST-LAUNCH-RESTRUCTURE-PLAN.md) |
+| Workspace hygiene | Current folder map, source-of-truth rules, and cleanup checks | [`REPO-MAP.md`](REPO-MAP.md) |
 
 ## How To Work In This Repo
 
@@ -118,7 +118,7 @@ Harley owns orchestration, Claire owns status hygiene, and Dan keeps final phase
 
 ## Clean Structure Recommendation
 
-Do not reorganize files blindly. The workspace contains raw imported history, active app code, approved artifacts, and living status documents. The recommended migration plan is documented in [`docs/PROJECT-SCOPE-AND-STRUCTURE.md`](docs/PROJECT-SCOPE-AND-STRUCTURE.md).
+Do not reorganize files blindly. The workspace contains raw imported history, active app code, approved artifacts, and living status documents. The recommended migration plan is documented in [`docs/POST-LAUNCH-RESTRUCTURE-PLAN.md`](docs/POST-LAUNCH-RESTRUCTURE-PLAN.md).
 
 High-level target:
 
